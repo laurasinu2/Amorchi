@@ -12,7 +12,7 @@ export interface SpecialOccasion {
 function isLeap(year:number){return year%4===0&&(year%100!==0||year%400===0);}
 
 export function occursOn(anniversaryDate:string,day:string):boolean {
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(anniversaryDate)||!/^\\d{4}-\\d{2}-\\d{2}$/.test(day))return false;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(anniversaryDate)||!/^\d{4}-\d{2}-\d{2}$/.test(day))return false;
   const year=Number(day.slice(0,4));
   if(year<Number(anniversaryDate.slice(0,4)))return false;
   const mmdd=anniversaryDate.slice(5);
