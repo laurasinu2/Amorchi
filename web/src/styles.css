@@ -85,3 +85,74 @@ body{margin:0;min-width:320px}button,input,select,textarea{font:inherit}button{c
 .import-file>div{display:grid;gap:4px;min-width:0}
 .import-file strong{font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .import-file small{font-size:.72rem;line-height:1.3}
+
+/* v0.1.2: portada ligera, menú contextual de fondos y fechas especiales */
+.dashboard-hero{height:114px;border-radius:17px}
+.dashboard-hero .hero-content{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:16px;width:100%;max-width:none;height:100%;padding:14px 60px 14px 23px}
+.hero-copy{min-width:0}
+.dashboard-hero .hero-content h1{font-size:clamp(1.35rem,2vw,1.95rem);line-height:1.1;margin:0 0 4px;white-space:normal}
+.dashboard-hero .hero-content p{font-size:.78rem;line-height:1.2;margin:0}
+.dashboard-hero .hero-years{align-self:center;flex-shrink:0;min-height:34px;font-size:.78rem;padding:8px 13px}
+.cover-actions{position:absolute;z-index:9;top:9px;right:10px}
+.cover-dots{width:34px;height:31px;display:flex;align-items:center;justify-content:center;color:white;border:1px solid rgba(255,255,255,.4);border-radius:11px;background:rgba(26,29,32,.26);backdrop-filter:blur(6px)}
+.cover-dots:hover,.cover-dots[aria-expanded="true"]{background:rgba(20,27,29,.66)}
+.cover-dropdown{position:absolute;top:38px;right:0;width:max-content;max-width:min(80vw,265px);overflow:hidden;background:#fffaf5;color:#40332e;border:1px solid #e9d9cb;border-radius:12px;box-shadow:0 10px 25px rgba(22,26,27,.25)}
+.cover-dropdown button{padding:12px 14px;display:flex;align-items:center;gap:9px;background:transparent;border:0;width:100%;text-align:left;color:#503e35;font-size:.85rem;font-weight:650;white-space:nowrap}
+.cover-dropdown button:hover{background:#f5e7db}
+.cover-picker-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:15px 0 20px}
+.cover-choice{position:relative;border:2px solid transparent;border-radius:14px;overflow:hidden;background:#f6ece4;color:#604b3f;padding:0;text-align:left}
+.cover-choice.chosen{border-color:#a96042}
+.cover-choice-image{width:100%;aspect-ratio:4/3}
+.cover-choice-caption{display:block;font-size:.73rem;padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cover-choice-check{position:absolute;top:7px;right:7px;width:28px;height:28px;display:grid;place-items:center;background:#a96042;color:white;border-radius:50%;border:2px solid white}
+.calendar-day.has-anniversary{box-shadow:inset 0 0 0 2px #ecc66c;border-color:#e4bd65}
+.calendar-anniversary{position:absolute;z-index:5;top:3px;right:3px;display:flex;align-items:center;gap:3px;padding:2px 5px;border-radius:7px;background:rgba(36,30,25,.78);border:1px solid rgba(255,208,103,.8);box-shadow:0 1px 4px rgba(10,10,10,.12);color:#ffe3a1;font-weight:900;font-size:.69rem;white-space:nowrap}
+.anniversary-heart{color:#f9c95a;font-size:.78rem}
+.anniversary-count{color:#ffdc83}
+.calendar-birthday{position:absolute;z-index:5;bottom:4px;left:4px;font-size:.82rem;line-height:1;background:rgba(255,251,245,.9);border-radius:5px;padding:2px;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.calendar-grid.compact .calendar-anniversary{top:0;right:0;font-size:.46rem;gap:1px;padding:0 2px;border-radius:3px;line-height:1.15}
+.calendar-grid.compact .anniversary-heart{font-size:.49rem}
+.calendar-grid.compact .calendar-birthday{font-size:.52rem;bottom:1px;left:1px;padding:0 1px}
+.calendar-legend .legend-anniversary{background:linear-gradient(135deg,#f7d580,#cb9d3f);border:1px solid #b9953e}
+.day-special-panel{grid-column:1/-1}
+.special-day-event{display:flex;align-items:center;gap:11px;padding:9px 2px;color:#624934}
+.special-day-event+.special-day-event{border-top:1px solid var(--border)}
+.special-day-event.anniversary{color:#9f6c1c}
+.special-day-icon{width:34px;height:34px;display:grid;place-items:center;background:#faedca;border:1px solid #ead497;border-radius:50%;color:#bb8a24}
+.special-day-event.birthday .special-day-icon{background:#f7e7da;border-color:#edddcc}
+.special-day-count{margin-left:auto;background:#f2db9f;color:#70521e;padding:5px 10px;border-radius:99px;font-weight:800}
+.special-settings{display:grid;gap:12px}
+.special-heading{display:flex;align-items:start;gap:11px;color:#b36b4a}
+.special-heading h3{margin:0 0 5px}
+.special-heading p{margin:0;font-size:.85rem;color:var(--muted)}
+.special-settings .settings-fields{max-width:580px}
+.special-settings h4{margin:3px 0 0}
+.settings-subheading{display:flex;align-items:center;gap:7px;color:#534238;font-size:.93rem}
+.birthday-person{display:grid;gap:12px;padding:15px;border:1px solid var(--border);background:#fdf7f1;border-radius:14px}
+.important-birthdays{display:grid;gap:10px}
+.important-title{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.birthday-entry{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;align-items:end;gap:10px;border:1px solid var(--border);padding:12px;border-radius:12px;background:#fdf7f1}
+.remove-birthday{color:#a84f48}
+@media(max-width:760px){
+  .dashboard-hero{height:104px;border-radius:15px}
+  .dashboard-hero .hero-content{padding:12px 48px 12px 13px;gap:7px}
+  .dashboard-hero .hero-content h1{font-size:clamp(1.12rem,4.3vw,1.55rem)}
+  .dashboard-hero .hero-content p{font-size:.69rem}
+  .dashboard-hero .hero-years{padding:7px 8px;font-size:.69rem;min-height:32px;gap:4px}
+  .dashboard-hero .hero-years svg{width:14px;height:14px}
+  .cover-dots{height:28px;width:28px}
+  .cover-actions{right:7px;top:6px}
+  .cover-dropdown{top:33px}
+  .cover-picker-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .calendar-anniversary{top:2px;right:1px;padding:1px 2px;font-size:.49rem;gap:1px}
+  .anniversary-heart{font-size:.55rem}
+  .calendar-birthday{font-size:.62rem;left:2px;bottom:2px}
+  .birthday-entry{grid-template-columns:1fr auto}
+  .birthday-entry .field:nth-child(1){grid-column:1/-1}
+  .birthday-entry .field:nth-child(2){grid-column:1}
+  .remove-birthday{grid-column:2}
+}
+@media(max-width:390px){
+  .dashboard-hero .hero-content p{display:none}
+  .cover-picker-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
