@@ -1,5 +1,27 @@
 export type MemoryKind = 'trip' | 'event' | 'moment';
 export type SubjectKind = 'person' | 'animal';
+export interface ImportantBirthday {
+  id:string;
+  name:string;
+  date:string; // YYYY-MM-DD
+}
+
+export interface AppSettings {
+  id:'main';
+  homeCoverPhotoId?:string;
+  relationshipStartedOn:string;
+  myName:string;
+  myBirthday:string;
+  partnerName:string;
+  partnerBirthday:string;
+  importantBirthdays:ImportantBirthday[];
+}
+
+export const defaultSettings:AppSettings={
+  id:'main',relationshipStartedOn:'',myName:'Yo',myBirthday:'',
+  partnerName:'Mi pareja',partnerBirthday:'',importantBirthdays:[]
+};
+
 export type DateSource = 'exif' | 'file' | 'manual';
 
 export interface Memory {
@@ -46,7 +68,7 @@ export interface Photo {
 export interface LocalOperation {
   id: string;
   type: 'upsert' | 'delete';
-  entity: 'photo' | 'memory' | 'subject';
+  entity: 'photo' | 'memory' | 'subject' | 'settings';
   entityId: string;
   createdAt: string;
 }

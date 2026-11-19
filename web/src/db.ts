@@ -2,7 +2,7 @@ import { openDB, type DBSchema } from 'idb';
 import * as exifr from 'exifr';
 import { sha256 } from 'js-sha256';
 import { createId } from './id';
-import type { ImportOptions, LocalOperation, Memory, Photo, Subject } from './types';
+import type { ImportOptions, LocalOperation, Memory, Photo, Subject, AppSettings, defaultSettings } from './types';
 import { localISO } from './dates';
 
 interface Asset { key: string; blob: Blob }
@@ -14,8 +14,9 @@ interface AmorchiSchema extends DBSchema {
   assets: { key: string; value: Asset };
   asset_sizes: { key: string; value: AssetSize };
   operations: { key: string; value: LocalOperation };
+  settings: { key: string; value: AppSettings };
 }
-const database = openDB<AmorchiSchema>('amorchi-local-v1', 2, {
+const database = openDB<AmorchiSchema>('amorchi-local-v1', 3, {
   upgrade(db) {
     if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos', { keyPath: 'id' });
     if(!db.objectStoreNames.contains('memories')) db.createObjectStore('memories', { keyPath: 'id' });
@@ -23,6 +24,7 @@ const database = openDB<AmorchiSchema>('amorchi-local-v1', 2, {
     if(!db.objectStoreNames.contains('assets')) db.createObjectStore('assets', { keyPath: 'key' });
     if(!db.objectStoreNames.contains('operations')) db.createObjectStore('operations', { keyPath: 'id' });
     if(!db.objectStoreNames.contains('asset_sizes')) db.createObjectStore('asset_sizes', { keyPath: 'key' });
+    if(!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'id' });
   }
 });
 
@@ -32,10 +34,18 @@ const op = (entity: LocalOperation['entity'],entityId:string):LocalOperation=>({
 
 export async function loadLibrary() {
   const db=await database;
-  const [photos,memories,subjects,operations]=await Promise.all([
-    db.getAll('photos'),db.getAll('memories'),db.getAll('subjects'),db.getAll('operations')
+  const [photos,memories,subjects,operations,settings]=await Promise.all([
+    db.getAll('photos'),db.getAll('memories'),db.getAll('subjects'),db.getAll('operations'),db.get('settings','main')
   ]);
-  return {photos,memories,subjects,operations};
+  return {photos,memories,subjects,operations,settings:settings||defaultSettings};
+}
+
+export async function saveSettings(settings:AppSettings){
+  const db=await database;
+  const tx=db.transaction(['settings','operations'],'readwrite');
+  await tx.objectStore('settings').put(settings);
+  await tx.objectStore('operations').put(op('settings','main'));
+  await tx.done;
 }
 
 export async function saveMemory(memory:Memory){
