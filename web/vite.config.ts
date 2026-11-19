@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg', 'brand/recuerdos-horizontal.webp', 'brand/recuerdos-app.webp', 'brand/icon-192.png', 'brand/icon-512.png'],
+      includeAssets: ['icon.svg', 'brand/recuerdos-horizontal.webp', 'brand/recuerdos-app.webp'],
       manifest: {
         name: 'Recuerdos · Amorchi',
         short_name: 'Recuerdos',
@@ -17,8 +17,8 @@ export default defineConfig({
         background_color: '#faf3ec',
         theme_color: '#253343',
         icons: [
-          { src: '/brand/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: '/brand/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+          { src: '/brand/recuerdos-app.webp', sizes: '192x192', type: 'image/webp', purpose: 'any' },
+          { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }
         ]
       },
       workbox: {
