@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, CalendarDays, Camera, ChevronLeft, ChevronRight, CloudUpload, Globe2, HardDrive, Heart, ImagePlus, MapPin, PawPrint, Plane, Plus, Search, ShieldCheck, Star, Users } from 'lucide-react';
-import type { Memory, Page, Photo, Subject } from './types';
+import type { AppSettings, Memory, Page, Photo, Subject } from './types';
 import { addDays, dateLabel, kindName, monthLabel } from './dates';
 import { getLocalUsage, requestPersistence } from './db';
 import { CalendarGrid } from './components/CalendarGrid';
 import { PhotoView } from './components/PhotoView';
 import { WorldMap } from './components/WorldMap';
+import { CoverMenu } from './components/CoverPicker';
+import { SpecialDatesSettings } from './components/SpecialDatesSettings';
+import { occasionsOn } from './specialDates';
 
 export function SectionTitle({title,action,onAction}:{title:string;action?:string;onAction?:()=>void}){
   return <div className="section-title"><h2>{title}</h2>{action&&<button className="text-link" onClick={onAction}>{action}<ArrowRight size={16}/></button>}</div>;
@@ -31,16 +34,18 @@ function MemoryCard({memory,photos,onOpen}:{memory:Memory;photos:Photo[];onOpen:
   </button>;
 }
 
-export function Dashboard({photos,memories,onNavigate,onOpenMemory,onViewPhoto,onImport,onCreateMemory}:{
-  photos:Photo[];memories:Memory[];onNavigate:(page:Page)=>void;onOpenMemory:(id:string)=>void;onViewPhoto:(id:string)=>void;onImport:()=>void;onCreateMemory:()=>void;
+export function Dashboard({photos,memories,settings,onNavigate,onOpenMemory,onViewPhoto,onImport,onCreateMemory,onChangeCover}:{
+  photos:Photo[];memories:Memory[];settings:AppSettings;onNavigate:(page:Page)=>void;onOpenMemory:(id:string)=>void;onViewPhoto:(id:string)=>void;onImport:()=>void;onCreateMemory:()=>void;onChangeCover:()=>void;
 }){
   const newest=orderPhotos(photos);
+  const homeCover=photos.find(p=>p.id===settings.homeCoverPhotoId)||newest[0];
   const trips=[...memories].filter(m=>m.kind==='trip').sort((a,b)=>b.startDate.localeCompare(a.startDate));
   const years=yearsOf(photos,memories);
   return <div className="page-stack">
     <section className="dashboard-hero">
-      {newest[0]&&<PhotoView id={newest[0].id} quality="preview" className="dashboard-hero-image"/>}
-      <div className="hero-content"><h1>Nuestra historia <em>♡</em></h1><p>Fotos, viajes y momentos.</p><button className="btn light" onClick={()=>onNavigate('anios')}>Ver años <ArrowRight size={17}/></button></div>
+      {homeCover&&<PhotoView id={homeCover.id} quality="preview" className="dashboard-hero-image"/>}
+      <div className="hero-content"><div className="hero-copy"><h1>Nuestra historia <em>♡</em></h1><p>Fotos, viajes y momentos.</p></div><button className="btn light hero-years" onClick={()=>onNavigate('anios')}>Ver años <ArrowRight size={17}/></button></div>
+      <CoverMenu onChange={onChangeCover}/>
     </section>
     <div className="stat-grid"><div className="stat"><CalendarDays/><strong>{years.length}</strong><span>Años</span></div><div className="stat"><Camera/><strong>{photos.length}</strong><span>Fotografías</span></div><div className="stat"><Plane/><strong>{trips.length}</strong><span>Viajes</span></div><div className="stat"><Heart/><strong>{memories.filter(m=>m.kind!=='trip').length}</strong><span>Recuerdos</span></div></div>
     <div className="quick-actions"><button onClick={()=>onNavigate('calendario')}><CalendarDays size={24}/><span><strong>Calendario fotográfico</strong><small>Revive vuestra historia día a día</small></span><ArrowRight size={16}/></button><button onClick={onImport}><ImagePlus size={24}/><span><strong>Subir fotografías</strong><small>Añade recuerdos incluso sin conexión</small></span><ArrowRight size={16}/></button></div>
@@ -70,12 +75,13 @@ export function YearsPage({photos,memories,onYear}:{photos:Photo[];memories:Memo
 }
 
 export type CalendarMode='year'|'month'|'day';
-export function CalendarPage({year,month,mode,selectedDay,photos,memories,onMode,onYear,onMonth,onDay,onViewPhoto}:{
-  year:number;month:number;mode:CalendarMode;selectedDay:string;photos:Photo[];memories:Memory[];
+export function CalendarPage({year,month,mode,selectedDay,photos,memories,settings,onMode,onYear,onMonth,onDay,onViewPhoto}:{
+  year:number;month:number;mode:CalendarMode;selectedDay:string;photos:Photo[];memories:Memory[];settings:AppSettings;
   onMode:(m:CalendarMode)=>void;onYear:(y:number)=>void;onMonth:(year:number,month:number)=>void;onDay:(iso:string)=>void;onViewPhoto:(id:string)=>void;
 }){
   const dayPhotos=orderPhotos(photos.filter(p=>p.takenOn===selectedDay));
   const dayMemories=memories.filter(m=>m.startDate<=selectedDay&&m.endDate>=selectedDay);
+  const daySpecials=occasionsOn(selectedDay,settings);
   function shift(delta:number){
     if(mode==='year')onYear(year+delta);
     else if(mode==='month'){const date=new Date(year,month+delta,1,12);onMonth(date.getFullYear(),date.getMonth());}
@@ -86,10 +92,10 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,onMode
     <div className="calendar-title"><button className="icon-button" onClick={()=>shift(-1)} aria-label="Anterior"><ChevronLeft/></button><h1><CalendarDays/>{mode==='year'?year:mode==='month'?monthLabel(year,month):dateLabel(selectedDay)}</h1><button className="icon-button" onClick={()=>shift(1)} aria-label="Siguiente"><ChevronRight/></button></div>
     {mode==='year'&&<div className="months-grid">{Array.from({length:12},(_,m)=><section className="month-card" key={m}>
       <button className="month-heading" onClick={()=>onMonth(year,m)}><strong>{new Intl.DateTimeFormat('es-ES',{month:'long'}).format(new Date(year,m,1))}</strong><small><Camera size={12}/>{photos.filter(p=>p.takenOn.startsWith(`${year}-${String(m+1).padStart(2,'0')}`)).length}</small></button>
-      <CalendarGrid year={year} month={m} compact photos={photos} memories={memories} onDay={onDay}/>
+      <CalendarGrid year={year} month={m} compact photos={photos} memories={memories} settings={settings} onDay={onDay}/>
     </section>)}</div>}
-    {mode==='month'&&<div className="month-wide"><CalendarGrid year={year} month={month} selectedDay={selectedDay} photos={photos} memories={memories} onDay={onDay}/><div className="calendar-legend"><span><i className="legend-photo"/>Día con foto</span><span><i className="legend-trip"/>Viaje</span><span><i className="legend-event"/>Evento / momento</span></div></div>}
-    {mode==='day'&&<div className="day-layout"><div className="panel"><SectionTitle title="Fotos del día"/>{dayPhotos.length?<div className="day-preview">{dayPhotos.slice(0,6).map(p=><PhotoView key={p.id} id={p.id} className="day-photo" onClick={()=>onViewPhoto(p.id)}/>)}</div>:<p className="muted-text">Todavía no hay fotos de este día.</p>}</div><div className="panel"><SectionTitle title="Viajes y momentos"/>{dayMemories.length?dayMemories.map(m=><p className="event-row" key={m.id}><span className={'pill '+m.kind}>{kindName(m.kind)}</span><strong>{m.title}</strong></p>):<p className="muted-text">Ningún evento definido en esta fecha.</p>}</div></div>}
+    {mode==='month'&&<div className="month-wide"><CalendarGrid year={year} month={month} selectedDay={selectedDay} photos={photos} memories={memories} settings={settings} onDay={onDay}/><div className="calendar-legend"><span><i className="legend-photo"/>Día con foto</span><span><i className="legend-trip"/>Viaje</span><span><i className="legend-event"/>Evento / momento</span><span><i className="legend-anniversary"/>Aniversario de pareja</span><span>🎂 Cumpleaños</span></div></div>}
+    {mode==='day'&&<div className="day-layout">{daySpecials.length>0&&<div className="panel day-special-panel"><SectionTitle title="Fechas especiales"/>{daySpecials.map(item=><div key={item.id} className={'special-day-event '+item.type}><span className="special-day-icon">{item.type==='anniversary'?'♥':'🎂'}</span><strong>{item.label}</strong>{item.type==='anniversary'&&item.years!==undefined&&item.years>0&&<span className="special-day-count">{item.years}º</span>}</div>)}</div>}<div className="panel"><SectionTitle title="Fotos del día"/>{dayPhotos.length?<div className="day-preview">{dayPhotos.slice(0,6).map(p=><PhotoView key={p.id} id={p.id} className="day-photo" onClick={()=>onViewPhoto(p.id)}/>)}</div>:<p className="muted-text">Todavía no hay fotos de este día.</p>}</div><div className="panel"><SectionTitle title="Viajes y momentos"/>{dayMemories.length?dayMemories.map(m=><p className="event-row" key={m.id}><span className={'pill '+m.kind}>{kindName(m.kind)}</span><strong>{m.title}</strong></p>):<p className="muted-text">Ningún evento definido en esta fecha.</p>}</div></div>}
     {mode!=='year'&&<p className="helper-text">Pulsa un día del calendario para consultar sus recuerdos. Las franjas muestran eventos y viajes que pueden durar varios días.</p>}
   </div>;
 }
@@ -103,9 +109,9 @@ export function MemoriesPage({memories,photos,onlyTrips,onOpen,onCreate}:{
   </div>;
 }
 
-export function MemoryDetail({memory,memories,photos,subjects,onViewPhoto,onEdit,onOpenMemory}:{
-  memory:Memory;memories:Memory[];photos:Photo[];subjects:Subject[];
-  onViewPhoto:(id:string)=>void;onEdit:()=>void;onOpenMemory:(id:string)=>void;
+export function MemoryDetail({memory,memories,photos,subjects,settings,onViewPhoto,onEdit,onOpenMemory,onChangeCover}:{
+  memory:Memory;memories:Memory[];photos:Photo[];subjects:Subject[];settings:AppSettings;
+  onViewPhoto:(id:string)=>void;onEdit:()=>void;onOpenMemory:(id:string)=>void;onChangeCover:()=>void;
 }){
   const [tab,setTab]=useState<'summary'|'photos'|'map'>('summary');
   useEffect(()=>setTab('summary'),[memory.id]);
@@ -117,13 +123,13 @@ export function MemoryDetail({memory,memories,photos,subjects,onViewPhoto,onEdit
   return <div className="page-stack memory-detail">
     <section className="memory-hero">{cover&&<PhotoView id={cover} quality="preview" className="memory-hero-image"/>}
       <div className="memory-hero-content"><span className="pill hero-pill">{kindName(memory.kind)}</span><h1>{memory.kind==='trip'?'✈ ':''}{memory.title}</h1><p><CalendarDays size={17}/>{dateLabel(memory.startDate,'short')}{memory.endDate!==memory.startDate?' – '+dateLabel(memory.endDate,'short'):''}{memory.place&&<> · <MapPin size={17}/>{memory.place}</>}</p></div>
-      <button className="btn light hero-edit" onClick={onEdit}>Editar recuerdo</button>
+      <button className="btn light hero-edit" onClick={onEdit}>Editar recuerdo</button><CoverMenu onChange={onChangeCover}/>
     </section>
     <div className="memory-content"><div className="memory-main">
       <div className="detail-tabs"><button className={tab==='summary'?'active':''} onClick={()=>setTab('summary')}>Resumen</button><button className={tab==='photos'?'active':''} onClick={()=>setTab('photos')}>Fotos ({related.length})</button><button className={tab==='map'?'active':''} onClick={()=>setTab('map')}>Mapa</button></div>
       {tab==='summary'&&<>
         {related.length?<div className="mosaic">{related.slice(0,5).map((p,i)=><PhotoView key={p.id} id={p.id} className={'mosaic-photo mosaic-'+i} onClick={()=>onViewPhoto(p.id)}/>)}</div>:<EmptyState title="Sin fotos asociadas" description="Abre una foto del álbum y vincúlala con este recuerdo."/>}
-        <section className="panel"><SectionTitle title="Calendario del recuerdo"/><CalendarGrid year={y} month={m-1} photos={related} memories={[memory]} onDay={()=>setTab('photos')}/></section>
+        <section className="panel"><SectionTitle title="Calendario del recuerdo"/><CalendarGrid year={y} month={m-1} photos={related} memories={[memory]} settings={settings} onDay={()=>setTab('photos')}/></section>
         {memory.description&&<section className="panel"><SectionTitle title="Nuestra historia"/><p>{memory.description}</p></section>}
         <section className="panel"><SectionTitle title="Momentos destacados"/><PhotoGrid photos={related.slice(0,8)} onView={onViewPhoto}/></section>
       </>}
@@ -174,7 +180,7 @@ export function SearchPage({photos,memories,onView,onOpen}:{photos:Photo[];memor
   </div>;
 }
 
-export function SettingsPage({pending}:{pending:number}){
+export function SettingsPage({pending,settings,onSaveSettings}:{pending:number;settings:AppSettings;onSaveSettings:(settings:AppSettings)=>Promise<void>}){
   const [bytes,setBytes]=useState(0);
   const [quota,setQuota]=useState<number|undefined>();
   const [persistent,setPersistent]=useState<boolean|undefined>();
@@ -182,6 +188,7 @@ export function SettingsPage({pending}:{pending:number}){
   useEffect(()=>{getLocalUsage().then(v=>{setBytes(v.bytes);setQuota(v.quota);}).catch(e=>setError(String(e)));navigator.storage?.persisted?.()?.then(setPersistent).catch(()=>undefined);},[]);
   const format=(n:number)=>n>1024**3?(n/1024**3).toFixed(2)+' GB':(n/1024**2).toFixed(1)+' MB';
   return <div className="page-stack"><div className="page-intro"><span className="eyebrow">ALMACENAMIENTO Y SEGURIDAD</span><h1>Ajustes</h1><p>Estado de tu biblioteca en este dispositivo.</p></div>
+    <SpecialDatesSettings settings={settings} onSave={onSaveSettings}/>
     <div className="settings-cards"><section className="panel"><h3><HardDrive size={20}/> Biblioteca offline</h3><p className="large-stat">{format(bytes)}</p><p>Fotografías originales y variantes guardadas localmente.</p>{quota!==undefined&&<small>Cuota estimada del navegador: {format(quota)}</small>}
       <button className="btn subtle" onClick={async()=>{const ok=await requestPersistence();setPersistent(ok);}}><ShieldCheck size={16}/>{persistent?'Almacenamiento persistente concedido':'Solicitar almacenamiento persistente'}</button>
     </section><section className="panel"><h3><CloudUpload size={20}/> Cola de sincronización</h3><p className="large-stat">{pending}</p><p>Operaciones pendientes en este dispositivo.</p><div className="warning-note">El servidor todavía no está conectado. Estas operaciones NO se han subido y podrían perderse si el navegador elimina sus datos.</div></section></div>
