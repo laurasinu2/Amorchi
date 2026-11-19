@@ -1,10 +1,11 @@
-import type { Memory,Photo } from '../types';
+import type { AppSettings,Memory,Photo } from '../types';
 import { covers, dateLabel, monthWeeks } from '../dates';
 import { PhotoView } from './PhotoView';
+import { occasionsOn } from '../specialDates';
 
 const weekdays=['L','M','X','J','V','S','D'];
-export function CalendarGrid({year,month,photos,memories,onDay,compact=false,selectedDay}:{
-  year:number;month:number;photos:Photo[];memories:Memory[];onDay:(iso:string)=>void;compact?:boolean;selectedDay?:string;
+export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=false,selectedDay}:{
+  year:number;month:number;photos:Photo[];memories:Memory[];settings:AppSettings;onDay:(iso:string)=>void;compact?:boolean;selectedDay?:string;
 }){
   const weeks=monthWeeks(year,month);
   const byDate=new Map<string,Photo>();
@@ -20,9 +21,14 @@ export function CalendarGrid({year,month,photos,memories,onDay,compact=false,sel
           const current=Number(day.slice(5,7))===month+1;
           const photo=byDate.get(day);
           const matches=memories.filter(m=>covers(m.startDate,m.endDate,day));
-          return <button key={day} type="button" title={dateLabel(day)} aria-label={dateLabel(day)} className={['calendar-day',current?'':'muted',photo?'with-photo':'',matches.length?'has-event':'',selectedDay===day?'selected':''].join(' ')} onClick={()=>onDay(day)}>
+          const specials=occasionsOn(day,settings);
+          const anniversary=specials.find(s=>s.type==='anniversary');
+          const birthdays=specials.filter(s=>s.type==='birthday');
+          return <button key={day} type="button" title={[dateLabel(day),...specials.map(s=>s.label)].join(' · ')} aria-label={[dateLabel(day),...specials.map(s=>s.label)].join(' · ')} className={['calendar-day',current?'':'muted',photo?'with-photo':'',matches.length?'has-event':'',anniversary?'has-anniversary':'',selectedDay===day?'selected':''].join(' ')} onClick={()=>onDay(day)}>
             {photo&&<PhotoView id={photo.id} className="day-backdrop"/>}
             <span className="day-number">{Number(day.slice(8,10))}</span>
+            {anniversary&&<span className="calendar-anniversary" aria-hidden="true"><span className="anniversary-heart">♥</span><span className="anniversary-count">{anniversary.years===0?'Inicio':`${anniversary.years}º`}</span></span>}
+            {birthdays.length>0&&<span className="calendar-birthday" aria-hidden="true">🎂</span>}
             {!photo&&matches.length>0&&<span className="calendar-dot"/>}
           </button>;
         })}
