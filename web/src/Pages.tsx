@@ -40,7 +40,7 @@ export function Dashboard({photos,memories,onNavigate,onOpenMemory,onViewPhoto,o
   return <div className="page-stack">
     <section className="dashboard-hero">
       {newest[0]&&<PhotoView id={newest[0].id} quality="preview" className="dashboard-hero-image"/>}
-      <div className="hero-content"><span className="eyebrow">NUESTRO ÁLBUM DE RECUERDOS</span><h1>Nuestra historia, <em>para siempre.</em></h1><p>Recorre los días, viajes y momentos que habéis vivido juntos.</p><button className="btn light" onClick={()=>onNavigate('anios')}>Explorar nuestros años <ArrowRight size={18}/></button></div>
+      <div className="hero-content"><h1>Nuestra historia <em>♡</em></h1><p>Fotos, viajes y momentos.</p><button className="btn light" onClick={()=>onNavigate('anios')}>Ver años <ArrowRight size={17}/></button></div>
     </section>
     <div className="stat-grid"><div className="stat"><CalendarDays/><strong>{years.length}</strong><span>Años</span></div><div className="stat"><Camera/><strong>{photos.length}</strong><span>Fotografías</span></div><div className="stat"><Plane/><strong>{trips.length}</strong><span>Viajes</span></div><div className="stat"><Heart/><strong>{memories.filter(m=>m.kind!=='trip').length}</strong><span>Recuerdos</span></div></div>
     <div className="quick-actions"><button onClick={()=>onNavigate('calendario')}><CalendarDays size={24}/><span><strong>Calendario fotográfico</strong><small>Revive vuestra historia día a día</small></span><ArrowRight size={16}/></button><button onClick={onImport}><ImagePlus size={24}/><span><strong>Subir fotografías</strong><small>Añade recuerdos incluso sin conexión</small></span><ArrowRight size={16}/></button></div>

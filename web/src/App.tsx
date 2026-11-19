@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { CalendarDays, Camera, CloudUpload, Compass, Heart, Home, Images, Layers, MapPin, Menu, Plane, Plus, Search, Settings, Star, Trash2, Users, WifiOff } from 'lucide-react';
+import { CalendarDays, CloudUpload, Compass, Heart, Home, Images, Layers, MapPin, Menu, Plane, Plus, Search, Settings, Star, Trash2, Users, WifiOff } from 'lucide-react';
 import type { ImportOptions, Memory, MemoryKind, Page, Photo, Subject } from './types';
 import { localISO } from './dates';
 import { importPhoto, loadLibrary, saveMemory, savePhoto, saveSubject } from './db';
@@ -84,7 +84,7 @@ export default function App(){
   const mainTitle=({inicio:'Inicio',anios:'Nuestros años',calendario:'Calendario',dia:'Calendario',viajes:'Viajes',recuerdos:'Recuerdos',lugares:'Mapa de recuerdos',personas:'Personas y mascotas',colecciones:'Colecciones',album:'Galería',buscar:'Buscar',favoritos:'Favoritos',papelera:'Papelera',ajustes:'Ajustes',memoria:selectedMemory?.title||'Recuerdo'} as Record<Page,string>)[page];
   return <div className="app-shell">
     <aside className={'sidebar '+(menu?'mobile-open':'')}>
-      <div className="sidebar-logo"><div className="brand-symbol"><Camera size={34}/><span>♡</span></div><div><strong>Amorchi</strong><small>NUESTRO ÁLBUM DE FOTOS</small></div></div>
+      <div className="sidebar-logo"><img className="sidebar-app-icon" src="/brand/recuerdos-app.webp" alt="" /><div><strong>Recuerdos</strong><small>ÁLBUM AMORCHI</small></div></div>
       <nav className="sidebar-nav" aria-label="Navegación principal">
         {sidebarItems.map((item,i)=><div key={item.page}>
           {(i===7||i===10)&&<hr/>}
@@ -95,7 +95,7 @@ export default function App(){
     </aside>
     {menu&&<button className="menu-scrim" aria-label="Cerrar menú" onClick={()=>setMenu(false)}/>}
     <div className="app-content">
-      <header className="topbar"><div className="topbar-left"><button className="icon-button mobile-menu" aria-label="Abrir menú" onClick={()=>setMenu(true)}><Menu/></button><span className="topbar-brand">Amorchi <span>♡</span></span><span className="breadcrumbs">/ {mainTitle}</span></div><div className="topbar-right"><span className={'sync-indicator '+(!isOnline?'offline':'')} title="Servidor aún no conectado">{isOnline?<CloudUpload size={16}/>:<WifiOff size={16}/>}<span>{!isOnline?'Sin conexión':'Datos locales'}</span><b>{pending}</b></span><button className="btn topbar-add" onClick={()=>setImportOpen(true)}><Plus size={17}/> Subir fotos</button></div></header>
+      <header className="topbar"><div className="topbar-left"><button className="icon-button mobile-menu" aria-label="Abrir menú" onClick={()=>setMenu(true)}><Menu/></button><img className="topbar-brand-image" src="/brand/recuerdos-horizontal.webp" alt="Recuerdos, álbum Amorchi" /><span className="breadcrumbs">/ {mainTitle}</span></div><div className="topbar-right"><span className={'sync-indicator '+(!isOnline?'offline':'')} title="Servidor aún no conectado">{isOnline?<CloudUpload size={16}/>:<WifiOff size={16}/>}<span>{!isOnline?'Sin conexión':'Datos locales'}</span><b>{pending}</b></span><button className="btn topbar-add" onClick={()=>setImportOpen(true)}><Plus size={17}/> Subir fotos</button></div></header>
       <main className="main-container">
         {!ready?<div className="empty-state"><h2>Abriendo tus recuerdos...</h2></div>:<>
           {error&&<div className="form-errors" role="alert">{error}</div>}

@@ -7,16 +7,19 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['icon.svg', 'brand/recuerdos-horizontal.webp', 'brand/recuerdos-app.webp', 'brand/icon-192.png', 'brand/icon-512.png'],
       manifest: {
-        name: 'Amorchi · Nuestros recuerdos',
-        short_name: 'Amorchi',
+        name: 'Recuerdos · Amorchi',
+        short_name: 'Recuerdos',
         description: 'Nuestra historia en fotografías',
         start_url: '/',
         display: 'standalone',
         background_color: '#faf3ec',
         theme_color: '#253343',
-        icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }]
+        icons: [
+          { src: '/brand/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/brand/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+        ]
       },
       workbox: {
         navigateFallback: '/index.html',
