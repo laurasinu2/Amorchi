@@ -3,6 +3,8 @@ import { Check, Heart, ImagePlus, MapPin, X } from 'lucide-react';
 import type { ImportOptions, Memory, MemoryKind, Photo, Subject, SubjectKind } from '../types';
 import { dateLabel, localISO } from '../dates';
 import { PhotoView } from './PhotoView';
+import { inspectPhoto, type PhotoInspection } from '../db';
+import { createId } from '../id';
 
 export function Dialog({title,children,onClose,wide=false}:{
   title:string;children:ReactNode;onClose:()=>void;wide?:boolean;
@@ -33,10 +35,23 @@ export function ImportDialog({memories,subjects,onClose,onCommit}:{
   const [errors,setErrors]=useState<string[]>([]);
   const [done,setDone]=useState(0);
   const [previews,setPreviews]=useState<string[]>([]);
+  const [inspections,setInspections]=useState<Array<PhotoInspection|undefined>>([]);
+  const [inspecting,setInspecting]=useState(false);
   useEffect(()=>{
-    const urls=files.slice(0,8).map(f=>URL.createObjectURL(f));
+    const urls=files.slice(0,12).map(f=>URL.createObjectURL(f));
     setPreviews(urls);
     return ()=>urls.forEach(url=>URL.revokeObjectURL(url));
+  },[files]);
+  useEffect(()=>{
+    let alive=true;
+    setInspections([]);
+    setInspecting(files.length>0);
+    if(files.length>0){
+      Promise.all(files.slice(0,12).map(f=>inspectPhoto(f).catch(()=>undefined))).then(data=>{
+        if(alive){setInspections(data);setInspecting(false);}
+      });
+    }
+    return ()=>{alive=false;};
   },[files]);
   async function submit(e:React.FormEvent){
     e.preventDefault();if(!files.length||busy)return;
@@ -54,11 +69,21 @@ export function ImportDialog({memories,subjects,onClose,onCommit}:{
       <label className="upload-zone">
         <ImagePlus size={31}/><strong>{files.length?`${files.length} fotografías seleccionadas`:'Seleccionar fotografías'}</strong>
         <small>Puedes elegir varias imágenes a la vez. Se guardarán en este dispositivo, con su archivo original.</small>
-        <input type="file" multiple accept="image/*,.heic,.heif" onChange={e=>setFiles(Array.from(e.target.files||[]))}/>
+        <input type="file" multiple accept="image/*,.heic,.heif" onChange={e=>{setFiles(Array.from(e.target.files||[]));setErrors([]);setDone(0);}}/>
       </label>
-      {files.length>0&&<div className="preview-row">{previews.map((url,i)=><img key={url} src={url} alt={files[i].name} onError={e=>{e.currentTarget.style.opacity='.25';}} />)}</div>}
+      {files.length>0&&<section className="detected-meta" aria-live="polite">
+        <div className="detected-meta-header"><strong>Fechas y ubicaciones detectadas</strong><small>{inspecting?'Leyendo metadatos...':`${inspections.filter(x=>x?.dateSource==='exif').length} fechas EXIF de ${Math.min(files.length,12)} fotos revisadas`}</small></div>
+        <div className="import-file-list">{previews.map((url,i)=><div className="import-file" key={url}>
+          <img src={url} alt="" onError={e=>{e.currentTarget.style.opacity='.25';}}/>
+          <div><strong title={files[i].name}>{files[i].name}</strong>
+            <small>{inspections[i]?`${dateLabel(inspections[i]!.takenOn,'short')} · ${inspections[i]!.takenTime} · ${inspections[i]!.dateSource==='exif'?'EXIF ✓':'Fecha del archivo (sin EXIF)'}`:'Leyendo fecha...'}</small>
+            <small>{inspections[i]?.latitude!==undefined?`GPS: ${inspections[i]!.latitude!.toFixed(5)}, ${inspections[i]!.longitude!.toFixed(5)}`:'Sin coordenadas GPS detectadas'}</small>
+          </div>
+        </div>)}</div>
+        {files.length>12&&<small>Se muestran los primeros 12 archivos. Se analizarán todos durante la importación.</small>}
+      </section>}
       <div className="form-grid">
-        <label className="field"><span>Corregir fecha (opcional)</span><input type="date" value={overrideDate} onChange={e=>setOverrideDate(e.target.value)}/><small>Si la dejas vacía, se utiliza EXIF o la fecha del archivo.</small></label>
+        <label className="field"><span>Corregir fecha (opcional)</span><input type="date" value={overrideDate} onChange={e=>setOverrideDate(e.target.value)}/><small>Si la dejas vacía, cada foto conserva su fecha detectada. Esta corrección se aplica a TODAS las fotos seleccionadas.</small></label>
         <label className="field"><span>Lugar (opcional)</span><input value={place} onChange={e=>setPlace(e.target.value)} placeholder="Barcelona, Roma..."/></label>
       </div>
       <label className="field"><span>Asignar a viaje, evento o momento</span>
@@ -70,7 +95,7 @@ export function ImportDialog({memories,subjects,onClose,onCommit}:{
       <div className="field"><span>¿Quién aparece? Selecciona personas y animales</span>
         {subjects.length?<div className="chips">{subjects.map(s=><button type="button" key={s.id} className={'chip '+(selectedSubjects.includes(s.id)?'selected':'')} onClick={()=>setSelectedSubjects(v=>v.includes(s.id)?v.filter(x=>x!==s.id):[...v,s.id])}>{s.kind==='animal'?'🐾':'♡'} {s.name} {selectedSubjects.includes(s.id)&&<Check size={12}/>}</button>)}</div>:<small>Añade primero personas o mascotas desde su sección. Puedes etiquetar la foto más adelante.</small>}
       </div>
-      <p className="helper-text">La aplicación detectará fechas y coordenadas EXIF cuando estén disponibles. No realizará reconocimiento facial automático. No hay todavía conexión con el servidor.</p>
+      <p className="helper-text">Se muestran fechas EXIF y coordenadas GPS si existen. La ubicación escrita se aplicará a todas las fotos. No realizará reconocimiento facial automático. No hay todavía conexión con el servidor.</p>
       {done>0&&<p className="success-text">{done} fotografías guardadas en este dispositivo.</p>}
       {errors.length>0&&<div className="form-errors" role="alert">{errors.slice(0,8).map((e,i)=><p key={i}>{e}</p>)}</div>}
       <div className="form-actions"><button type="button" className="btn subtle" onClick={onClose}>Cerrar</button><button className="btn primary" disabled={!files.length||busy} type="submit">{busy?'Guardando fotografías...':`Importar ${files.length||''} fotos`}</button></div>
@@ -99,7 +124,7 @@ export function MemoryDialog({onClose,onSave,initial,defaultKind}:{
     if(lat&&(Number(lat)<-90||Number(lat)>90||Number(lon)<-180||Number(lon)>180)){setError('Las coordenadas están fuera del rango válido.');return;}
     setBusy(true);
     try{
-      await onSave({id:initial?.id||crypto.randomUUID(),kind,title:title.trim(),description,
+      await onSave({id:initial?.id||createId(),kind,title:title.trim(),description,
         startDate,endDate:actualEnd,place:place.trim(),
         latitude:lat?Number(lat):undefined,longitude:lon?Number(lon):undefined,
         favorite:initial?.favorite||false,coverPhotoId:initial?.coverPhotoId,createdAt:initial?.createdAt||new Date().toISOString()});
@@ -138,7 +163,7 @@ export function SubjectDialog({onClose,onSave}:{
   const [busy,setBusy]=useState(false);
   async function submit(e:React.FormEvent){
     e.preventDefault();setBusy(true);
-    try{await onSave({id:crypto.randomUUID(),kind,name:name.trim(),notes});onClose();}
+    try{await onSave({id:createId(),kind,name:name.trim(),notes});onClose();}
     catch(err){setError(String(err));}finally{setBusy(false);}
   }
   return <Dialog title="Añadir persona o mascota" onClose={onClose}>

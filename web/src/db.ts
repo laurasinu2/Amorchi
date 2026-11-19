@@ -1,5 +1,7 @@
 import { openDB, type DBSchema } from 'idb';
 import * as exifr from 'exifr';
+import { sha256 } from 'js-sha256';
+import { createId } from './id';
 import type { ImportOptions, LocalOperation, Memory, Photo, Subject } from './types';
 import { localISO } from './dates';
 
@@ -25,7 +27,7 @@ const database = openDB<AmorchiSchema>('amorchi-local-v1', 2, {
 });
 
 const op = (entity: LocalOperation['entity'],entityId:string):LocalOperation=>({
-  id:crypto.randomUUID(), type:'upsert', entity, entityId, createdAt:new Date().toISOString()
+  id:createId(), type:'upsert', entity, entityId, createdAt:new Date().toISOString()
 });
 
 export async function loadLibrary() {
@@ -77,6 +79,62 @@ async function webpVariant(file:File,max:number,quality:number):Promise<Blob|und
   finally { bitmap?.close(); }
 }
 
+export interface PhotoInspection {
+  takenOn:string;
+  takenTime:string;
+  dateSource:'exif'|'file';
+  latitude?:number;
+  longitude?:number;
+}
+
+// Cache por referencia a File durante la importación. No sube datos a ningún servidor.
+const inspectionCache=new WeakMap<File,Promise<PhotoInspection>>();
+
+function readExifDate(value:unknown):Date|undefined{
+  if(value instanceof Date) return Number.isFinite(value.getTime())?value:undefined;
+  if(typeof value==='string'){
+    const match=/^(\\d{4})[:/-](\\d{2})[:/-](\\d{2})[ T](\\d{2}):(\\d{2})(?::(\\d{2}))?/.exec(value);
+    if(match){
+      const [,y,m,d,h,min,s]=match;
+      const date=new Date(Number(y),Number(m)-1,Number(d),Number(h),Number(min),Number(s||0));
+      return Number.isFinite(date.getTime())?date:undefined;
+    }
+    const parsed=new Date(value);
+    return Number.isFinite(parsed.getTime())?parsed:undefined;
+  }
+  return undefined;
+}
+
+export async function inspectPhoto(file:File):Promise<PhotoInspection>{
+  const cached=inspectionCache.get(file);
+  if(cached)return cached;
+  const inspection=(async()=>{
+    const [exif,gps]=await Promise.all([
+      exifr.parse(file).catch(()=>undefined) as Promise<Record<string,unknown>|undefined>,
+      exifr.gps(file).catch(()=>undefined)
+    ]);
+    const captured=readExifDate(exif?.DateTimeOriginal)
+      ||readExifDate(exif?.CreateDate)
+      ||readExifDate(exif?.DateTimeDigitized)
+      ||readExifDate(exif?.DateTime)
+      ||readExifDate(exif?.ModifyDate);
+    const fallback=new Date(file.lastModified);
+    const date=captured || (Number.isFinite(fallback.getTime())?fallback:new Date());
+    const latitude=typeof gps?.latitude==='number' ? gps.latitude
+      :typeof exif?.latitude==='number'?exif.latitude:undefined;
+    const longitude=typeof gps?.longitude==='number' ? gps.longitude
+      :typeof exif?.longitude==='number'?exif.longitude:undefined;
+    return {
+      takenOn:localISO(date),
+      takenTime:String(date.getHours()).padStart(2,'0')+':'+String(date.getMinutes()).padStart(2,'0'),
+      dateSource:captured?'exif' as const:'file' as const,
+      latitude,longitude
+    };
+  })();
+  inspectionCache.set(file,inspection);
+  return inspection;
+}
+
 export async function importPhoto(file:File,opts:ImportOptions):Promise<Photo> {
   if(file.size>60*1024*1024) throw new Error('Archivo de más de 60 MB: requiere importación desde el servidor.');
   if(!file.type.startsWith('image/') && !/\.(heic|heif|jpg|jpeg|png|webp|avif)$/i.test(file.name)){
@@ -89,25 +147,22 @@ export async function importPhoto(file:File,opts:ImportOptions):Promise<Photo> {
   }
   // Deduplicación exacta; no modifica el archivo original.
   const bytes=await file.arrayBuffer();
-  const digest=await crypto.subtle.digest('SHA-256',bytes);
-  const hash=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  // subtle.digest requiere un contexto seguro; en HTTP doméstico mantenemos SHA-256 con JS.
+  const hash=globalThis.crypto?.subtle
+    ? Array.from(new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',bytes))).map(b=>b.toString(16).padStart(2,'0')).join('')
+    : sha256(new Uint8Array(bytes));
   const existing=(await db.getAll('photos')).find(p=>p.hash===hash);
   if(existing) throw new Error('Esta fotografía ya está importada (archivo idéntico).');
 
-  let exif:Record<string,unknown>|undefined;
-  try { exif=(await exifr.parse(file)) as Record<string,unknown>|undefined; } catch { /* Sin EXIF válido */ }
-  const captured=exif?.DateTimeOriginal instanceof Date ? exif.DateTimeOriginal :
-                 exif?.CreateDate instanceof Date ? exif.CreateDate : undefined;
-  const fileDate=new Date(file.lastModified);
-  const date=captured || (Number.isFinite(fileDate.getTime())?fileDate:new Date());
-  const takenOn=opts.overrideDate || localISO(date);
-  const takenTime=String(date.getHours()).padStart(2,'0')+':'+String(date.getMinutes()).padStart(2,'0');
-  const latitude=typeof exif?.latitude==='number'?exif.latitude:undefined;
-  const longitude=typeof exif?.longitude==='number'?exif.longitude:undefined;
+  const inspected=await inspectPhoto(file);
+  const takenOn=opts.overrideDate || inspected.takenOn;
+  const takenTime=inspected.takenTime;
+  const latitude=inspected.latitude;
+  const longitude=inspected.longitude;
   const photo:Photo={
-    id:crypto.randomUUID(), filename:file.name,mimeType:file.type||'application/octet-stream',
+    id:createId(), filename:file.name,mimeType:file.type||'application/octet-stream',
     size:file.size, hash, takenOn, takenTime,
-    dateSource:opts.overrideDate?'manual':captured?'exif':'file',
+    dateSource:opts.overrideDate?'manual':inspected.dateSource,
     place:opts.place, latitude,longitude,
     memoryIds:opts.memoryId?[opts.memoryId]:[],
     subjectIds:opts.subjectIds, description:'',favorite:false,createdAt:new Date().toISOString()
