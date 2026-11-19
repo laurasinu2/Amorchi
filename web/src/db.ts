@@ -4,20 +4,23 @@ import type { ImportOptions, LocalOperation, Memory, Photo, Subject } from './ty
 import { localISO } from './dates';
 
 interface Asset { key: string; blob: Blob }
+interface AssetSize { key: string; bytes: number }
 interface AmorchiSchema extends DBSchema {
   photos: { key: string; value: Photo };
   memories: { key: string; value: Memory };
   subjects: { key: string; value: Subject };
   assets: { key: string; value: Asset };
+  asset_sizes: { key: string; value: AssetSize };
   operations: { key: string; value: LocalOperation };
 }
-const database = openDB<AmorchiSchema>('amorchi-local-v1', 1, {
+const database = openDB<AmorchiSchema>('amorchi-local-v1', 2, {
   upgrade(db) {
-    db.createObjectStore('photos', { keyPath: 'id' });
-    db.createObjectStore('memories', { keyPath: 'id' });
-    db.createObjectStore('subjects', { keyPath: 'id' });
-    db.createObjectStore('assets', { keyPath: 'key' });
-    db.createObjectStore('operations', { keyPath: 'id' });
+    if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos', { keyPath: 'id' });
+    if(!db.objectStoreNames.contains('memories')) db.createObjectStore('memories', { keyPath: 'id' });
+    if(!db.objectStoreNames.contains('subjects')) db.createObjectStore('subjects', { keyPath: 'id' });
+    if(!db.objectStoreNames.contains('assets')) db.createObjectStore('assets', { keyPath: 'key' });
+    if(!db.objectStoreNames.contains('operations')) db.createObjectStore('operations', { keyPath: 'id' });
+    if(!db.objectStoreNames.contains('asset_sizes')) db.createObjectStore('asset_sizes', { keyPath: 'key' });
   }
 });
 
@@ -80,6 +83,10 @@ export async function importPhoto(file:File,opts:ImportOptions):Promise<Photo> {
     throw new Error('Solo se admiten imágenes en esta primera versión.');
   }
   const db=await database;
+  const quota=await navigator.storage?.estimate?.().catch(()=>undefined);
+  if(quota?.quota&&quota.usage&&quota.usage+file.size*2>quota.quota*0.90){
+    throw new Error('No hay espacio suficiente para guardar la fotografía y su copia local con seguridad.');
+  }
   // Deduplicación exacta; no modifica el archivo original.
   const bytes=await file.arrayBuffer();
   const digest=await crypto.subtle.digest('SHA-256',bytes);
@@ -109,10 +116,11 @@ export async function importPhoto(file:File,opts:ImportOptions):Promise<Photo> {
     webpVariant(file,2560,0.82),webpVariant(file,360,0.72)
   ]);
   // Transacción única: nunca debe quedar una ficha sin su archivo original.
-  const tx=db.transaction(['photos','assets','operations'],'readwrite');
+  const tx=db.transaction(['photos','assets','asset_sizes','operations'],'readwrite');
   await tx.objectStore('assets').put({key:photo.id+':original',blob:file});
-  if(preview)await tx.objectStore('assets').put({key:photo.id+':preview',blob:preview});
-  if(thumbnail)await tx.objectStore('assets').put({key:photo.id+':thumb',blob:thumbnail});
+  await tx.objectStore('asset_sizes').put({key:photo.id+':original',bytes:file.size});
+  if(preview){await tx.objectStore('assets').put({key:photo.id+':preview',blob:preview});await tx.objectStore('asset_sizes').put({key:photo.id+':preview',bytes:preview.size});}
+  if(thumbnail){await tx.objectStore('assets').put({key:photo.id+':thumb',blob:thumbnail});await tx.objectStore('asset_sizes').put({key:photo.id+':thumb',bytes:thumbnail.size});}
   await tx.objectStore('photos').put(photo);
   await tx.objectStore('operations').put(op('photo',photo.id));
   await tx.done;
@@ -128,8 +136,9 @@ export async function getPhotoAsset(id:string,quality:'thumb'|'preview'|'origina
 
 export async function getLocalUsage():Promise<{bytes:number;quota?:number;usage?:number}>{
   const db=await database;
-  const assets=await db.getAll('assets');
-  const bytes=assets.reduce((sum,a)=>sum+a.blob.size,0);
+  // Evitar getAll('assets'): cargaría en memoria todos los blobs, que podrían ocupar gigabytes.
+  const sizes=await db.getAll('asset_sizes');
+  const bytes=sizes.length?sizes.reduce((sum,a)=>sum+a.bytes,0):(await db.getAll('photos')).reduce((sum,p)=>sum+p.size,0);
   const estimate=await navigator.storage?.estimate?.().catch(()=>undefined);
   return {bytes,quota:estimate?.quota,usage:estimate?.usage};
 }
