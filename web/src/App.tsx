@@ -1,9 +1,10 @@
 import { useEffect, useState, type ComponentType } from 'react';
 import { CalendarDays, CloudUpload, Compass, Heart, Home, Images, Layers, MapPin, Menu, Plane, Plus, Search, Settings, Star, Trash2, Users, WifiOff } from 'lucide-react';
-import type { ImportOptions, Memory, MemoryKind, Page, Photo, Subject } from './types';
+import { defaultSettings, type AppSettings, type ImportOptions, type Memory, type MemoryKind, type Page, type Photo, type Subject } from './types';
 import { localISO } from './dates';
-import { importPhoto, loadLibrary, saveMemory, savePhoto, saveSubject } from './db';
+import { importPhoto, loadLibrary, saveMemory, savePhoto, saveSubject, saveSettings } from './db';
 import { ImportDialog, MemoryDialog, PhotoDialog, SubjectDialog } from './components/Dialogs';
+import { CoverPicker } from './components/CoverPicker';
 import { AlbumPage, CalendarPage, Dashboard, EmptyState, MemoriesPage, MemoryDetail, PeoplePage, PlacesPage, SearchPage, SettingsPage, YearsPage, type CalendarMode } from './Pages';
 
 type Icon=ComponentType<{size?:number;strokeWidth?:number}>;
@@ -31,6 +32,8 @@ export default function App(){
   const [photos,setPhotos]=useState<Photo[]>([]);
   const [memories,setMemories]=useState<Memory[]>([]);
   const [subjects,setSubjects]=useState<Subject[]>([]);
+  const [settings,setSettings]=useState<AppSettings>(defaultSettings);
+  const [coverTarget,setCoverTarget]=useState<'home'|{memoryId:string}|null>(null);
   const [pending,setPending]=useState(0);
   const [ready,setReady]=useState(false);
   const [error,setError]=useState('');
@@ -51,7 +54,7 @@ export default function App(){
   async function refresh(){
     const library=await loadLibrary();
     setPhotos(library.photos);setMemories(library.memories);
-    setSubjects(library.subjects);setPending(library.operations.length);
+    setSubjects(library.subjects);setPending(library.operations.length);setSettings(library.settings);
   }
   useEffect(()=>{
     refresh().catch(e=>setError('No se pudo abrir el almacenamiento local: '+String(e))).finally(()=>setReady(true));
@@ -68,6 +71,19 @@ export default function App(){
   function openCalendarDay(day:string){setSelectedDay(day);setYear(Number(day.slice(0,4)));setMonth(Number(day.slice(5,7))-1);setCalendarMode('day');navigate('calendario');}
   function createMemory(kind:MemoryKind='moment'){setEditMemory(undefined);setNewKind(kind);setMemoryOpen(true);}
   async function commitMemory(memory:Memory){await saveMemory(memory);await refresh();}
+  async function commitSettings(next:AppSettings){
+    await saveSettings(next);await refresh();
+  }
+  async function commitCover(photoId?:string){
+    if(coverTarget==='home'){
+      await commitSettings({...settings,homeCoverPhotoId:photoId});
+    }else if(coverTarget){
+      const memory=memories.find(m=>m.id===coverTarget.memoryId);
+      if(!memory)throw new Error('No se encontró el recuerdo.');
+      await saveMemory({...memory,coverPhotoId:photoId});
+      await refresh();
+    }
+  }
   async function commitSubject(subject:Subject){await saveSubject(subject);await refresh();}
   async function commitPhoto(photo:Photo){await savePhoto(photo);await refresh();}
   async function commitImport(files:File[],options:ImportOptions){
@@ -99,18 +115,18 @@ export default function App(){
       <main className="main-container">
         {!ready?<div className="empty-state"><h2>Abriendo tus recuerdos...</h2></div>:<>
           {error&&<div className="form-errors" role="alert">{error}</div>}
-          {page==='inicio'&&<Dashboard photos={photos} memories={memories} onNavigate={navigate} onOpenMemory={openMemory} onViewPhoto={setSelectedPhotoId} onImport={()=>setImportOpen(true)} onCreateMemory={()=>createMemory('trip')}/>}
+          {page==='inicio'&&<Dashboard photos={photos} memories={memories} settings={settings} onChangeCover={()=>setCoverTarget('home')} onNavigate={navigate} onOpenMemory={openMemory} onViewPhoto={setSelectedPhotoId} onImport={()=>setImportOpen(true)} onCreateMemory={()=>createMemory('trip')}/>}
           {page==='anios'&&<YearsPage photos={photos} memories={memories} onYear={openCalendarYear}/>}
-          {(page==='calendario'||page==='dia')&&<CalendarPage year={year} month={month} mode={calendarMode} selectedDay={selectedDay} photos={photos} memories={memories} onMode={setCalendarMode} onYear={openCalendarYear} onMonth={openCalendarMonth} onDay={openCalendarDay} onViewPhoto={setSelectedPhotoId}/>}
+          {(page==='calendario'||page==='dia')&&<CalendarPage year={year} month={month} mode={calendarMode} selectedDay={selectedDay} photos={photos} memories={memories} settings={settings} onMode={setCalendarMode} onYear={openCalendarYear} onMonth={openCalendarMonth} onDay={openCalendarDay} onViewPhoto={setSelectedPhotoId}/>}
           {page==='viajes'&&<MemoriesPage memories={memories} photos={photos} onlyTrips onOpen={openMemory} onCreate={()=>createMemory('trip')}/>}
           {page==='recuerdos'&&<MemoriesPage memories={memories} photos={photos} onlyTrips={false} onOpen={openMemory} onCreate={()=>createMemory('moment')}/>}
-          {page==='memoria'&&(selectedMemory?<MemoryDetail memory={selectedMemory} memories={memories} photos={photos} subjects={subjects} onViewPhoto={setSelectedPhotoId} onEdit={()=>{setEditMemory(selectedMemory);setMemoryOpen(true);}} onOpenMemory={openMemory}/>:<EmptyState title="Recuerdo no encontrado" description="Vuelve a tus recuerdos desde el menú." onAction={()=>navigate('recuerdos')} action="Ver recuerdos"/>)}
+          {page==='memoria'&&(selectedMemory?<MemoryDetail memory={selectedMemory} memories={memories} photos={photos} subjects={subjects} settings={settings} onChangeCover={()=>setCoverTarget({memoryId:selectedMemory.id})} onViewPhoto={setSelectedPhotoId} onEdit={()=>{setEditMemory(selectedMemory);setMemoryOpen(true);}} onOpenMemory={openMemory}/>:<EmptyState title="Recuerdo no encontrado" description="Vuelve a tus recuerdos desde el menú." onAction={()=>navigate('recuerdos')} action="Ver recuerdos"/>)}
           {page==='lugares'&&<PlacesPage memories={memories} onOpen={openMemory}/>}
           {page==='personas'&&<PeoplePage subjects={subjects} photos={photos} onCreate={()=>setSubjectOpen(true)} onView={setSelectedPhotoId}/>}
           {page==='album'&&<AlbumPage photos={photos} onView={setSelectedPhotoId}/>}
           {page==='favoritos'&&<AlbumPage photos={photos} onView={setSelectedPhotoId} filterFavorites/>}
           {page==='buscar'&&<SearchPage photos={photos} memories={memories} onView={setSelectedPhotoId} onOpen={openMemory}/>}
-          {page==='ajustes'&&<SettingsPage pending={pending}/>}
+          {page==='ajustes'&&<SettingsPage pending={pending} settings={settings} onSaveSettings={commitSettings}/>}
           {page==='colecciones'&&<div className="page-stack"><div className="page-intro"><h1>Colecciones</h1><p>Accede a tus grupos de fotos y recuerdos.</p></div><MemoriesPage photos={photos} memories={memories} onlyTrips={false} onOpen={openMemory} onCreate={()=>createMemory('moment')}/></div>}
           {page==='papelera'&&<EmptyState title="Papelera" description="El borrado seguro y la recuperación de fotos se añadirán con el servidor. Esta versión no borra originales desde la interfaz."/>}
         </>}
@@ -121,6 +137,7 @@ export default function App(){
       <button className="add-tab" onClick={()=>setImportOpen(true)} aria-label="Subir fotografías"><Plus size={31}/><span>Subir</span></button>
       {bottomItems.slice(2).map(item=><button key={item.page} className={page===item.page?'active':''} onClick={()=>navigate(item.page)}><item.icon size={23}/><span>{item.label}</span></button>)}
     </nav>
+    {coverTarget&&<CoverPicker photos={photos} title={coverTarget==='home'?'Elegir foto de fondo de Inicio':'Elegir foto de fondo del recuerdo'} selectedId={coverTarget==='home'?settings.homeCoverPhotoId:memories.find(m=>m.id===coverTarget.memoryId)?.coverPhotoId} onClose={()=>setCoverTarget(null)} onSelect={commitCover}/>}
     {importOpen&&<ImportDialog memories={memories} subjects={subjects} onClose={()=>setImportOpen(false)} onCommit={commitImport}/>}
     {memoryOpen&&<MemoryDialog initial={editMemory} defaultKind={newKind} onClose={()=>setMemoryOpen(false)} onSave={commitMemory}/>}
     {subjectOpen&&<SubjectDialog onClose={()=>setSubjectOpen(false)} onSave={commitSubject}/>}
