@@ -58,18 +58,21 @@ export function Dashboard({photos,memories,settings,onNavigate,onOpenMemory,onVi
   </div>;
 }
 
-export function YearsPage({photos,memories,onYear}:{photos:Photo[];memories:Memory[];onYear:(year:number)=>void}){
+export function YearsPage({photos,memories,settings,onYear,onChangeCover}:{photos:Photo[];memories:Memory[];settings:AppSettings;onYear:(year:number)=>void;onChangeCover:(year:number)=>void}){
   const years=yearsOf(photos,memories);
   return <div className="page-stack">
     <div className="page-intro"><span className="eyebrow">ARCHIVO CRONOLÓGICO</span><h1>Nuestros años ♡</h1><p>Cada año guarda sus propios viajes, lugares y fotografías.</p></div>
     <div className="year-cards">{years.map(y=>{
-      const photo=photos.find(p=>p.takenOn.startsWith(String(y)));
+      const photo=photos.find(p=>p.id===settings.yearCoverPhotoIds?.[String(y)])||photos.find(p=>p.takenOn.startsWith(String(y)));
       const count=photos.filter(p=>p.takenOn.startsWith(String(y))).length;
       const yearMem=memories.filter(m=>m.startDate.slice(0,4)===String(y));
-      return <button key={y} onClick={()=>onYear(y)} className="year-card">
-        {photo?<PhotoView id={photo.id} className="year-cover"/>:<span className="year-cover placeholder">♡</span>}
-        <span><strong>{y}</strong><small>{count} fotos · {yearMem.length} recuerdos</small><span className="year-tags">{yearMem.slice(0,2).map(m=><span className={'pill '+m.kind} key={m.id}>{m.kind==='trip'?'✈ ': '♡ '}{m.title}</span>)}</span></span><ArrowRight size={22}/>
-      </button>;
+      return <article key={y} className="year-card">
+        <button type="button" className="year-card-main" onClick={()=>onYear(y)}>
+          {photo?<PhotoView id={photo.id} className="year-cover"/>:<span className="year-cover placeholder">♡</span>}
+          <span><strong>{y}</strong><small>{count} fotos · {yearMem.length} recuerdos</small><span className="year-tags">{yearMem.slice(0,2).map(m=><span className={'pill '+m.kind} key={m.id}>{m.kind==='trip'?'✈ ': '♡ '}{m.title}</span>)}</span></span><ArrowRight size={22}/>
+        </button>
+        <CoverMenu onChange={()=>onChangeCover(y)}/>
+      </article>;
     })}</div>
   </div>;
 }

@@ -156,3 +156,17 @@ body{margin:0;min-width:320px}button,input,select,textarea{font:inherit}button{c
   .dashboard-hero .hero-content p{display:none}
   .cover-picker-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* Portadas individuales para cada año, sin botones anidados. */
+.year-card{position:relative;display:block;padding:0;overflow:visible}
+.year-card-main{display:grid;width:100%;grid-template-columns:minmax(120px,28%) 1fr auto;gap:23px;align-items:center;background:transparent;border:0;border-radius:inherit;padding:10px;text-align:left;color:var(--ink)}
+.year-card-main>span:nth-child(2){display:grid;gap:7px}
+.year-card-main>svg{margin-right:20px;color:#a75a3c}
+.year-card .cover-actions{top:9px;right:10px}
+.year-card .cover-dots{background:rgba(54,43,35,.55)}
+.year-card .cover-dropdown{z-index:15}
+.year-card-main>svg{margin-top:40px}
+@media(max-width:760px){
+  .year-card-main{grid-template-columns:34% 1fr auto;gap:10px}
+  .year-card-main>svg{margin-right:4px;margin-top:33px}
+}

@@ -9,6 +9,7 @@ export interface ImportantBirthday {
 export interface AppSettings {
   id:'main';
   homeCoverPhotoId?:string;
+  yearCoverPhotoIds?:Record<string,string>;
   relationshipStartedOn:string;
   myName:string;
   myBirthday:string;
