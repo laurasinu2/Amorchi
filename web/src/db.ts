@@ -2,7 +2,7 @@ import { openDB, type DBSchema } from 'idb';
 import * as exifr from 'exifr';
 import { sha256 } from 'js-sha256';
 import { createId } from './id';
-import type { ImportOptions, LocalOperation, Memory, Photo, Subject, AppSettings, defaultSettings } from './types';
+import { defaultSettings, type ImportOptions, type LocalOperation, type Memory, type Photo, type Subject, type AppSettings } from './types';
 import { localISO } from './dates';
 
 interface Asset { key: string; blob: Blob }
