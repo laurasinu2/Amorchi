@@ -16,3 +16,22 @@ jobs:
           node-version: "22"
       - run: npm install --no-audit --no-fund
       - run: npm run build
+      - run: npm run test:dates
+  schema:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: amorchi
+          POSTGRES_USER: amorchi
+          POSTGRES_PASSWORD: password_only_for_ci
+        options: >-
+          --health-cmd "pg_isready -U amorchi -d amorchi"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate initial PostgreSQL migration
+        run: docker exec -i ${{ job.services.postgres.id }} psql -U amorchi -d amorchi -v ON_ERROR_STOP=1 < server/db/001_initial.sql
