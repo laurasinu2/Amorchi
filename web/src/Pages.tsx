@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, CalendarDays, Camera, ChevronLeft, ChevronRight, Clock3, CloudUpload, Globe2, HardDrive, Heart, ImagePlus, MapPin, PawPrint, Plane, Plus, Search, ShieldCheck, Star, Users } from 'lucide-react';
-import type { Memory, MemoryKind, Page, Photo, Subject } from './types';
-import { addDays, dateLabel, kindName, localISO, monthLabel } from './dates';
+import { ArrowRight, CalendarDays, Camera, ChevronLeft, ChevronRight, CloudUpload, Globe2, HardDrive, Heart, ImagePlus, MapPin, PawPrint, Plane, Plus, Search, ShieldCheck, Star, Users } from 'lucide-react';
+import type { Memory, Page, Photo, Subject } from './types';
+import { addDays, dateLabel, kindName, monthLabel } from './dates';
 import { getLocalUsage, requestPersistence } from './db';
 import { CalendarGrid } from './components/CalendarGrid';
 import { PhotoView } from './components/PhotoView';
@@ -70,9 +70,9 @@ export function YearsPage({photos,memories,onYear}:{photos:Photo[];memories:Memo
 }
 
 export type CalendarMode='year'|'month'|'day';
-export function CalendarPage({year,month,mode,selectedDay,photos,memories,onMode,onYear,onMonth,onDay}:{
+export function CalendarPage({year,month,mode,selectedDay,photos,memories,onMode,onYear,onMonth,onDay,onViewPhoto}:{
   year:number;month:number;mode:CalendarMode;selectedDay:string;photos:Photo[];memories:Memory[];
-  onMode:(m:CalendarMode)=>void;onYear:(y:number)=>void;onMonth:(year:number,month:number)=>void;onDay:(iso:string)=>void;
+  onMode:(m:CalendarMode)=>void;onYear:(y:number)=>void;onMonth:(year:number,month:number)=>void;onDay:(iso:string)=>void;onViewPhoto:(id:string)=>void;
 }){
   const dayPhotos=orderPhotos(photos.filter(p=>p.takenOn===selectedDay));
   const dayMemories=memories.filter(m=>m.startDate<=selectedDay&&m.endDate>=selectedDay);
@@ -89,7 +89,7 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,onMode
       <CalendarGrid year={year} month={m} compact photos={photos} memories={memories} onDay={onDay}/>
     </section>)}</div>}
     {mode==='month'&&<div className="month-wide"><CalendarGrid year={year} month={month} selectedDay={selectedDay} photos={photos} memories={memories} onDay={onDay}/><div className="calendar-legend"><span><i className="legend-photo"/>Día con foto</span><span><i className="legend-trip"/>Viaje</span><span><i className="legend-event"/>Evento / momento</span></div></div>}
-    {mode==='day'&&<div className="day-layout"><div className="panel"><SectionTitle title="Fotos del día"/>{dayPhotos.length?<div className="day-preview">{dayPhotos.slice(0,6).map(p=><PhotoView key={p.id} id={p.id} className="day-photo" onClick={()=>onDay(selectedDay)}/>)}</div>:<p className="muted-text">Todavía no hay fotos de este día.</p>}</div><div className="panel"><SectionTitle title="Viajes y momentos"/>{dayMemories.length?dayMemories.map(m=><p className="event-row" key={m.id}><span className={'pill '+m.kind}>{kindName(m.kind)}</span><strong>{m.title}</strong></p>):<p className="muted-text">Ningún evento definido en esta fecha.</p>}</div></div>}
+    {mode==='day'&&<div className="day-layout"><div className="panel"><SectionTitle title="Fotos del día"/>{dayPhotos.length?<div className="day-preview">{dayPhotos.slice(0,6).map(p=><PhotoView key={p.id} id={p.id} className="day-photo" onClick={()=>onViewPhoto(p.id)}/>)}</div>:<p className="muted-text">Todavía no hay fotos de este día.</p>}</div><div className="panel"><SectionTitle title="Viajes y momentos"/>{dayMemories.length?dayMemories.map(m=><p className="event-row" key={m.id}><span className={'pill '+m.kind}>{kindName(m.kind)}</span><strong>{m.title}</strong></p>):<p className="muted-text">Ningún evento definido en esta fecha.</p>}</div></div>}
     {mode!=='year'&&<p className="helper-text">Pulsa un día del calendario para consultar sus recuerdos. Las franjas muestran eventos y viajes que pueden durar varios días.</p>}
   </div>;
 }
@@ -179,7 +179,7 @@ export function SettingsPage({pending}:{pending:number}){
   const [quota,setQuota]=useState<number|undefined>();
   const [persistent,setPersistent]=useState<boolean|undefined>();
   const [error,setError]=useState('');
-  useEffect(()=>{getLocalUsage().then(v=>{setBytes(v.bytes);setQuota(v.quota);}).catch(e=>setError(String(e)));navigator.storage?.persisted?.().then(setPersistent).catch(()=>undefined);},[]);
+  useEffect(()=>{getLocalUsage().then(v=>{setBytes(v.bytes);setQuota(v.quota);}).catch(e=>setError(String(e)));navigator.storage?.persisted?.()?.then(setPersistent).catch(()=>undefined);},[]);
   const format=(n:number)=>n>1024**3?(n/1024**3).toFixed(2)+' GB':(n/1024**2).toFixed(1)+' MB';
   return <div className="page-stack"><div className="page-intro"><span className="eyebrow">ALMACENAMIENTO Y SEGURIDAD</span><h1>Ajustes</h1><p>Estado de tu biblioteca en este dispositivo.</p></div>
     <div className="settings-cards"><section className="panel"><h3><HardDrive size={20}/> Biblioteca offline</h3><p className="large-stat">{format(bytes)}</p><p>Fotografías originales y variantes guardadas localmente.</p>{quota!==undefined&&<small>Cuota estimada del navegador: {format(quota)}</small>}

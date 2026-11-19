@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { CalendarDays, Camera, CloudUpload, Compass, Heart, Home, Images, Layers, MapPin, Menu, Plane, Plus, Search, Settings, Star, Trash2, Users, WifiOff, X } from 'lucide-react';
+import { CalendarDays, Camera, CloudUpload, Compass, Heart, Home, Images, Layers, MapPin, Menu, Plane, Plus, Search, Settings, Star, Trash2, Users, WifiOff } from 'lucide-react';
 import type { ImportOptions, Memory, MemoryKind, Page, Photo, Subject } from './types';
 import { localISO } from './dates';
 import { importPhoto, loadLibrary, saveMemory, savePhoto, saveSubject } from './db';

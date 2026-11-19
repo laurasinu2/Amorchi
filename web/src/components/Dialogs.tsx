@@ -78,10 +78,10 @@ export function ImportDialog({memories,subjects,onClose,onCommit}:{
   </Dialog>;
 }
 
-export function MemoryDialog({onClose,onSave,initial}:{
-  onClose:()=>void;onSave:(memory:Memory)=>Promise<void>;initial?:Memory;
+export function MemoryDialog({onClose,onSave,initial,defaultKind}:{
+  onClose:()=>void;onSave:(memory:Memory)=>Promise<void>;initial?:Memory;defaultKind?:MemoryKind;
 }){
-  const [kind,setKind]=useState<MemoryKind>(initial?.kind||'moment');
+  const [kind,setKind]=useState<MemoryKind>(initial?.kind||defaultKind||'moment');
   const [title,setTitle]=useState(initial?.title||'');
   const [description,setDescription]=useState(initial?.description||'');
   const [startDate,setStartDate]=useState(initial?.startDate||localISO(new Date()));
