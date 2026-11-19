@@ -4,7 +4,8 @@
 
 - React + Vite + TypeScript; interfaz diferente para móvil y escritorio.
 - IndexedDB almacena metadatos, fotos originales, previsualizaciones y miniaturas **en este dispositivo**.
-- Las operaciones de edición se colocan en una cola local. **La subida al servidor aún no está implementada**.
+- Las operaciones de edición, elecciones de portada y fechas especiales se colocan en una cola local. **La subida al servidor aún no está implementada**.
+- Los cumpleaños/aniversarios se calculan dinámicamente por año: no se crean filas duplicadas por repetición. El 29 de febrero se marca el 28 de febrero en años no bisiestos.
 - El service worker almacena la interfaz compilada para su apertura offline después de una primera visita online.
 - No existe autenticación real todavía. No se debe exponer como servicio público.
 
@@ -33,3 +34,15 @@
 3. Para PostgreSQL, copia `.env.example` a `.env`, cambia las contraseñas y ejecuta `docker compose up -d db`.
 4. pgAdmin opcional: `docker compose --profile tools up -d` y abre http://localhost:5050 en el ordenador servidor.
 5. La app de esta fase todavía no está conectada al servidor. El puerto 5432 está enlazado solo a 127.0.0.1 por seguridad.
+
+## Fechas especiales y portadas (versión 0.1.2)
+
+- En IndexedDB existe una única configuración local `settings/main` que conserva la portada de Inicio, las portadas por año, la fecha de inicio de la relación y cumpleaños propios, de pareja y de otras personas importantes.
+- `server/db/002_preferences.sql` prepara `album_preferences`, `album_year_covers`, `important_birthdays` y `memories.cover_media_id` para la futura API. **No se transfieren datos al PostgreSQL en esta fase**.
+- El inicializador de Docker aplica esta migración únicamente si el volumen PostgreSQL se crea vacío. Para una base ya inicializada, haz copia de seguridad y ejecuta en la raíz del proyecto:
+
+```bash
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1' < server/db/002_preferences.sql
+```
+
+- No uses `docker compose down -v` para actualizar: eliminaría la base de datos. Las fotos del navegador tampoco son un respaldo.

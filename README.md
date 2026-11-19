@@ -11,7 +11,9 @@ Está programada una primera interfaz móvil y de escritorio con:
 - Importación múltiple con **previsualización de fecha EXIF/GPS antes de guardar**. Si EXIF no existe, la fecha de modificación se indica expresamente como fallback. Hash SHA-256 para evitar duplicados exactos y miniaturas/visualizaciones WebP.
 - Creación de viajes, eventos, momentos y fichas de personas/animales.
 - Mapa mundial esquemático de los **recuerdos localizados**, no de fotografías individuales.
-- Barra lateral oscura compacta en ordenador (aproximadamente 1/5 del ancho, sin desplazamiento), portada reducida y navegación inferior en móvil.
+- Barra lateral oscura compacta en ordenador (aproximadamente 1/5 del ancho, sin desplazamiento), portada de Inicio mínima con «Ver años» a la derecha y navegación inferior en móvil.
+- Selección de imagen de fondo desde el menú translúcido «···» en Inicio, portadas de años y fichas de viajes, eventos y momentos.
+- Ajustes de fecha de inicio de relación y cumpleaños propios, de pareja e importantes, con marcadores anuales en el calendario (corazón y número de años dorado).
 - Logos aportados por el usuario, optimizados para la interfaz y el icono instalable. El nombre del repositorio sigue siendo Amorchi.
 - IndexedDB con fotos y metadatos locales; service worker de la PWA para abrir la interfaz sin conexión después de una visita inicial por HTTPS/localhost.
 - Cola persistente de cambios locales **aún sin API de sincronización**.
@@ -59,7 +61,7 @@ docker compose --profile tools up -d
 
 En ese ordenador abre `http://localhost:5050`. Desde pgAdmin, el servidor PostgreSQL se llama `db` (red interna Docker), puerto `5432` y las credenciales están en `.env`. El puerto PostgreSQL está limitado a `127.0.0.1` intencionadamente; más adelante los móviles hablarán con una API HTTPS, no con PostgreSQL.
 
-El SQL `server/db/001_initial.sql` se aplica **solo al crear el volumen por primera vez**. La API y las migraciones incrementales se implementarán en una siguiente etapa.
+Los SQL `server/db/001_initial.sql` y `server/db/002_preferences.sql` se aplican **solo al crear el volumen por primera vez**. En instalaciones existentes, la migración 002 se ejecuta manualmente tras una copia de seguridad, como se describe en `docs/ARQUITECTURA.md`. La API y las migraciones incrementales se implementarán en una siguiente etapa.
 
 ## Diseño y seguridad
 

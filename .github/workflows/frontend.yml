@@ -33,5 +33,8 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v4
-      - name: Validate initial PostgreSQL migration
-        run: docker exec -i ${{ job.services.postgres.id }} psql -U amorchi -d amorchi -v ON_ERROR_STOP=1 < server/db/001_initial.sql
+      - name: Validate PostgreSQL schema and idempotent preferences migration
+        run: |
+          docker exec -i ${{ job.services.postgres.id }} psql -U amorchi -d amorchi -v ON_ERROR_STOP=1 < server/db/001_initial.sql
+          docker exec -i ${{ job.services.postgres.id }} psql -U amorchi -d amorchi -v ON_ERROR_STOP=1 < server/db/002_preferences.sql
+          docker exec -i ${{ job.services.postgres.id }} psql -U amorchi -d amorchi -v ON_ERROR_STOP=1 < server/db/002_preferences.sql
