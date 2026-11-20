@@ -2,8 +2,8 @@ import { useEffect, useState, type ComponentType } from 'react';
 import { CalendarDays, CloudUpload, Compass, Heart, Home, Images, Layers, MapPin, Menu, Plane, Plus, Search, Settings, Star, Trash2, Users, WifiOff } from 'lucide-react';
 import { defaultSettings, type AppSettings, type ImportOptions, type Memory, type MemoryKind, type Page, type Photo, type Subject } from './types';
 import { localISO } from './dates';
-import { deletePhoto, importPhoto, loadLibrary, saveMemory, savePhoto, saveSubject, saveSettings } from './db';
-import { ImportDialog, MemoryDialog, PhotoDialog, SubjectDialog } from './components/Dialogs';
+import { deleteMemory, deletePhoto, importPhoto, loadLibrary, saveMemory, savePhoto, saveSubject, saveSettings } from './db';
+import { ImportDialog, MemoryDeleteDialog, MemoryDialog, PhotoDialog, SubjectDialog } from './components/Dialogs';
 import { CoverPicker } from './components/CoverPicker';
 import { AlbumPage, CalendarPage, Dashboard, EmptyState, MemoriesPage, MemoryDetail, PeoplePage, PlacesPage, SearchPage, SettingsPage, YearsPage, type CalendarMode } from './Pages';
 
@@ -44,6 +44,7 @@ export default function App(){
   const [selectedDay,setSelectedDay]=useState(localISO(new Date()));
   const [calendarMode,setCalendarMode]=useState<CalendarMode>('year');
   const [selectedMemoryId,setSelectedMemoryId]=useState<string|undefined>();
+  const [memoryToDeleteId,setMemoryToDeleteId]=useState<string|undefined>();
   const [selectedPhotoId,setSelectedPhotoId]=useState<string|undefined>();
   const [importOpen,setImportOpen]=useState(false);
   const [memoryOpen,setMemoryOpen]=useState(false);
@@ -89,6 +90,15 @@ export default function App(){
       await refresh();
     }
   }
+  async function commitDeleteMemory(){
+    const memory=memories.find(m=>m.id===memoryToDeleteId);
+    if(!memory)throw new Error('El recuerdo ya no está disponible.');
+    await deleteMemory(memory.id);
+    await refresh();
+    setMemoryToDeleteId(undefined);
+    setSelectedMemoryId(undefined);
+    navigate(memory.kind==='trip'?'viajes':'recuerdos');
+  }
   async function commitSubject(subject:Subject){await saveSubject(subject);await refresh();}
   async function commitPhoto(photo:Photo){await savePhoto(photo);await refresh();}
   async function commitDeletePhoto(id:string){
@@ -129,7 +139,7 @@ export default function App(){
           {(page==='calendario'||page==='dia')&&<CalendarPage year={year} month={month} mode={calendarMode} selectedDay={selectedDay} photos={photos} memories={memories} settings={settings} onMode={setCalendarMode} onYear={openCalendarYear} onMonth={openCalendarMonth} onDay={openCalendarDay} onViewPhoto={setSelectedPhotoId}/>}
           {page==='viajes'&&<MemoriesPage memories={memories} photos={photos} onlyTrips onOpen={openMemory} onCreate={()=>createMemory('trip')}/>}
           {page==='recuerdos'&&<MemoriesPage memories={memories} photos={photos} onlyTrips={false} onOpen={openMemory} onCreate={()=>createMemory('moment')}/>}
-          {page==='memoria'&&(selectedMemory?<MemoryDetail memory={selectedMemory} memories={memories} photos={photos} subjects={subjects} settings={settings} onChangeCover={()=>setCoverTarget({memoryId:selectedMemory.id})} onViewPhoto={setSelectedPhotoId} onEdit={()=>{setEditMemory(selectedMemory);setMemoryOpen(true);}} onOpenMemory={openMemory}/>:<EmptyState title="Recuerdo no encontrado" description="Vuelve a tus recuerdos desde el menú." onAction={()=>navigate('recuerdos')} action="Ver recuerdos"/>)}
+          {page==='memoria'&&(selectedMemory?<MemoryDetail memory={selectedMemory} memories={memories} photos={photos} subjects={subjects} settings={settings} onChangeCover={()=>setCoverTarget({memoryId:selectedMemory.id})} onDelete={()=>setMemoryToDeleteId(selectedMemory.id)} onViewPhoto={setSelectedPhotoId} onEdit={()=>{setEditMemory(selectedMemory);setMemoryOpen(true);}} onOpenMemory={openMemory}/>:<EmptyState title="Recuerdo no encontrado" description="Vuelve a tus recuerdos desde el menú." onAction={()=>navigate('recuerdos')} action="Ver recuerdos"/>)}
           {page==='lugares'&&<PlacesPage memories={memories} onOpen={openMemory}/>}
           {page==='personas'&&<PeoplePage subjects={subjects} photos={photos} onCreate={()=>setSubjectOpen(true)} onView={setSelectedPhotoId}/>}
           {page==='album'&&<AlbumPage photos={photos} onView={setSelectedPhotoId}/>}
@@ -147,6 +157,7 @@ export default function App(){
       {bottomItems.slice(2).map(item=><button key={item.page} className={page===item.page?'active':''} onClick={()=>navigate(item.page)}><item.icon size={23}/><span>{item.label}</span></button>)}
     </nav>
     {coverTarget&&<CoverPicker photos={coverTarget&&coverTarget!=='home'&&'year' in coverTarget?photos.filter(p=>p.takenOn.startsWith(String(coverTarget.year))):photos} title={coverTarget==='home'?'Elegir foto de fondo de Inicio':'year' in coverTarget?`Portada del año ${coverTarget.year}`:'Elegir foto de fondo del recuerdo'} selectedId={coverTarget==='home'?settings.homeCoverPhotoId:'year' in coverTarget?settings.yearCoverPhotoIds?.[String(coverTarget.year)]:memories.find(m=>m.id===coverTarget.memoryId)?.coverPhotoId} onClose={()=>setCoverTarget(null)} onSelect={commitCover}/>}
+    {memoryToDeleteId&&memories.find(m=>m.id===memoryToDeleteId)&&<MemoryDeleteDialog memory={memories.find(m=>m.id===memoryToDeleteId)!} photoCount={photos.filter(p=>p.memoryIds.includes(memoryToDeleteId)).length} onClose={()=>setMemoryToDeleteId(undefined)} onConfirm={commitDeleteMemory}/>}
     {importOpen&&<ImportDialog memories={memories} subjects={subjects} onClose={()=>setImportOpen(false)} onCommit={commitImport}/>}
     {memoryOpen&&<MemoryDialog initial={editMemory} defaultKind={newKind} onClose={()=>setMemoryOpen(false)} onSave={commitMemory}/>}
     {subjectOpen&&<SubjectDialog onClose={()=>setSubjectOpen(false)} onSave={commitSubject}/>}

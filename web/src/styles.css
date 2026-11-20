@@ -209,3 +209,13 @@ body{margin:0;min-width:320px}button,input,select,textarea{font:inherit}button{c
 .world-map .leaflet-tooltip{font-weight:700;color:#4d3c33;background:#fff7ef;border-color:#e7d3c0}
 .world-map .leaflet-image-layer{image-rendering:auto}
 @media(max-width:760px){.leaflet-world-map{height:56vh;min-height:335px}.world-map-tools{align-items:start}.world-upload{font-size:.75rem}}
+
+/* Gestión segura de recuerdos: foto original intacta al borrar un viaje/evento/momento. */
+.memory-actions-panel{display:grid;gap:9px}
+.memory-actions-panel h3{margin:0}
+.memory-actions-panel .btn{width:100%}
+.memory-actions-panel small{font-size:.72rem;line-height:1.4}
+.memory-delete-photos-note{display:flex;align-items:flex-start;gap:10px;padding:13px;border-radius:12px;border:1px solid #cfddcd;background:#f1f6ef;color:#526b51;font-size:.86rem;line-height:1.5;margin:0}
+.memory-delete-photos-note svg{flex-shrink:0;margin-top:2px}
+.holiday-pranks{--holiday-ring:#d36caa;--holiday-surface:#fae4f1}
+.holiday-symbol-pranks{color:#b74791}

@@ -39,7 +39,7 @@ export function SpecialDatesSettings({settings,onSave}:{
       <div className="settings-fields">
         <label className="field relationship-field"><span>♡ Inicio de nuestra relación</span><input type="date" value={draft.relationshipStartedOn} onChange={e=>patch({relationshipStartedOn:e.target.value})}/><small>En cada aniversario aparecerán un corazón y los años cumplidos en dorado sobre la fotografía de ese día.</small></label>
       </div>
-      <label className="traditions-switch"><input type="checkbox" checked={draft.showTraditions!==false} onChange={e=>patch({showTraditions:e.target.checked})}/><span><strong>Mostrar celebraciones tradicionales</strong><small>Navidad, Reyes, Sant Esteve, Semana Santa, Carnaval, Halloween, puente posible de diciembre y otros días señalados. El calendario no presupone que todos sean festivos laborales.</small></span></label>
+      <label className="traditions-switch"><input type="checkbox" checked={draft.showTraditions!==false} onChange={e=>patch({showTraditions:e.target.checked})}/><span><strong>Mostrar celebraciones tradicionales</strong><small>Navidad, Reyes, Sant Esteve, Semana Santa, Carnaval, Halloween, Santos Inocentes (28 de diciembre), puente posible de diciembre y otros días señalados. El calendario no presupone que todos sean festivos laborales.</small></span></label>
       <h4 className="settings-subheading"><Cake size={17}/> Nuestros cumpleaños</h4>
       <div className="form-grid">
         <div className="birthday-person">

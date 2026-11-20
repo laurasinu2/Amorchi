@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, CalendarDays, Camera, ChevronLeft, ChevronRight, CloudUpload, Globe2, HardDrive, Heart, ImagePlus, MapPin, PawPrint, Plane, Plus, Search, ShieldCheck, Star, Users } from 'lucide-react';
+import { ArrowRight, CalendarDays, Camera, ChevronLeft, ChevronRight, CloudUpload, Globe2, HardDrive, Heart, ImagePlus, MapPin, PawPrint, Plane, Plus, Search, ShieldCheck, Star, Trash2, Users } from 'lucide-react';
 import type { AppSettings, Memory, Page, Photo, Subject } from './types';
 import { addDays, dateLabel, kindName, monthLabel } from './dates';
 import { getLocalUsage, requestPersistence } from './db';
@@ -99,9 +99,9 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,settin
       <button className="month-heading" onClick={()=>onMonth(year,m)}><strong>{new Intl.DateTimeFormat('es-ES',{month:'long'}).format(new Date(year,m,1))}</strong><small><Camera size={12}/>{photos.filter(p=>p.takenOn.startsWith(`${year}-${String(m+1).padStart(2,'0')}`)).length}</small></button>
       <CalendarGrid year={year} month={m} compact photos={photos} memories={memories} settings={settings} onDay={onDay}/>
     </section>)}</div>}
-    {mode==='month'&&<div className="month-wide"><CalendarGrid year={year} month={month} selectedDay={selectedDay} photos={photos} memories={memories} settings={settings} onDay={onDay}/><div className="calendar-legend"><span><i className="legend-photo"/>Día con foto</span><span><i className="legend-trip"/>Viaje</span><span><i className="legend-event"/>Evento / momento</span><span><i className="legend-anniversary"/>Aniversario de pareja</span><span>🎂 Cumpleaños</span><span className="legend-themed">✶ Navidad · <b>naranja</b></span><span className="legend-themed">✿ Semana Santa · <b>verde</b></span><span className="legend-themed">🎭 Carnaval · <b>morado</b></span><span className="legend-themed">🍂 Otoño · <b>cobre</b></span><span className="legend-themed">↔ Puente posible · <b>azul</b></span></div></div>}
+    {mode==='month'&&<div className="month-wide"><CalendarGrid year={year} month={month} selectedDay={selectedDay} photos={photos} memories={memories} settings={settings} onDay={onDay}/><div className="calendar-legend"><span><i className="legend-photo"/>Día con foto</span><span><i className="legend-trip"/>Viaje</span><span><i className="legend-event"/>Evento / momento</span><span><i className="legend-anniversary"/>Aniversario de pareja</span><span>🎂 Cumpleaños</span><span className="legend-themed">✶ Navidad · <b>naranja</b></span><span className="legend-themed">✿ Semana Santa · <b>verde</b></span><span className="legend-themed">🎭 Carnaval · <b>morado</b></span><span className="legend-themed">🍂 Otoño · <b>cobre</b></span><span className="legend-themed">↔ Puente posible · <b>azul</b></span><span className="legend-themed">🤭 Santos Inocentes · <b>rosa</b></span></div></div>}
     {mode==='day'&&<div className="day-layout">{dayHolidays.length>0&&<div className="panel day-special-panel">
-      <SectionTitle title="Celebraciones y tradiciones"/>{dayHolidays.map(h=><div key={h.id} className={'traditional-day-event holiday-'+h.theme}><span>{h.theme==='christmas'?'✶':h.theme==='carnival'?'🎭':h.theme==='autumn'?'🍂':h.theme==='spring'?'✿':h.theme==='bridge'?'↔':'★'}</span><strong>{h.title}</strong>{h.status==='optional-bridge'&&<small>No es festivo laboral automático</small>}</div>)}</div>}{daySpecials.length>0&&<div className="panel day-special-panel"><SectionTitle title="Fechas especiales"/>{daySpecials.map(item=><div key={item.id} className={'special-day-event '+item.type}><span className="special-day-icon">{item.type==='anniversary'?'♥':'🎂'}</span><strong>{item.label}</strong>{item.type==='anniversary'&&item.years!==undefined&&item.years>0&&<span className="special-day-count">{item.years}º</span>}</div>)}</div>}<div className="panel"><SectionTitle title="Fotos del día"/>{dayPhotos.length?<div className="day-preview">{dayPhotos.slice(0,6).map(p=><PhotoView key={p.id} id={p.id} className="day-photo" onClick={()=>onViewPhoto(p.id)}/>)}</div>:<p className="muted-text">Todavía no hay fotos de este día.</p>}</div><div className="panel"><SectionTitle title="Viajes y momentos"/>{dayMemories.length?dayMemories.map(m=><p className="event-row" key={m.id}><span className={'pill '+m.kind}>{kindName(m.kind)}</span><strong>{m.title}</strong></p>):<p className="muted-text">Ningún evento definido en esta fecha.</p>}</div></div>}
+      <SectionTitle title="Celebraciones y tradiciones"/>{dayHolidays.map(h=><div key={h.id} className={'traditional-day-event holiday-'+h.theme}><span>{h.theme==='christmas'?'✶':h.theme==='carnival'?'🎭':h.theme==='pranks'?'🤭':h.theme==='autumn'?'🍂':h.theme==='spring'?'✿':h.theme==='bridge'?'↔':'★'}</span><strong>{h.title}</strong>{h.status==='optional-bridge'&&<small>No es festivo laboral automático</small>}</div>)}</div>}{daySpecials.length>0&&<div className="panel day-special-panel"><SectionTitle title="Fechas especiales"/>{daySpecials.map(item=><div key={item.id} className={'special-day-event '+item.type}><span className="special-day-icon">{item.type==='anniversary'?'♥':'🎂'}</span><strong>{item.label}</strong>{item.type==='anniversary'&&item.years!==undefined&&item.years>0&&<span className="special-day-count">{item.years}º</span>}</div>)}</div>}<div className="panel"><SectionTitle title="Fotos del día"/>{dayPhotos.length?<div className="day-preview">{dayPhotos.slice(0,6).map(p=><PhotoView key={p.id} id={p.id} className="day-photo" onClick={()=>onViewPhoto(p.id)}/>)}</div>:<p className="muted-text">Todavía no hay fotos de este día.</p>}</div><div className="panel"><SectionTitle title="Viajes y momentos"/>{dayMemories.length?dayMemories.map(m=><p className="event-row" key={m.id}><span className={'pill '+m.kind}>{kindName(m.kind)}</span><strong>{m.title}</strong></p>):<p className="muted-text">Ningún evento definido en esta fecha.</p>}</div></div>}
     {mode!=='year'&&<p className="helper-text">Pulsa un día del calendario para consultar sus recuerdos. Las franjas muestran eventos y viajes que pueden durar varios días.</p>}
   </div>;
 }
@@ -115,9 +115,9 @@ export function MemoriesPage({memories,photos,onlyTrips,onOpen,onCreate}:{
   </div>;
 }
 
-export function MemoryDetail({memory,memories,photos,subjects,settings,onViewPhoto,onEdit,onOpenMemory,onChangeCover}:{
+export function MemoryDetail({memory,memories,photos,subjects,settings,onViewPhoto,onEdit,onOpenMemory,onChangeCover,onDelete}:{
   memory:Memory;memories:Memory[];photos:Photo[];subjects:Subject[];settings:AppSettings;
-  onViewPhoto:(id:string)=>void;onEdit:()=>void;onOpenMemory:(id:string)=>void;onChangeCover:()=>void;
+  onViewPhoto:(id:string)=>void;onEdit:()=>void;onOpenMemory:(id:string)=>void;onChangeCover:()=>void;onDelete:()=>void;
 }){
   const [tab,setTab]=useState<'summary'|'photos'|'map'>('summary');
   useEffect(()=>setTab('summary'),[memory.id]);
@@ -145,6 +145,11 @@ export function MemoryDetail({memory,memories,photos,subjects,settings,onViewPho
       <section className="panel"><h3>Información del recuerdo</h3><p><CalendarDays size={17}/>{dateLabel(memory.startDate,'short')}</p><p><MapPin size={17}/>{memory.place||'Lugar sin definir'}</p><p><Camera size={17}/>{related.length} fotografías</p></section>
       <section className="panel"><h3>Personas y mascotas ({people.length})</h3>{people.length?<div className="chips">{people.map(s=><span className="chip" key={s.id}>{s.kind==='animal'?'🐾':'♡'} {s.name}</span>)}</div>:<p className="muted-text">Sin etiquetas aún.</p>}</section>
       <section className="panel"><h3>Recuerdos relacionados</h3>{relatedMemories.length?relatedMemories.map(r=><button className="related-link" key={r.id} onClick={()=>onOpenMemory(r.id)}>{r.title}<ArrowRight size={16}/></button>):<p className="muted-text">Ninguno en estas fechas.</p>}</section>
+      <section className="panel memory-actions-panel">
+        <h3>Gestionar {kindName(memory.kind).toLowerCase()}</h3>
+        <button type="button" className="btn danger-outline" onClick={onDelete}><Trash2 size={16}/> Eliminar {kindName(memory.kind).toLowerCase()}</button>
+        <small>Las fotografías se conservarán en el álbum.</small>
+      </section>
     </aside></div>
   </div>;
 }

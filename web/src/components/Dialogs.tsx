@@ -177,6 +177,42 @@ export function SubjectDialog({onClose,onSave}:{
   </Dialog>;
 }
 
+
+/** Confirmación específica para eliminar viajes, eventos y momentos sin borrar fotos. */
+export function MemoryDeleteDialog({memory,photoCount,onClose,onConfirm}:{
+  memory:Memory;photoCount:number;onClose:()=>void;onConfirm:()=>Promise<void>;
+}){
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState('');
+  const noun=memory.kind==='trip'?'viaje':memory.kind==='event'?'evento':'momento';
+  async function confirm(){
+    if(busy)return;
+    setBusy(true);setError('');
+    try{await onConfirm();}catch(err){
+      setError(err instanceof Error?err.message:String(err));
+      setBusy(false);
+    }
+  }
+  return <Dialog title={`Eliminar ${noun}`} onClose={()=>{if(!busy)onClose();}}>
+    <div className="form-stack">
+      <div className="delete-confirmation">
+        <strong>¿Seguro que quieres eliminar este {noun}?</strong>
+        <p><b>{memory.title}</b></p>
+        <p>Se eliminará su ficha, sus fechas y su marcador del mapa. No se podrá deshacer.</p>
+      </div>
+      <p className="memory-delete-photos-note"><ImagePlus size={18}/>
+        {photoCount===0?'No hay fotografías vinculadas a este recuerdo.':
+        `Las ${photoCount} ${photoCount===1?'fotografía vinculada':'fotografías vinculadas'} NO se eliminarán. Seguirán disponibles en el álbum y en cualquier otro recuerdo al que pertenezcan.`}
+      </p>
+      {error&&<p className="form-errors" role="alert">{error}</p>}
+      <div className="form-actions">
+        <button type="button" className="btn subtle" onClick={onClose} disabled={busy}>Cancelar</button>
+        <button type="button" className="btn danger" onClick={confirm} disabled={busy}><Trash2 size={16}/>{busy?'Eliminando…':`Sí, eliminar ${noun}`}</button>
+      </div>
+    </div>
+  </Dialog>;
+}
+
 export function PhotoDialog({photo,memories,subjects,onClose,onSave,onDelete}:{
   photo:Photo;memories:Memory[];subjects:Subject[];onClose:()=>void;onSave:(p:Photo)=>Promise<void>;onDelete:(id:string)=>Promise<void>;
 }){

@@ -32,7 +32,7 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
             <span className="day-number">{Number(day.slice(8,10))}</span>
             {anniversary&&<span className="calendar-anniversary" aria-hidden="true"><span className="anniversary-heart">♥</span><span className="anniversary-count">{anniversary.years===0?'Inicio':`${anniversary.years}º`}</span></span>}
             {birthdays.length>0&&<span className="calendar-birthday" aria-hidden="true">🎂</span>}
-            {mainHoliday&&<span className={'holiday-symbol holiday-symbol-'+mainHoliday.theme} aria-hidden="true">{mainHoliday.theme==='christmas'?'✶':mainHoliday.theme==='carnival'?'🎭':mainHoliday.theme==='autumn'?'🍂':mainHoliday.theme==='spring'?'✿':mainHoliday.theme==='bridge'?'↔':mainHoliday.theme==='summer'?'☀':'★'}</span>}
+            {mainHoliday&&<span className={'holiday-symbol holiday-symbol-'+mainHoliday.theme} aria-hidden="true">{mainHoliday.theme==='christmas'?'✶':mainHoliday.theme==='carnival'?'🎭':mainHoliday.theme==='pranks'?'🤭':mainHoliday.theme==='autumn'?'🍂':mainHoliday.theme==='spring'?'✿':mainHoliday.theme==='bridge'?'↔':mainHoliday.theme==='summer'?'☀':'★'}</span>}
             {!photo&&matches.length>0&&<span className="calendar-dot"/>}
           </button>;
         })}
