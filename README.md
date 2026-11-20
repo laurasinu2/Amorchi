@@ -10,10 +10,12 @@ Está programada una primera interfaz móvil y de escritorio con:
 - Galería y visor con edición de fecha, lugar, descripción, favoritos, personas, mascotas y asociación a varios recuerdos.
 - Importación múltiple con **previsualización de fecha EXIF/GPS antes de guardar**. Si EXIF no existe, la fecha de modificación se indica expresamente como fallback. Hash SHA-256 para evitar duplicados exactos y miniaturas/visualizaciones WebP.
 - Creación de viajes, eventos, momentos y fichas de personas/animales.
-- Mapa mundial esquemático de los **recuerdos localizados**, no de fotografías individuales.
+- Mapa mundial **georreferenciado EPSG:3857** basado en el GeoTIFF aportado por el usuario; visualización Leaflet sin teselas externas, con zoom y marcadores por recuerdos (no por fotografía). Importa una vez el WebP optimizado desde la página de Lugares de cada dispositivo.
 - Barra lateral oscura compacta en ordenador (aproximadamente 1/5 del ancho, sin desplazamiento), portada de Inicio mínima con «Ver años» a la derecha y navegación inferior en móvil.
 - Selección de imagen de fondo desde el menú translúcido «···» en Inicio, portadas de años y fichas de viajes, eventos y momentos.
 - Ajustes de fecha de inicio de relación y cumpleaños propios, de pareja e importantes, con marcadores anuales en el calendario (corazón y número de años dorado).
+- Celebraciones catalanas y tradicionales con bordes temáticos (Navidad, Sant Esteve, Reyes, Halloween/Castanyada, Carnaval y Semana Santa según el año, La Purísima, y posible puente de diciembre). Un puente no equivale a un festivo laboral.
+- Borrado de fotografías con confirmación explícita; elimina originales, variantes y referencias de portada del almacenamiento local y deja una operación de borrado pendiente para el servidor.
 - Logos aportados por el usuario, optimizados para la interfaz y el icono instalable. El nombre del repositorio sigue siendo Amorchi.
 - IndexedDB con fotos y metadatos locales; service worker de la PWA para abrir la interfaz sin conexión después de una visita inicial por HTTPS/localhost.
 - Cola persistente de cambios locales **aún sin API de sincronización**.

@@ -1,4 +1,4 @@
-import {addDays, localISO} from './dates';
+import {addDays, localISO} from './dates.ts';
 
 export type HolidayTheme='christmas'|'spring'|'carnival'|'autumn'|'national'|'bridge'|'summer';
 export type HolidayStatus='tradition'|'common-holiday'|'optional-bridge';
@@ -55,6 +55,7 @@ export function traditionalDays(year:number):TraditionalDay[]{
   if(seventh!==0&&seventh!==6)put(all,'december-bridge',iso(year,12,7),'Posible puente de diciembre (día laborable)','bridge','optional-bridge');
   const easter=easterSunday(year);
   put(all,'palm-sunday',addDays(easter,-7),'Domingo de Ramos','spring');
+  for(let i=-6;i<=-4;i++)put(all,'holy-week-'+i,addDays(easter,i),'Semana Santa','spring');
   put(all,'holy-thursday',addDays(easter,-3),'Jueves Santo','spring');
   put(all,'good-friday',addDays(easter,-2),'Viernes Santo','spring','common-holiday');
   put(all,'holy-saturday',addDays(easter,-1),'Sábado Santo','spring');

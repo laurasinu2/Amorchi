@@ -46,3 +46,22 @@ docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v O
 ```
 
 - No uses `docker compose down -v` para actualizar: eliminaría la base de datos. Las fotos del navegador tampoco son un respaldo.
+
+## Mapa mundial georreferenciado (GeoTIFF del usuario)
+
+El GeoTIFF original tiene tamaño **28740 × 27559** y unos **480 MB**, con **EPSG:3857** y estos límites en metros (x_min, y_min, x_max, y_max):
+`-20075000, -19250000, 20074860.299720608, 19250000`.
+
+Se ha convertido en una imagen WebP a resolución 4096 × 3928 (aprox. 1 MB), sin recortar. El WebP no contiene GeoTIFF tags: la georreferenciación se aplica en `web/src/components/WorldMap.tsx` con los límites indicados y Leaflet (CRS EPSG:3857). No se consulta ningún proveedor externo de teselas.
+
+Para instalar el mapa: desde **Lugares / Mapa de recuerdos** selecciona **Cargar mapa optimizado** y elige el WebP entregado con este chat; el navegador lo almacenará en IndexedDB y lo mostrará con zoom, desplazamiento y marcadores por recuerdo. Es una operación **por dispositivo** mientras no haya sincronización de archivos. Puedes sustituirlo desde el mismo botón.
+
+Alternativamente, genera el WebP a partir del GeoTIFF (fuera de Git, no subas el original de 480 MB):
+```bash
+pip install rasterio pillow
+python scripts/prepare_map.py /ruta/recurso_georref.tif /ruta/amorchi-mapa-mundial.webp
+```
+
+Importa ese archivo desde la PWA. Las coordenadas de los marcadores son latitud/longitud WGS84, transformadas correctamente al CRS Web Mercator por Leaflet.
+
+**Nota**: las imágenes WebP, JPEG o PNG ajenas a este GeoTIFF no son cartografía válida para el mapa, aunque tengan dimensiones similares. Importa únicamente una versión reducida creada a partir del archivo original.
