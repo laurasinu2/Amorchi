@@ -4,6 +4,7 @@ import { sha256 } from 'js-sha256';
 import { createId } from './id';
 import { defaultSettings, type ImportOptions, type LocalOperation, type Memory, type Photo, type Subject, type AppSettings } from './types';
 import { localISO } from './dates';
+import { unlinkMemory } from './memoryLinks';
 
 interface Asset { key: string; blob: Blob }
 interface AssetSize { key: string; bytes: number }
@@ -48,6 +49,49 @@ export async function saveSettings(settings:AppSettings){
   await tx.objectStore('settings').put(settings);
   await tx.objectStore('operations').put(op('settings','main'));
   await tx.done;
+}
+
+
+/**
+ * Elimina un viaje, evento o momento localmente, pero NO sus fotografías.
+ * Fotos vinculadas a otros recuerdos conservan esas asociaciones.
+ * Todo sucede en una sola transacción, incluyendo la cola de borrados.
+ */
+export async function deleteMemory(memoryId:string):Promise<void>{
+  const db=await database;
+  const tx=db.transaction(['memories','photos','operations'],'readwrite');
+  try{
+    const memoryStore=tx.objectStore('memories');
+    const photoStore=tx.objectStore('photos');
+    const operationStore=tx.objectStore('operations');
+    const memory=await memoryStore.get(memoryId);
+    if(!memory)throw new Error('El recuerdo ya no existe.');
+
+    const affectedPhotos=new Set<string>();
+    const allPhotos=await photoStore.getAll();
+    for(const photo of allPhotos){
+      if(!photo.memoryIds.includes(memoryId))continue;
+      await photoStore.put(unlinkMemory(photo,memoryId));
+      affectedPhotos.add(photo.id);
+    }
+
+    // Evita que operaciones locales anteriores recreen enlaces o el recuerdo borrado.
+    for(const pending of await operationStore.getAll()){
+      if((pending.entity==='memory'&&pending.entityId===memoryId)
+        ||(pending.entity==='photo'&&affectedPhotos.has(pending.entityId)&&pending.type==='upsert')){
+        await operationStore.delete(pending.id);
+      }
+    }
+    for(const photoId of affectedPhotos){
+      await operationStore.put(op('photo',photoId));
+    }
+    await memoryStore.delete(memoryId);
+    await operationStore.put({...op('memory',memoryId),type:'delete'});
+    await tx.done;
+  }catch(err){
+    if(tx.db.name){try{tx.abort();}catch{/* Tx cerrada o ya abortada */}}
+    throw err;
+  }
 }
 
 export async function saveMemory(memory:Memory){

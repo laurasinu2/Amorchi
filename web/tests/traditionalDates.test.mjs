@@ -26,3 +26,13 @@ test('Orden cronológico y sin filas duplicadas',()=>{
   assert.deepEqual([...items].sort((a,b)=>a.date.localeCompare(b.date)),items);
   assert.equal(new Set(items.map(x=>x.id)).size,items.length);
 });
+
+test('Santos Inocentes, día tradicional de las bromas, se marca el 28 de diciembre cada año',()=>{
+  for(const year of [2025,2026,2027,2030]){
+    const day=holidaysOn(`${year}-12-28`).find(x=>x.id==='sants-innocents');
+    assert.equal(day?.theme,'pranks');
+    assert.equal(day?.status,'tradition');
+    assert.match(day?.title||'',/Santos Inocentes/);
+    assert.equal(holidaysOn(`${year}-12-27`).some(x=>x.id==='sants-innocents'),false);
+  }
+});

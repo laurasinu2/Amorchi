@@ -1,6 +1,6 @@
 import {addDays, localISO} from './dates.ts';
 
-export type HolidayTheme='christmas'|'spring'|'carnival'|'autumn'|'national'|'bridge'|'summer';
+export type HolidayTheme='christmas'|'spring'|'carnival'|'autumn'|'national'|'bridge'|'summer'|'pranks';
 export type HolidayStatus='tradition'|'common-holiday'|'optional-bridge';
 export interface TraditionalDay {
   id:string;
@@ -47,6 +47,7 @@ export function traditionalDays(year:number):TraditionalDay[]{
     ['christmas-eve',12,24,'Nochebuena','christmas','tradition'],
     ['christmas',12,25,'Navidad','christmas','common-holiday'],
     ['sant-esteve',12,26,'Sant Esteve','christmas','tradition'],
+    ['sants-innocents',12,28,'Día de los Santos Inocentes · Día de las bromas','pranks','tradition'],
     ['new-years-eve',12,31,'Fin de Año','christmas','tradition']
   ] as const;
   for(const [id,m,d,title,theme,status] of fixed)put(all,id,iso(year,m,d),title,theme,status);
