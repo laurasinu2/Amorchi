@@ -65,3 +65,5 @@ python scripts/prepare_map.py /ruta/recurso_georref.tif /ruta/amorchi-mapa-mundi
 Importa ese archivo desde la PWA. Las coordenadas de los marcadores son latitud/longitud WGS84, transformadas correctamente al CRS Web Mercator por Leaflet.
 
 **Nota**: las imágenes WebP, JPEG o PNG ajenas a este GeoTIFF no son cartografía válida para el mapa, aunque tengan dimensiones similares. Importa únicamente una versión reducida creada a partir del archivo original.
+
+La eliminación de una fotografía se realiza en una única transacción local IndexedDB: se borran original, miniaturas, metadatos y referencias de portada. Se conserva una operación `delete` pendiente, pero **aún no se propaga a otros dispositivos ni servidores**. Asegúrate de tener copia del archivo fuera del navegador antes de confirmar el borrado.
