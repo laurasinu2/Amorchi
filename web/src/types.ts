@@ -16,11 +16,12 @@ export interface AppSettings {
   partnerName:string;
   partnerBirthday:string;
   importantBirthdays:ImportantBirthday[];
+  showTraditions?:boolean;
 }
 
 export const defaultSettings:AppSettings={
   id:'main',relationshipStartedOn:'',myName:'Yo',myBirthday:'',
-  partnerName:'Mi pareja',partnerBirthday:'',importantBirthdays:[]
+  partnerName:'Mi pareja',partnerBirthday:'',importantBirthdays:[],showTraditions:true
 };
 
 export type DateSource = 'exif' | 'file' | 'manual';
