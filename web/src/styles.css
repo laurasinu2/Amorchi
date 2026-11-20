@@ -170,3 +170,29 @@ body{margin:0;min-width:320px}button,input,select,textarea{font:inherit}button{c
   .year-card-main{grid-template-columns:34% 1fr auto;gap:10px}
   .year-card-main>svg{margin-right:4px;margin-top:33px}
 }
+
+/* Celebraciones tradicionales: borde propio, compatible con foto de fondo y aniversarios. */
+.calendar-day.holiday-border{border:2px solid var(--holiday-ring,#d88956);box-shadow:inset 0 0 0 1px var(--holiday-ring,#d88956)}
+.holiday-christmas{--holiday-ring:#d96e46;--holiday-surface:#fbe5d8}
+.holiday-spring{--holiday-ring:#6ba66e;--holiday-surface:#e0f1dd}
+.holiday-carnival{--holiday-ring:#9570bd;--holiday-surface:#ede2f7}
+.holiday-autumn{--holiday-ring:#b77639;--holiday-surface:#f6e7d4}
+.holiday-national{--holiday-ring:#bd6d69;--holiday-surface:#f4e4df}
+.holiday-bridge{--holiday-ring:#6b93b8;--holiday-surface:#deecf6}
+.holiday-summer{--holiday-ring:#d9ab45;--holiday-surface:#faf0d5}
+.calendar-day.holiday-border.has-anniversary{outline:2px solid #e5c36d;outline-offset:-5px}
+.holiday-symbol{position:absolute;bottom:3px;right:3px;z-index:6;min-width:16px;min-height:17px;display:grid;place-items:center;background:rgba(255,250,242,.92);color:var(--holiday-ring,#c07854);font-size:.77rem;border:1px solid currentColor;border-radius:5px;padding:1px 2px;line-height:1}
+.holiday-symbol-christmas{color:#b95037}.holiday-symbol-spring{color:#478b54}.holiday-symbol-carnival{color:#865dae}.holiday-symbol-autumn{color:#ae6b2b}.holiday-symbol-bridge{color:#5d88a9}
+.calendar-grid.compact .holiday-symbol{font-size:.42rem;min-width:8px;min-height:8px;bottom:1px;right:1px;padding:0;border-radius:2px}
+.traditional-day-event{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:10px 8px;border-left:4px solid var(--holiday-ring);background:var(--holiday-surface);border-radius:9px;margin:5px 0}
+.traditional-day-event strong{font-size:.89rem}.traditional-day-event small{margin-left:auto}
+.traditions-switch{display:flex;gap:12px;align-items:start;padding:12px 14px;border-radius:13px;background:#f8ede5;border:1px solid #ead8cb;cursor:pointer}
+.traditions-switch input{width:19px;height:19px;margin-top:3px;accent-color:#ad6849}
+.traditions-switch span{display:grid;gap:5px}.traditions-switch small{line-height:1.4}
+.legend-themed b{font-weight:650}
+.btn.danger{background:#af423a;color:white}
+.btn.danger-outline{background:#fff4f0;border:1px solid #dcb7ad;color:#a13d38}
+.delete-confirmation{display:grid;gap:9px;background:#fff0e9;border:1px solid #e3b0a1;color:#713b31;padding:14px;border-radius:14px}
+.delete-confirmation p{font-size:.85rem;color:#794f46;margin:0;line-height:1.45}
+.photo-actions{flex-wrap:wrap}.photo-actions-spacer{flex:1 1 auto}
+@media(max-width:760px){.calendar-grid.compact .holiday-symbol{display:none}.holiday-symbol{min-width:12px;font-size:.6rem;bottom:2px;right:2px}.photo-actions .btn{font-size:.76rem}}

@@ -2,6 +2,7 @@ import type { AppSettings,Memory,Photo } from '../types';
 import { covers, dateLabel, monthWeeks } from '../dates';
 import { PhotoView } from './PhotoView';
 import { occasionsOn } from '../specialDates';
+import { holidaysOn } from '../traditionalDates';
 
 const weekdays=['L','M','X','J','V','S','D'];
 export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=false,selectedDay}:{
@@ -24,11 +25,14 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
           const specials=occasionsOn(day,settings);
           const anniversary=specials.find(s=>s.type==='anniversary');
           const birthdays=specials.filter(s=>s.type==='birthday');
-          return <button key={day} type="button" title={[dateLabel(day),...specials.map(s=>s.label)].join(' · ')} aria-label={[dateLabel(day),...specials.map(s=>s.label)].join(' · ')} className={['calendar-day',current?'':'muted',photo?'with-photo':'',matches.length?'has-event':'',anniversary?'has-anniversary':'',selectedDay===day?'selected':''].join(' ')} onClick={()=>onDay(day)}>
+          const traditional=settings.showTraditions===false?[]:holidaysOn(day);
+          const mainHoliday=traditional.find(x=>x.status!=='optional-bridge')||traditional[0];
+          return <button key={day} type="button" title={[dateLabel(day),...specials.map(s=>s.label),...traditional.map(h=>h.title)].join(' · ')} aria-label={[dateLabel(day),...specials.map(s=>s.label),...traditional.map(h=>h.title)].join(' · ')} className={['calendar-day',current?'':'muted',photo?'with-photo':'',matches.length?'has-event':'',mainHoliday?'holiday-border holiday-'+mainHoliday.theme:'',anniversary?'has-anniversary':'',selectedDay===day?'selected':''].join(' ')} onClick={()=>onDay(day)}>
             {photo&&<PhotoView id={photo.id} className="day-backdrop"/>}
             <span className="day-number">{Number(day.slice(8,10))}</span>
             {anniversary&&<span className="calendar-anniversary" aria-hidden="true"><span className="anniversary-heart">♥</span><span className="anniversary-count">{anniversary.years===0?'Inicio':`${anniversary.years}º`}</span></span>}
             {birthdays.length>0&&<span className="calendar-birthday" aria-hidden="true">🎂</span>}
+            {mainHoliday&&<span className={'holiday-symbol holiday-symbol-'+mainHoliday.theme} aria-hidden="true">{mainHoliday.theme==='christmas'?'✶':mainHoliday.theme==='carnival'?'🎭':mainHoliday.theme==='autumn'?'🍂':mainHoliday.theme==='spring'?'✿':mainHoliday.theme==='bridge'?'↔':mainHoliday.theme==='summer'?'☀':'★'}</span>}
             {!photo&&matches.length>0&&<span className="calendar-dot"/>}
           </button>;
         })}
