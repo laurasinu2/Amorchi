@@ -14,7 +14,7 @@ Está programada una primera interfaz móvil y de escritorio con:
 - Barra lateral oscura compacta en ordenador (aproximadamente 1/5 del ancho, sin desplazamiento), portada de Inicio mínima con «Ver años» a la derecha y navegación inferior en móvil.
 - Selección de imagen de fondo desde el menú translúcido «···» en Inicio, portadas de años y fichas de viajes, eventos y momentos.
 - Ajustes de fecha de inicio de relación y cumpleaños propios, de pareja e importantes, con marcadores anuales en el calendario (corazón y número de años dorado).
-- Celebraciones catalanas y tradicionales con bordes temáticos (Navidad, Sant Esteve, Reyes, Halloween/Castanyada, Carnaval y Semana Santa según el año, La Purísima, y posible puente de diciembre). Un puente no equivale a un festivo laboral.
+- Celebraciones catalanas y tradicionales con bordes temáticos (Navidad, Sant Esteve, Reyes, Halloween/Castanyada, Santos Inocentes y día de las bromas cada 28 de diciembre, Carnaval y Semana Santa según el año, La Purísima, y posible puente de diciembre). Un puente no equivale a un festivo laboral.
 - Borrado de fotografías con confirmación explícita; elimina originales, variantes y referencias de portada del almacenamiento local y deja una operación de borrado pendiente para el servidor.
 - Logos aportados por el usuario, optimizados para la interfaz y el icono instalable. El nombre del repositorio sigue siendo Amorchi.
 - IndexedDB con fotos y metadatos locales; service worker de la PWA para abrir la interfaz sin conexión después de una visita inicial por HTTPS/localhost.
@@ -70,3 +70,9 @@ Los SQL `server/db/001_initial.sql` y `server/db/002_preferences.sql` se aplican
 No subas fotografías privadas, contraseñas, `.env`, volúmenes de Docker ni exportaciones de PostgreSQL al repositorio. `public/` solo incluye el icono de la app.
 
 Revisa [ARQUITECTURA.md](docs/ARQUITECTURA.md) para el plan de autenticación, copias de seguridad, sincronización por cursor y almacenamiento definitivo de originales y variantes.
+
+## Eliminar recuerdos, viajes y eventos
+
+Abre la ficha del recuerdo y pulsa **Eliminar viaje**, **Eliminar evento** o **Eliminar momento** en el panel «Gestionar». La aplicación pide confirmación mostrando cuántas fotografías se desvincularán. **Las fotos no se borran**, permanecen en el álbum y conservan asociaciones con otros recuerdos. Se elimina únicamente la ficha, su intervalo en el calendario y su marcador del mapa.
+
+Los cambios se guardan atómicamente en IndexedDB junto con un marcador de borrado en la cola offline. **La sincronización real todavía no está implementada**: borrar el recuerdo en un dispositivo no lo elimina aún de los demás. La papelera con recuperación no está disponible en esta fase.

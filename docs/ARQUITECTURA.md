@@ -67,3 +67,9 @@ Importa ese archivo desde la PWA. Las coordenadas de los marcadores son latitud/
 **Nota**: las imágenes WebP, JPEG o PNG ajenas a este GeoTIFF no son cartografía válida para el mapa, aunque tengan dimensiones similares. Importa únicamente una versión reducida creada a partir del archivo original.
 
 La eliminación de una fotografía se realiza en una única transacción local IndexedDB: se borran original, miniaturas, metadatos y referencias de portada. Se conserva una operación `delete` pendiente, pero **aún no se propaga a otros dispositivos ni servidores**. Asegúrate de tener copia del archivo fuera del navegador antes de confirmar el borrado.
+
+## Borrado de recuerdos: integridad referencial local
+
+`deleteMemory(memoryId)` en `web/src/db.ts` utiliza una sola transacción sobre `memories`, `photos` y `operations`. Desvincula ese ID de todas las fotos, mantiene sus blobs, fechas y demás asociaciones intactas, elimina los `upsert` locales obsoletos y crea operaciones de actualización para las fotos afectadas y una operación `delete` para el recuerdo. El borrado exige una confirmación específica en la interfaz. Si falla la transacción no se considera borrado.
+
+El **28 de diciembre** se incluye como **Día de los Santos Inocentes (bromas)** con borde rosa en el calendario. Se calcula anualmente sin generar eventos de usuario ni filas persistentes adicionales; puede desactivarse junto con las demás celebraciones tradicionales en Ajustes.
