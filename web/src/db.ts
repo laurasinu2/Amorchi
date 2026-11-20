@@ -15,8 +15,9 @@ interface AmorchiSchema extends DBSchema {
   asset_sizes: { key: string; value: AssetSize };
   operations: { key: string; value: LocalOperation };
   settings: { key: string; value: AppSettings };
+  map_assets: { key: string; value: Asset };
 }
-const database = openDB<AmorchiSchema>('amorchi-local-v1', 3, {
+const database = openDB<AmorchiSchema>('amorchi-local-v1', 4, {
   upgrade(db) {
     if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos', { keyPath: 'id' });
     if(!db.objectStoreNames.contains('memories')) db.createObjectStore('memories', { keyPath: 'id' });
@@ -25,6 +26,7 @@ const database = openDB<AmorchiSchema>('amorchi-local-v1', 3, {
     if(!db.objectStoreNames.contains('operations')) db.createObjectStore('operations', { keyPath: 'id' });
     if(!db.objectStoreNames.contains('asset_sizes')) db.createObjectStore('asset_sizes', { keyPath: 'key' });
     if(!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'id' });
+    if(!db.objectStoreNames.contains('map_assets')) db.createObjectStore('map_assets', { keyPath: 'key' });
   }
 });
 
@@ -246,6 +248,24 @@ export async function getPhotoAsset(id:string,quality:'thumb'|'preview'|'origina
   const result=await db.get('assets',id+':'+quality);
   if(result)return result.blob;
   return (await db.get('assets',id+':original'))?.blob;
+}
+
+/** Base cartográfica optimizada del GeoTIFF EPSG:3857 proporcionado por el usuario. */
+export async function getWorldMapImage():Promise<Blob|undefined>{
+  return (await (await database).get('map_assets','georef-world'))?.blob;
+}
+
+export async function saveWorldMapImage(blob:Blob):Promise<void>{
+  if(!['image/webp','image/png','image/jpeg'].includes(blob.type)){
+    throw new Error('Selecciona la versión optimizada WebP/JPEG/PNG, no el TIFF original.');
+  }
+  if(blob.size>20*1024*1024)throw new Error('El mapa pesa demasiado. Utiliza la versión WebP optimizada.');
+  const bitmap=await createImageBitmap(blob).catch(()=>undefined);
+  if(!bitmap)throw new Error('No se pudo leer la imagen del mapa.');
+  const ratio=bitmap.width/bitmap.height;
+  bitmap.close();
+  if(Math.abs(ratio-28740/27559)>0.018)throw new Error('Esta imagen no coincide con la proporción del mapa georreferenciado.');
+  await (await database).put('map_assets',{key:'georef-world',blob});
 }
 
 export async function getLocalUsage():Promise<{bytes:number;quota?:number;usage?:number}>{

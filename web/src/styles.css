@@ -196,3 +196,16 @@ body{margin:0;min-width:320px}button,input,select,textarea{font:inherit}button{c
 .delete-confirmation p{font-size:.85rem;color:#794f46;margin:0;line-height:1.45}
 .photo-actions{flex-wrap:wrap}.photo-actions-spacer{flex:1 1 auto}
 @media(max-width:760px){.calendar-grid.compact .holiday-symbol{display:none}.holiday-symbol{min-width:12px;font-size:.6rem;bottom:2px;right:2px}.photo-actions .btn{font-size:.76rem}}
+
+/* Mapa de fondo original preparado desde GeoTIFF, Leaflet íntegramente offline */
+.world-map{background:#faf7f1;border:1px solid #e6d9ca;border-radius:17px;padding:12px;display:grid;gap:12px}
+.world-map-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.world-map-tools>div{display:grid;gap:5px}.world-map-tools strong{font-size:.95rem}.world-map-tools small{font-size:.72rem}
+.world-upload{position:relative;cursor:pointer}.world-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.world-map-frame{position:relative;border-radius:13px;overflow:hidden;background:#deecf1}
+.leaflet-world-map{width:100%;height:clamp(350px,51vh,680px);background:#b5d3df;z-index:0}
+.world-map-empty{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:24px;display:grid;justify-items:center;gap:9px;text-align:center;max-width:360px;width:calc(100% - 35px);border-radius:18px;background:rgba(255,253,249,.94);box-shadow:0 8px 24px rgba(20,35,45,.17);z-index:400;pointer-events:none}
+.world-map-empty p{font-size:.8rem;color:#756b62;line-height:1.5;margin:0}
+.world-map .leaflet-tooltip{font-weight:700;color:#4d3c33;background:#fff7ef;border-color:#e7d3c0}
+.world-map .leaflet-image-layer{image-rendering:auto}
+@media(max-width:760px){.leaflet-world-map{height:56vh;min-height:335px}.world-map-tools{align-items:start}.world-upload{font-size:.75rem}}
