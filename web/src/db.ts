@@ -64,6 +64,55 @@ export async function saveSubject(subject:Subject){
   await tx.done;
 }
 
+
+/**
+ * Elimina permanentemente la foto y TODAS sus variantes locales en una única
+ * transacción. Conserva el tombstone en la cola para que el futuro servidor
+ * aplique el borrado remoto. No eliminar las operaciones "delete" de la cola.
+ */
+export async function deletePhoto(photoId:string):Promise<void>{
+  const db=await database;
+  const tx=db.transaction(['photos','assets','asset_sizes','operations','memories','settings'],'readwrite');
+  const photoStore=tx.objectStore('photos');
+  const memoryStore=tx.objectStore('memories');
+  const settingsStore=tx.objectStore('settings');
+  const operations=tx.objectStore('operations');
+  const photo=await photoStore.get(photoId);
+  if(!photo){
+    tx.abort();
+    throw new Error('La fotografía ya no existe.');
+  }
+  // Limpiar referencias de portada en toda la biblioteca, no solo el recuerdo activo.
+  const memories=await memoryStore.getAll();
+  for(const m of memories){
+    if(m.coverPhotoId===photoId){
+      await memoryStore.put({...m,coverPhotoId:undefined});
+      await operations.put(op('memory',m.id));
+    }
+  }
+  const settings=await settingsStore.get('main');
+  if(settings){
+    const yearCovers=Object.fromEntries(Object.entries(settings.yearCoverPhotoIds||{}).filter(([,id])=>id!==photoId));
+    if(settings.homeCoverPhotoId===photoId||Object.keys(yearCovers).length!==Object.keys(settings.yearCoverPhotoIds||{}).length){
+      await settingsStore.put({...settings,yearCoverPhotoIds:yearCovers,
+        homeCoverPhotoId:settings.homeCoverPhotoId===photoId?undefined:settings.homeCoverPhotoId});
+      await operations.put(op('settings','main'));
+    }
+  }
+  for(const variant of ['original','preview','thumb']){
+    await tx.objectStore('assets').delete(photoId+':'+variant);
+    await tx.objectStore('asset_sizes').delete(photoId+':'+variant);
+  }
+  await photoStore.delete(photoId);
+  const existing=await operations.getAll();
+  for(const prior of existing){
+    if(prior.entity==='photo'&&prior.entityId===photoId&&prior.type==='upsert')
+      await operations.delete(prior.id);
+  }
+  await operations.put({...op('photo',photoId),type:'delete'});
+  await tx.done;
+}
+
 export async function savePhoto(photo:Photo){
   const db=await database;
   const tx=db.transaction(['photos','operations'],'readwrite');

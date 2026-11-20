@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Check, Heart, ImagePlus, MapPin, X } from 'lucide-react';
+import { Check, Heart, ImagePlus, MapPin, Trash2, X } from 'lucide-react';
 import type { ImportOptions, Memory, MemoryKind, Photo, Subject, SubjectKind } from '../types';
 import { dateLabel, localISO } from '../dates';
 import { PhotoView } from './PhotoView';
@@ -177,12 +177,19 @@ export function SubjectDialog({onClose,onSave}:{
   </Dialog>;
 }
 
-export function PhotoDialog({photo,memories,subjects,onClose,onSave}:{
-  photo:Photo;memories:Memory[];subjects:Subject[];onClose:()=>void;onSave:(p:Photo)=>Promise<void>;
+export function PhotoDialog({photo,memories,subjects,onClose,onSave,onDelete}:{
+  photo:Photo;memories:Memory[];subjects:Subject[];onClose:()=>void;onSave:(p:Photo)=>Promise<void>;onDelete:(id:string)=>Promise<void>;
 }){
   const [draft,setDraft]=useState(photo);
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
+  const [confirmDelete,setConfirmDelete]=useState(false);
+  async function deleteConfirmed(){
+    setError('');setBusy(true);
+    try{await onDelete(photo.id);onClose();}
+    catch(err){setError(err instanceof Error?err.message:String(err));}
+    finally{setBusy(false);}
+  }
   useEffect(()=>setDraft(photo),[photo]);
   async function submit(e:React.FormEvent){
     e.preventDefault();setBusy(true);setError('');
@@ -206,7 +213,12 @@ export function PhotoDialog({photo,memories,subjects,onClose,onSave}:{
         </div>
         <button type="button" className={'favorite-toggle '+(draft.favorite?'on':'')} onClick={()=>setDraft(v=>({...v,favorite:!v.favorite}))}><Heart size={20} fill={draft.favorite?'currentColor':'none'}/>{draft.favorite?'Favorita':'Marcar como favorita'}</button>
         {error&&<p className="form-errors">{error}</p>}
-        <div className="form-actions"><button type="button" className="btn subtle" onClick={onClose}>Cerrar</button><button type="submit" className="btn primary" disabled={busy}>Guardar cambios</button></div>
+        {confirmDelete&&<div className="delete-confirmation" role="alertdialog" aria-label="Confirmar eliminación de fotografía">
+          <strong>¿Seguro que quieres eliminar esta fotografía?</strong>
+          <p>Se eliminará el archivo original, las miniaturas y sus asociaciones locales. No se puede deshacer.</p>
+          <div className="form-actions"><button className="btn subtle" type="button" disabled={busy} onClick={()=>setConfirmDelete(false)}>Cancelar</button><button className="btn danger" type="button" disabled={busy} onClick={deleteConfirmed}>{busy?'Eliminando…':'Sí, eliminar definitivamente'}</button></div>
+        </div>}
+        {!confirmDelete&&<div className="form-actions photo-actions"><button type="button" className="btn danger-outline" disabled={busy} onClick={()=>setConfirmDelete(true)}><Trash2 size={16}/> Eliminar fotografía</button><span className="photo-actions-spacer"/><button type="button" className="btn subtle" onClick={onClose}>Cerrar</button><button type="submit" className="btn primary" disabled={busy}>Guardar cambios</button></div>}
       </div>
     </form>
   </Dialog>;

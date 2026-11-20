@@ -2,7 +2,7 @@ import { useEffect, useState, type ComponentType } from 'react';
 import { CalendarDays, CloudUpload, Compass, Heart, Home, Images, Layers, MapPin, Menu, Plane, Plus, Search, Settings, Star, Trash2, Users, WifiOff } from 'lucide-react';
 import { defaultSettings, type AppSettings, type ImportOptions, type Memory, type MemoryKind, type Page, type Photo, type Subject } from './types';
 import { localISO } from './dates';
-import { importPhoto, loadLibrary, saveMemory, savePhoto, saveSubject, saveSettings } from './db';
+import { deletePhoto, importPhoto, loadLibrary, saveMemory, savePhoto, saveSubject, saveSettings } from './db';
 import { ImportDialog, MemoryDialog, PhotoDialog, SubjectDialog } from './components/Dialogs';
 import { CoverPicker } from './components/CoverPicker';
 import { AlbumPage, CalendarPage, Dashboard, EmptyState, MemoriesPage, MemoryDetail, PeoplePage, PlacesPage, SearchPage, SettingsPage, YearsPage, type CalendarMode } from './Pages';
@@ -91,6 +91,10 @@ export default function App(){
   }
   async function commitSubject(subject:Subject){await saveSubject(subject);await refresh();}
   async function commitPhoto(photo:Photo){await savePhoto(photo);await refresh();}
+  async function commitDeletePhoto(id:string){
+    await deletePhoto(id);
+    await refresh();
+  }
   async function commitImport(files:File[],options:ImportOptions){
     const errors:string[]=[];let imported=0;
     for(const file of files){
@@ -146,6 +150,6 @@ export default function App(){
     {importOpen&&<ImportDialog memories={memories} subjects={subjects} onClose={()=>setImportOpen(false)} onCommit={commitImport}/>}
     {memoryOpen&&<MemoryDialog initial={editMemory} defaultKind={newKind} onClose={()=>setMemoryOpen(false)} onSave={commitMemory}/>}
     {subjectOpen&&<SubjectDialog onClose={()=>setSubjectOpen(false)} onSave={commitSubject}/>}
-    {selectedPhoto&&<PhotoDialog photo={selectedPhoto} memories={memories} subjects={subjects} onClose={()=>setSelectedPhotoId(undefined)} onSave={commitPhoto}/>}
+    {selectedPhoto&&<PhotoDialog photo={selectedPhoto} memories={memories} subjects={subjects} onClose={()=>setSelectedPhotoId(undefined)} onSave={commitPhoto} onDelete={commitDeletePhoto}/>}
   </div>;
 }
