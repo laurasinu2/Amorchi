@@ -214,7 +214,7 @@ export function PhotoDetailPage({photo,photos,memories,subjects,settings,onBack,
       </section>
 
       <aside className="memrly-photo-sidebar" aria-label="Información de la fotografía">
-        <section className="memrly-photo-panel memrly-photo-information">
+        <section className={'memrly-photo-panel memrly-photo-information'+(peoplePicker?' has-popup':'')}>
           <h2>Detalles de la fotografía</h2>
           <div className="memrly-photo-detail-rows">
             <div className="memrly-photo-detail-row"><CalendarDays size={19}/><div><strong>Fecha</strong><span>{dateLabel(photo.takenOn)}{photo.takenTime?', '+photo.takenTime:''}</span></div></div>

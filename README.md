@@ -158,3 +158,12 @@ Si el dispositivo mantiene el icono antiguo después de actualizar la PWA, puede
 ## Recuerdos de una sola fecha en el calendario
 
 Si un viaje, evento o recuerdo tiene `startDate === endDate`, su casilla **no muestra la etiqueta superpuesta con el nombre** y utiliza exclusivamente un pequeño icono de categoría: avión (viaje), calendario (evento) o corazón (recuerdo). El borde del intervalo no cambia. Si el evento dura varios días, continúa mostrando la etiqueta habitual, aunque alguna semana solo contenga un día del intervalo (por ejemplo un domingo aislado). El nombre completo sigue accesible para lectores de pantalla mediante el `aria-label` de la fecha; el tooltip nativo al pasar el cursor no incluye el nombre de los recuerdos de un solo día. Esto no modifica las asociaciones ni los datos guardados.
+
+## Ajustes responsive de la ficha de fotografía (2026-11-22)
+
+- El panel **Detalles de la fotografía** presenta sus cuatro filas compactas, sin repartirlas artificialmente entre los extremos del panel. El segundo panel de recuerdos ocupa solo la altura necesaria y mantiene un scroll interno para listas extensas.
+- La columna de imagen fija su track CSS a `minmax(0,1fr)`; antes el contenido mínimo de controles de zoom/miniaturas podía desbordar el propio recuadro y solaparse con el panel derecho.
+- Se acota el ancho del slider, se reduce el texto secundario que no cabe, y la tira de miniaturas puede desplazarse horizontalmente en tamaños intermedios.
+- En ventanas de **1240 px o menos de ancho**, o **menos de 700 px de alto**, los bloques pasan a una columna vertical con scroll natural; a partir de 1241 px con altura suficiente, se mantiene la página de escritorio sin scroll exterior.
+- Los menús flotantes de personas se muestran por encima de las otras tarjetas y se ajustan al ancho de pantalla. El aviso de errores ya no rompe el reparto vertical de filas, gracias a la estructura flex.
+- No se han modificado ni las fotos ni los datos IndexedDB. Las pruebas automatizadas verifican compilación y lógica, no sustituyen una comprobación visual manual en todas las resoluciones.
