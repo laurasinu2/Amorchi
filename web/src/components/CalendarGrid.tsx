@@ -62,7 +62,7 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
             return <div key={m.id} className={'memrly-range memrly-range-'+m.kind} style={{
               gridColumn:`${begin+1} / span ${finish-begin+1}`,
               gridRow:1,
-              inset:`${2+i*4}px`,
+              margin:`${2+i*4}px`,
               zIndex:3+i
             }} title={category(m)+': '+m.title}>
               <span className="memrly-range-label">{category(m)}: {m.title}</span>

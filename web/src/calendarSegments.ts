@@ -1,4 +1,4 @@
-import { monthWeeks } from './dates';
+import { monthWeeks } from './dates.ts';
 
 /** Reproducible span calculation for a multi-day memory within each calendar week. */
 export function calendarSegments(start:string,end:string,year:number,month:number):Array<{startColumn:number;endColumn:number;week:number}>{
