@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { calendarSegments } from '../src/calendarSegments.ts';
+import { calendarSegments, isSingleDayMemory } from '../src/calendarSegments.ts';
 
 test('Viaje que cruza domingo: un tramo por semana, sin bordes interiores',()=>{
   const ranges=calendarSegments('2026-08-09','2026-08-14',2026,7);
@@ -38,4 +38,14 @@ test('Viaje de la captura 10 a 15 de agosto: un solo rectángulo de 6 columnas',
   assert.deepEqual(calendarSegments('2026-08-10','2026-08-15',2026,7),[
     {week:2,startColumn:0,endColumn:5}
   ]);
+});
+
+test('Solo un recuerdo de un día usa icono; uno de varios días dividido por semanas mantiene etiqueta',()=>{
+  assert.equal(isSingleDayMemory('2026-08-04','2026-08-04'),true);
+  assert.equal(isSingleDayMemory('2026-08-10','2026-08-11'),false);
+  assert.equal(isSingleDayMemory('2026-08-09','2026-08-14'),false);
+  assert.equal(isSingleDayMemory('',''),false);
+  const segments=calendarSegments('2026-08-09','2026-08-14',2026,7);
+  assert.equal(segments[0].startColumn,segments[0].endColumn);
+  assert.equal(isSingleDayMemory('2026-08-09','2026-08-14'),false);
 });

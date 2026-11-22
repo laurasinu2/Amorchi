@@ -156,3 +156,7 @@ La aplicación ahora **prioriza los archivos originales sin redibujar ni modific
 - `web/public/brand/memrly-horizontal.png`: original horizontal con «Memrly», PNG **2048 × 682**.
 
 Estas rutas corresponden a las dos imágenes entregadas por el usuario el 22/11/2026. Una vez añadidos los binarios al repositorio y reiniciado Vite, la barra lateral, la cabecera, el favicon y el manifiesto PWA utilizarán **sus PNG exactos**. Si faltan, se mostrarán los SVG recreados únicamente como alternativa de seguridad, para no romper la instalación ni la página. Los PNG **todavía no están dentro del árbol Git**: no confundir «rutas preparadas» con «archivos subidos». El cambio de icono de una PWA ya instalada puede requerir reinstalación o actualización del navegador. No afecta a datos locales ni fotografías.
+
+## Recuerdos de una sola fecha en el calendario
+
+Si un viaje, evento o recuerdo tiene `startDate === endDate`, su casilla **no muestra la etiqueta superpuesta con el nombre** y utiliza exclusivamente un pequeño icono de categoría: avión (viaje), calendario (evento) o corazón (recuerdo). El borde del intervalo no cambia. Si el evento dura varios días, continúa mostrando la etiqueta habitual, aunque alguna semana solo contenga un día del intervalo (por ejemplo un domingo aislado). El nombre completo sigue accesible para lectores de pantalla mediante el `aria-label` de la fecha; el tooltip nativo al pasar el cursor no incluye el nombre de los recuerdos de un solo día. Esto no modifica las asociaciones ni los datos guardados.

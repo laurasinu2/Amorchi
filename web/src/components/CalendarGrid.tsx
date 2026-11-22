@@ -1,9 +1,10 @@
+import { CalendarDays, Heart, Plane } from 'lucide-react';
 import type { AppSettings, Memory, Photo } from '../types';
 import { covers, dateLabel, monthWeeks } from '../dates';
 import { PhotoView } from './PhotoView';
 import { occasionsOn } from '../specialDates';
 import { holidaysOn } from '../traditionalDates';
-import { calendarSegments } from '../calendarSegments';
+import { calendarSegments, isSingleDayMemory } from '../calendarSegments';
 
 const weekdays=['L','M','X','J','V','S','D'];
 const category=(m:Memory)=>m.kind==='trip'?'Viaje':m.kind==='event'?'Evento':'Recuerdo';
@@ -43,7 +44,10 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
           const birthday=specials.some(s=>s.type==='birthday');
           const holidays=settings.showTraditions===false?[]:holidaysOn(day);
           const holiday=holidays.find(h=>h.status!=='optional-bridge')||holidays[0];
+          // Los recuerdos de una sola fecha se representan con un icono, nunca
+          // mediante un tooltip de título; aria-label conserva el contexto completo.
           const label=[dateLabel(day),...matches.map(m=>category(m)+': '+m.title),...specials.map(s=>s.label),...holidays.map(h=>h.title)].join(' · ');
+          const tooltip=[dateLabel(day),...matches.filter(m=>!isSingleDayMemory(m.startDate,m.endDate)).map(m=>category(m)+': '+m.title),...specials.map(s=>s.label),...holidays.map(h=>h.title)].join(' · ');
           return <button type="button" key={day} className={[
               'calendar-day',current?'':'muted',photo?'with-photo':'',
               matches.length?'has-event':'',
@@ -52,7 +56,7 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
               holiday?'holiday-border holiday-'+holiday.theme:'',
               birthday?'memrly-special-birthday':'',
               anniversary?'has-anniversary memrly-special-anniversary':''
-            ].join(' ')} title={label} aria-label={label} onClick={()=>onDay(day)}>
+            ].join(' ')} title={tooltip} aria-label={label} onClick={()=>onDay(day)}>
             {photo&&<PhotoView id={photo.id} className="day-backdrop"/>}
             <span className={'day-number '+(matches.length?'memrly-number-mark':'')}>{Number(day.slice(8,10))}</span>
             {anniversary&&<span className="calendar-anniversary" aria-hidden="true"><span className="anniversary-heart">♥</span><span className="anniversary-count">{anniversary.years===0?'Inicio':`${anniversary.years}º`}</span></span>}
@@ -73,7 +77,16 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
               margin:`${i*3}px`,
             }}
           >
-            {!compact&&<span className="memrly-interval-tag">{category(memory)}: {memory.title}</span>}
+            {isSingleDayMemory(memory.startDate,memory.endDate)
+              ? <span className={'memrly-interval-icon memrly-interval-icon-'+memory.kind}
+                  title={undefined}
+                  style={{
+                    right:`calc(3px + ${i*20}px)`,
+                    ...(settings.showTraditions!==false&&holidaysOn(memory.startDate).length>0?{bottom:'26px'}:{}),
+                  }}>
+                  {memory.kind==='trip'?<Plane size={14}/>:memory.kind==='event'?<CalendarDays size={14}/>:<Heart size={14}/>}
+                </span>
+              : !compact&&<span className="memrly-interval-tag">{category(memory)}: {memory.title}</span>}
           </div>)}
         </div>}
       </div>;

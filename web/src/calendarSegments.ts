@@ -21,3 +21,9 @@ export function calendarSegments(start:string,end:string,year:number,month:numbe
     return left<0||right<left?[]:[{startColumn:left,endColumn:right,week:index}];
   });
 }
+
+/** Un recuerdo de una sola fecha muestra únicamente icono, aunque otro
+ * intervalo esté truncado a una columna al cruzar de semana o mes. */
+export function isSingleDayMemory(start:string,end:string):boolean{
+  return Boolean(start)&&start===end;
+}

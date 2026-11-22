@@ -911,3 +911,40 @@ h1,h2,h3,h4,p,small{color:inherit}
 .topbar-brand-image{width:clamp(160px,19vw,245px);max-width:245px;height:45px;object-fit:contain;object-position:left center}
 .sidebar-app-icon{object-fit:contain;background:transparent;border-radius:12px}
 @media(max-width:760px){.topbar-brand-image{width:clamp(115px,32vw,165px);height:37px}}
+
+/* Recuerdos, viajes y eventos de UNA sola fecha: sustituimos la etiqueta
+   superpuesta por un pequeño icono de categoría, sin alterar el contorno. */
+.memrly-calendar-grid .memrly-interval-icon{
+  position:absolute;
+  bottom:3px;
+  display:grid;
+  place-items:center;
+  width:20px;
+  height:20px;
+  box-sizing:border-box;
+  border-radius:6px;
+  background:var(--memrly-navy);
+  color:white;
+  border:1px solid rgba(255,255,255,.85);
+  box-shadow:0 1px 3px rgba(16,43,73,.2);
+  pointer-events:none;
+  line-height:1;
+}
+.memrly-calendar-grid .memrly-interval-icon svg{
+  display:block;
+  width:14px;
+  height:14px;
+  stroke-width:2.25;
+}
+.memrly-calendar-grid.compact .memrly-interval-icon,
+.memrly-mini-month .memrly-interval-icon{
+  width:13px;
+  height:13px;
+  bottom:1px;
+  border-radius:3px;
+}
+.memrly-calendar-grid.compact .memrly-interval-icon svg,
+.memrly-mini-month .memrly-interval-icon svg{
+  width:9px;
+  height:9px;
+}
