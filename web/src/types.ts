@@ -73,6 +73,8 @@ export interface Photo {
   latitude?: number;
   longitude?: number;
   memoryIds: string[];
+  celebrationIncludeIds?:string[];
+  celebrationExcludeIds?:string[];
   subjectIds: string[];
   description: string;
   favorite: boolean;
