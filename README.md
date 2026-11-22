@@ -147,3 +147,12 @@ Los datos siguen residiendo en IndexedDB. El código de selección de relacionad
 ## Logotipo e iconos de Memrly (22/11/2026)
 
 Se ha retirado la identidad de «Recuerdos» de la cabecera, barra lateral, favicon y manifiesto de la PWA. Los recursos vectoriales `web/public/brand/memrly-app.svg` y `web/public/brand/memrly-horizontal.svg` son **recreaciones provisionales** del logo cuadrado azul marino con fotógrafo y del logo largo «Memrly» aportados en el chat. No sustituyen los archivos PNG originales del usuario, que deberán añadirse como recursos cuando se disponga de transferencia binaria al repositorio. Se mantiene la identidad en azul marino y blanco; no se alteran fotografías ni datos de IndexedDB.
+
+## Logos originales PNG (pendiente de incorporar los archivos binarios)
+
+La aplicación ahora **prioriza los archivos originales sin redibujar ni modificar sus píxeles** en estas rutas:
+
+- `web/public/brand/memrly-app.png`: original cuadrado del fotógrafo, PNG **1254 × 1254**.
+- `web/public/brand/memrly-horizontal.png`: original horizontal con «Memrly», PNG **2048 × 682**.
+
+Estas rutas corresponden a las dos imágenes entregadas por el usuario el 22/11/2026. Una vez añadidos los binarios al repositorio y reiniciado Vite, la barra lateral, la cabecera, el favicon y el manifiesto PWA utilizarán **sus PNG exactos**. Si faltan, se mostrarán los SVG recreados únicamente como alternativa de seguridad, para no romper la instalación ni la página. Los PNG **todavía no están dentro del árbol Git**: no confundir «rutas preparadas» con «archivos subidos». El cambio de icono de una PWA ya instalada puede requerir reinstalación o actualización del navegador. No afecta a datos locales ni fotografías.
