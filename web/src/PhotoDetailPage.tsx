@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { ArrowLeft, CalendarDays, Check, ChevronLeft, ChevronRight, Download, Edit3, Expand, Heart, Image as ImageIcon, MapPin, Maximize2, Minus, MoreHorizontal, Plus, PlusCircle, RotateCcw, Share2, Trash2, Users, X, ZoomIn } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Check, ChevronLeft, ChevronRight, Download, Edit3, Heart, Image as ImageIcon, MapPin, Maximize2, Minus, MoreHorizontal, Plus, PlusCircle, RotateCcw, Share2, Trash2, Users, X } from 'lucide-react';
 import type { AppSettings, Memory, Photo, Subject } from './types';
 import { dateLabel, kindName } from './dates';
 import { getPhotoAsset } from './db';

@@ -96,4 +96,4 @@ export interface ImportOptions {
   subjectIds: string[];
 }
 
-export type Page = 'inicio' | 'anios' | 'calendario' | 'dia' | 'viajes' | 'recuerdos' | 'lugares' | 'personas' | 'colecciones' | 'album' | 'buscar' | 'favoritos' | 'papelera' | 'ajustes' | 'memoria';
+export type Page = 'inicio' | 'anios' | 'calendario' | 'dia' | 'viajes' | 'recuerdos' | 'lugares' | 'personas' | 'colecciones' | 'album' | 'buscar' | 'favoritos' | 'papelera' | 'ajustes' | 'memoria' | 'foto';
