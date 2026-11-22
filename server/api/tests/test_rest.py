@@ -61,10 +61,11 @@ def test_private_upload_workflow(tmp_path, monkeypatch):
         uploaded = client.post("/api/v1/photos", headers=h1,
             files={"file":("nieve.png", PNG,"image/png")},
             data={"latitude":"41.4132","longitude":"2.1032",
-                  "captured_local_date":"2026-03-06"})
+                  "captured_local_date":"2026-03-06","name":"Excursión a la nieve"})
         assert uploaded.status_code == 201, uploaded.text
         photo = uploaded.json()
         assert photo["filename"] == "nieve.png"
+        assert photo["name"] == "Excursión a la nieve"
         assert photo["captured_local_date"] == "2026-03-06"
         assert photo["latitude"] == 41.4132 and photo["longitude"] == 2.1032
         assert photo["uploaded_at"]

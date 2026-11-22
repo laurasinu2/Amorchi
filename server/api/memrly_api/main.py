@@ -1,5 +1,6 @@
 """Memrly REST v1. Photo reads are album-scoped; no anonymous file URLs."""
 from datetime import date, datetime, timezone
+from pathlib import Path
 from typing import Annotated
 from uuid import UUID, uuid4
 
@@ -48,6 +49,7 @@ class TokenOut(BaseModel):
 class PhotoOut(BaseModel):
     id: UUID
     filename: str
+    name: str
     uploaded_at: datetime
     captured_local_date: date
     latitude: float | None
@@ -87,7 +89,7 @@ def writable_album(conn, uid: UUID) -> UUID:
 
 def get_photo_row(cur, uid: UUID, photo_id: UUID):
     cur.execute(
-        """SELECT m.id, f.filename, m.created_at AS uploaded_at, m.captured_local_date,
+        """SELECT m.id, f.filename, m.title AS name, m.created_at AS uploaded_at, m.captured_local_date,
                   m.latitude, m.longitude, f.mime_type, f.size_bytes, f.object_key
            FROM media m
            JOIN original_files f ON f.id=m.original_file_id AND f.album_id=m.album_id
@@ -155,7 +157,7 @@ def list_photos(uid: Annotated[UUID, Depends(current_user)], conn=Depends(get_co
         raise HTTPException(422, "Paginación inválida.")
     with conn.cursor() as cur:
         cur.execute(
-            """SELECT m.id, f.filename, m.created_at AS uploaded_at,
+            """SELECT m.id, f.filename, m.title AS name, m.created_at AS uploaded_at,
                       m.captured_local_date, m.latitude, m.longitude,
                       f.mime_type, f.size_bytes
                FROM media m
@@ -202,6 +204,7 @@ def upload_photo(
     uid: Annotated[UUID, Depends(current_user)],
     conn=Depends(get_conn),
     file: UploadFile = File(...),
+    name: str | None = Form(None, max_length=180),
     latitude: float | None = Form(None, ge=-90, le=90),
     longitude: float | None = Form(None, ge=-180, le=180),
     captured_local_date: date | None = Form(None),
@@ -213,6 +216,7 @@ def upload_photo(
     temp, length, sha256, extension = receive_file(file,cfg["storage"],cfg["max_bytes"])
     original_id, photo_id = uuid4(),uuid4()
     key = object_key(original_id,extension)
+    display_name = (name or Path(safe_name(file.filename)).stem).strip()[:180] or "Fotografía"
     final_path = object_path(cfg["storage"],key)
     moved = False
     committed = False
@@ -226,10 +230,10 @@ def upload_photo(
             )
             cur.execute(
                 """INSERT INTO media
-                   (id,album_id,original_file_id,captured_local_date,date_source,
+                   (id,album_id,original_file_id,title,captured_local_date,date_source,
                     latitude,longitude,uploaded_by)
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
-                (photo_id,album_id,original_id,
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                (photo_id,album_id,original_id,display_name,
                  captured_local_date or datetime.now(timezone.utc).date(),
                  "manual" if captured_local_date else "file",
                  latitude,longitude,uid),

@@ -1,0 +1,17 @@
+# Keep secrets and local objects OUT of Docker build contexts.
+.git
+**/.env
+**/.env.*
+!**/.env.example
+**/node_modules
+**/dist
+**/.pytest_cache
+**/__pycache__
+**/*.pyc
+**/.venv
+**/venv
+**/backups
+**/tmp
+**/*.log
+*.dump
+*.tar.gz

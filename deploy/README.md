@@ -84,7 +84,7 @@ imágenes de prueba. Los tests automatizados usan un PostgreSQL real en GitHub A
 El registro crea una cuenta y un álbum privado; el login devuelve un JWT de
 12 horas. Una subida multipart admite `file`, `latitude`, `longitude` y
 `captured_local_date` (últimos tres opcionales, pero coordenadas en pareja).
-PostgreSQL guarda UUID, nombre, fecha de subida, fecha de captura, coordenadas,
+PostgreSQL guarda UUID, nombre del archivo, título opcional `name`, fecha de subida, fecha de captura, coordenadas,
 MIME y tamaño. El archivo binario se guarda como original en un volumen privado.
 
 JPEG, PNG, WebP y HEIC tienen comprobación básica de firma y un límite de
