@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CalendarDays, ChevronRight, Heart, Images, Search } from 'lucide-react';
+import { CalendarDays, Heart, Images, Search } from 'lucide-react';
 import type { AppSettings, Memory, Photo } from '../types';
 import { celebrationCatalog, celebrationSeasons, hasCelebration } from '../celebrations';
 import { dateLabel } from '../dates';

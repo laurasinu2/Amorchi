@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Check, Heart, ImagePlus, MapPin, Trash2, X } from 'lucide-react';
-import type { ImportOptions, Memory, MemoryKind, Photo, Subject, SubjectKind } from '../types';
+import type { AppSettings, ImportOptions, Memory, MemoryKind, Photo, Subject, SubjectKind } from '../types';
+import { celebrationCatalog, automaticCelebrationIds, overrideCelebration } from '../celebrations';
 import { dateLabel, localISO } from '../dates';
 import { PhotoView } from './PhotoView';
 import { inspectPhoto, type PhotoInspection } from '../db';
@@ -213,13 +214,18 @@ export function MemoryDeleteDialog({memory,photoCount,onClose,onConfirm}:{
   </Dialog>;
 }
 
-export function PhotoDialog({photo,memories,subjects,onClose,onSave,onDelete}:{
-  photo:Photo;memories:Memory[];subjects:Subject[];onClose:()=>void;onSave:(p:Photo)=>Promise<void>;onDelete:(id:string)=>Promise<void>;
+export function PhotoDialog({photo,memories,subjects,settings,onClose,onSave,onDelete}:{
+  photo:Photo;memories:Memory[];subjects:Subject[];settings:AppSettings;onClose:()=>void;onSave:(p:Photo)=>Promise<void>;onDelete:(id:string)=>Promise<void>;
 }){
   const [draft,setDraft]=useState(photo);
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
   const [confirmDelete,setConfirmDelete]=useState(false);
+  const [newCelebrationId,setNewCelebrationId]=useState('');
+  const catalog=celebrationCatalog(settings);
+  const automatically=new Set(automaticCelebrationIds(draft.takenOn,settings));
+  const associated=catalog.filter(c=>automatically.has(c.id)||(draft.celebrationIncludeIds||[]).includes(c.id)||(draft.celebrationExcludeIds||[]).includes(c.id));
+  const unassociated=catalog.filter(c=>!associated.some(x=>x.id===c.id));
   async function deleteConfirmed(){
     setError('');setBusy(true);
     try{await onDelete(photo.id);onClose();}
@@ -247,6 +253,35 @@ export function PhotoDialog({photo,memories,subjects,onClose,onSave,onDelete}:{
         <div className="field"><span>Personas y mascotas</span>
           <div className="chips">{subjects.length?subjects.map(s=><button key={s.id} type="button" className={'chip '+(draft.subjectIds.includes(s.id)?'selected':'')} onClick={()=>setDraft(v=>({...v,subjectIds:v.subjectIds.includes(s.id)?v.subjectIds.filter(id=>id!==s.id):[...v.subjectIds,s.id]}))}>{s.kind==='animal'?'🐾':'♡'} {s.name}</button>):<small>Añade personas o mascotas desde su sección.</small>}</div>
         </div>
+        <section className="celebration-associations" aria-label="Celebraciones de la fotografía">
+          <div className="celebration-associations-title">
+            <strong>Celebraciones y fechas especiales</strong>
+            <small>Por fecha aparecen automáticamente. Puedes incluir anticipadas o excluir coincidencias sin afectar a viajes y recuerdos.</small>
+          </div>
+          {associated.length?<div className="celebration-editor-rows">{associated.map(c=>{
+            const mode=(draft.celebrationExcludeIds||[]).includes(c.id)?'exclude':
+              (draft.celebrationIncludeIds||[]).includes(c.id)?'include':'auto';
+            return <label className="celebration-editor-row" key={c.id}>
+              <span><strong>{c.title}</strong><small>{automatically.has(c.id)?'Coincide con la fecha':'Asociación manual'}</small></span>
+              <select aria-label={'Asociación de '+c.title} value={mode} onChange={e=>setDraft(v=>overrideCelebration(v,c.id,e.target.value as 'auto'|'include'|'exclude'))}>
+                <option value="auto">{automatically.has(c.id)?'Automática por fecha':'Sin asociación'}</option>
+                <option value="include">Incluir manualmente</option>
+                <option value="exclude">Excluir de la celebración</option>
+              </select>
+            </label>;
+          })}</div>:<p className="helper-text">No hay celebraciones automáticas para esta fecha.</p>}
+          {unassociated.length>0&&<div className="celebration-add-row">
+            <select value={newCelebrationId} aria-label="Elegir celebración" onChange={e=>setNewCelebrationId(e.target.value)}>
+              <option value="">Elegir otra celebración</option>
+              {unassociated.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
+            </select>
+            <button type="button" className="btn subtle" disabled={!newCelebrationId} onClick={()=>{
+              if(!newCelebrationId)return;
+              setDraft(v=>overrideCelebration(v,newCelebrationId,'include'));
+              setNewCelebrationId('');
+            }}>Añadir</button>
+          </div>}
+        </section>
         <button type="button" className={'favorite-toggle '+(draft.favorite?'on':'')} onClick={()=>setDraft(v=>({...v,favorite:!v.favorite}))}><Heart size={20} fill={draft.favorite?'currentColor':'none'}/>{draft.favorite?'Favorita':'Marcar como favorita'}</button>
         {error&&<p className="form-errors">{error}</p>}
         {confirmDelete&&<div className="delete-confirmation" role="alertdialog" aria-label="Confirmar eliminación de fotografía">

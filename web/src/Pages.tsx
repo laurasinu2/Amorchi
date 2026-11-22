@@ -8,6 +8,7 @@ import { PhotoView } from './components/PhotoView';
 import { WorldMap } from './components/WorldMap';
 import { CoverMenu } from './components/CoverPicker';
 import { SpecialDatesSettings } from './components/SpecialDatesSettings';
+import { CelebrationGallery } from './components/CelebrationGallery';
 export { Dashboard, YearsPage } from './OverviewPages';
 export { CalendarPage } from './CalendarRedesign';
 export type { CalendarMode } from './CalendarRedesign';
@@ -83,13 +84,10 @@ export function MemoryDetail({memory,memories,photos,subjects,settings,onViewPho
   </div>;
 }
 
-export function AlbumPage({photos,onView,filterFavorites=false}:{photos:Photo[];onView:(id:string)=>void;filterFavorites?:boolean}){
-  const shown=orderPhotos(photos.filter(p=>!filterFavorites||p.favorite));
-  const groups=new Map<string,Photo[]>();
-  for(const photo of shown){const arr=groups.get(photo.takenOn)||[];arr.push(photo);groups.set(photo.takenOn,arr);}
-  return <div className="page-stack"><div className="page-intro"><span className="eyebrow">BIBLIOTECA FOTOGRÁFICA</span><h1>{filterFavorites?'Fotografías favoritas':'Todas nuestras fotografías'}</h1><p>{shown.length} fotografías · agrupadas por día</p></div>
-    {shown.length?[...groups.entries()].map(([date,list])=><section className="panel photo-day-section" key={date}><SectionTitle title={dateLabel(date)}/><PhotoGrid photos={list} onView={onView}/></section>):<EmptyState title={filterFavorites?'Sin favoritas todavía':'No hay fotografías aún'} description="Importa fotografías o marca alguna como favorita para verla aquí."/>}
-  </div>;
+export function AlbumPage({photos,memories,settings,onView,filterFavorites=false}:{
+  photos:Photo[];memories:Memory[];settings:AppSettings;onView:(id:string)=>void;filterFavorites?:boolean;
+}){
+  return <CelebrationGallery photos={photos} memories={memories} settings={settings} onView={onView} onlyFavorites={filterFavorites}/>;
 }
 
 export function PlacesPage({memories,onOpen}:{memories:Memory[];onOpen:(id:string)=>void}){

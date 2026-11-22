@@ -169,8 +169,8 @@ export default function App(){
           {page==='memoria'&&(selectedMemory?<MemoryDetail memory={selectedMemory} memories={memories} photos={photos} subjects={subjects} settings={settings} onChangeCover={()=>setCoverTarget({memoryId:selectedMemory.id})} onDelete={()=>setMemoryToDeleteId(selectedMemory.id)} onViewPhoto={setSelectedPhotoId} onEdit={()=>{setEditMemory(selectedMemory);setMemoryOpen(true);}} onOpenMemory={openMemory}/>:<EmptyState title="Recuerdo no encontrado" description="Vuelve a tus recuerdos desde el menú." onAction={()=>navigate('recuerdos')} action="Ver recuerdos"/>)}
           {page==='lugares'&&<PlacesPage memories={memories} onOpen={openMemory}/>}
           {page==='personas'&&<PeoplePage subjects={subjects} photos={photos} onCreate={()=>setSubjectOpen(true)} onView={setSelectedPhotoId}/>}
-          {page==='album'&&<AlbumPage photos={photos} onView={setSelectedPhotoId}/>}
-          {page==='favoritos'&&<AlbumPage photos={photos} onView={setSelectedPhotoId} filterFavorites/>}
+          {page==='album'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={setSelectedPhotoId}/>}
+          {page==='favoritos'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={setSelectedPhotoId} filterFavorites/>}
           {page==='buscar'&&<SearchPage photos={photos} memories={memories} onView={setSelectedPhotoId} onOpen={openMemory}/>}
           {page==='ajustes'&&<SettingsPage pending={pending} settings={settings} onSaveSettings={commitSettings}/>}
           {page==='colecciones'&&<CollectionsPage collections={collections} photos={photos} onView={setSelectedPhotoId} onCreate={day=>setCollectionDate(day)}/>}
@@ -189,6 +189,6 @@ export default function App(){
     {memoryOpen&&<MemoryDialog initial={editMemory} initialDate={memoryDate} defaultKind={newKind} onClose={()=>{setMemoryOpen(false);setMemoryDate(undefined);}} onSave={commitMemory}/>}
     {collectionDate&&<AddToCollectionDialog date={collectionDate} photos={photos} collections={collections} onClose={()=>setCollectionDate(undefined)} onSave={commitCollection}/>}
     {subjectOpen&&<SubjectDialog onClose={()=>setSubjectOpen(false)} onSave={commitSubject}/>}
-    {selectedPhoto&&<PhotoDialog photo={selectedPhoto} memories={memories} subjects={subjects} onClose={()=>setSelectedPhotoId(undefined)} onSave={commitPhoto} onDelete={commitDeletePhoto}/>}
+    {selectedPhoto&&<PhotoDialog photo={selectedPhoto} memories={memories} subjects={subjects} settings={settings} onClose={()=>setSelectedPhotoId(undefined)} onSave={commitPhoto} onDelete={commitDeletePhoto}/>}
   </div>;
 }
