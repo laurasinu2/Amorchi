@@ -3,6 +3,7 @@ import { ArrowLeft, CalendarDays, Check, ChevronLeft, ChevronRight, Download, Ed
 import type { AppSettings, Memory, Photo, Subject } from './types';
 import { dateLabel, kindName } from './dates';
 import { getPhotoAsset } from './db';
+import { relatedMemories, relatedPhotos } from './photoRelations';
 import { PhotoView } from './components/PhotoView';
 
 type Move={x:number;y:number};
@@ -72,9 +73,6 @@ function Avatar({subject,settings}:{
   </div>;
 }
 
-const ordered=(photos:Photo[])=>[...photos].sort((a,b)=>a.takenOn.localeCompare(b.takenOn)||
-  (a.takenTime||'').localeCompare(b.takenTime||'')||a.createdAt.localeCompare(b.createdAt));
-
 export function PhotoDetailPage({photo,photos,memories,subjects,settings,onBack,onSelect,onSave,onEdit,onOpenMemory,onOpenDay,onCreateSubject,onDelete}:{
   photo:Photo;photos:Photo[];memories:Memory[];subjects:Subject[];settings:AppSettings;
   onBack:()=>void;onSelect:(id:string)=>void;onSave:(photo:Photo)=>Promise<void>;onEdit:()=>void;
@@ -113,17 +111,11 @@ export function PhotoDetailPage({photo,photos,memories,subjects,settings,onBack,
     return ()=>document.removeEventListener('pointerdown',outside);
   },[more,peoplePicker]);
 
-  const group=useMemo(()=>{
-    const ids=new Set(photo.memoryIds);
-    const matching=photos.filter(p=>p.id===photo.id||p.takenOn===photo.takenOn||p.memoryIds.some(id=>ids.has(id)));
-    return ordered(matching);
-  },[photo,photos]);
+  const group=useMemo(()=>relatedPhotos(photo,photos),[photo,photos]);
   const currentIndex=Math.max(0,group.findIndex(p=>p.id===photo.id));
   const stripStart=Math.max(0,Math.min(currentIndex-4,Math.max(0,group.length-9)));
   const strip=group.slice(stripStart,stripStart+9);
-  const linkedMemories=useMemo(()=>memories
-    .filter(m=>photo.memoryIds.includes(m.id)||(m.startDate<=photo.takenOn&&m.endDate>=photo.takenOn))
-    .sort((a,b)=>Number(photo.memoryIds.includes(b.id))-Number(photo.memoryIds.includes(a.id))||a.title.localeCompare(b.title,'es')),[memories,photo]);
+  const linkedMemories=useMemo(()=>relatedMemories(photo,memories),[photo,memories]);
   const selectedSubjects=subjects.filter(s=>photo.subjectIds.includes(s.id));
   const place=photo.place.trim()||(photo.latitude!==undefined&&photo.longitude!==undefined?photo.latitude.toFixed(5)+', '+photo.longitude.toFixed(5):'Sin ubicación');
   function reset(){setZoom(1);setMove({x:0,y:0});}
