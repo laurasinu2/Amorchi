@@ -6,7 +6,7 @@ import { getLocalUsage, requestPersistence } from './db';
 import { CalendarGrid } from './components/CalendarGrid';
 import { PhotoView } from './components/PhotoView';
 import { WorldMap } from './components/WorldMap';
-import { CoverMenu } from './components/CoverPicker';
+import { CoverMenu, CoverPicker } from './components/CoverPicker';
 import { SpecialDatesSettings } from './components/SpecialDatesSettings';
 import { CelebrationGallery } from './components/CelebrationGallery';
 export { Dashboard, YearsPage } from './OverviewPages';
