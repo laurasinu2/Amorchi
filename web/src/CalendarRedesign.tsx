@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, CalendarDays, Camera, ChevronDown, ChevronLeft, ChevronRight, FolderPlus, Heart, Image as ImageIcon, MapPin, Plane, Plus } from 'lucide-react';
+import { ArrowRight, Camera, ChevronDown, ChevronLeft, ChevronRight, FolderPlus, Heart, Image as ImageIcon, MapPin, Plane, Plus } from 'lucide-react';
 import type { AppSettings, Memory, Photo } from './types';
 import { dateLabel, kindName, localISO, monthLabel } from './dates';
 import { holidaysOn } from './traditionalDates';

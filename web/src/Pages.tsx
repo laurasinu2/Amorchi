@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, CalendarDays, Camera, CloudUpload, HardDrive, Heart, MapPin, PawPrint, Plus, Search, ShieldCheck, Star, Trash2, Users } from 'lucide-react';
-import type { AppSettings, Memory, Page, Photo, Subject } from './types';
+import type { AppSettings, Memory, Photo, Subject } from './types';
 import { dateLabel, kindName } from './dates';
 import { getLocalUsage, requestPersistence } from './db';
 import { CalendarGrid } from './components/CalendarGrid';
