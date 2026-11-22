@@ -85,3 +85,13 @@ Las posiciones elegidas de portada (`CoverPosition {x,y}`, porcentajes 0-100) qu
 La tienda `collections` conserva `PhotoCollection {id,title,photoIds,createdAt}`. `AddToCollectionDialog` permite crear una colección o añadir las fotografías de una fecha a una existente. Se evita la duplicación de IDs y de los blobs. Al eliminar una fotografía se eliminan sus referencias de colecciones en la misma transacción. Las modificaciones generan operaciones de entidad `collection` en la cola offline; la API y el esquema de servidor para colecciones quedan pendientes.
 
 **Resumen anual** es una tarjeta de diseño marcada «Próximamente», sin lógica ni generación de resúmenes. No confundir el resumen básico de estadísticas por año con una futura función de selección de destacados.
+
+## Modelo de celebraciones recurrentes y excepciones
+
+El catálogo es una **entidad lógica independiente** de `Memory` y `Photo`: `celebrationCatalog(settings)` presenta las categorías por ID estable, `automaticCelebrationIds(date,settings)` calcula las coincidencias por fecha, y `photoCelebrations(photo,settings)` combina las reglas con las excepciones manuales. No se almacena una fila por foto/fecha/año para celebraciones automáticas; eso evita duplicaciones y permite que una foto antigua aparezca en el filtro por Navidades inmediatamente.
+
+Los IDs de las celebraciones están en `web/src/celebrations.ts`, sin depender del texto que se ve en pantalla. La temporada de Navidades se indexa por el año de inicio (por ejemplo `2025` = **Navidades 2025–2026**). Para cumpleaños se usan identificadores `birthday:me`, `birthday:partner` y `birthday:<id>`. Los eventos y viajes siguen asociándose mediante `Photo.memoryIds[]`. No existe límite de un único vínculo.
+
+Las asociaciones manuales son dos atributos opcionales de `Photo`: `celebrationIncludeIds?:string[]` y `celebrationExcludeIds?:string[]`. Se actualizan de forma inmutable desde el editor de foto y se persisten mediante la operación habitual `savePhoto`, que mantiene la cola local. `photoCelebrations` resuelve las exclusiones con prioridad sobre la coincidencia automática. Un cambio de fecha recalcula automáticamente las celebraciones pero no borra las decisiones manuales.
+
+**Pendiente para el futuro servidor:** exponer el catálogo/versionado de reglas y sincronizar esas listas de excepciones junto con fotos, preferencias de fechas y colecciones. No se ha ejecutado migración PostgreSQL ni traslado de fotografías en esta iteración.

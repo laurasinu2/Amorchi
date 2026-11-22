@@ -105,3 +105,16 @@ Los dos archivos PNG proporcionados por el usuario tienen tamaños originales de
 - `memrly-horizontal.png`: logotipo alargado con el icono cuadrado y «Memrly».
 
 La interfaz prioriza esos PNG y recurre a los anteriores si aún no están presentes. **Los PNG originales de este mensaje todavía no forman parte de GitHub**: la transferencia de archivos binarios desde el adjunto de ChatGPT falló en esta sesión. Para completar la instalación, copia estos dos PNG al directorio anterior y confirma su subida a la rama de desarrollo. Después actualiza en `web/vite.config.ts` el icono PWA del manifest y en `web/index.html` el favicon, que conservan el icono antiguo por seguridad hasta disponer del nuevo archivo. No borrar los anteriores antes de comprobar la actualización.
+
+## Celebraciones recurrentes, vínculos múltiples y filtros (2026-11-22)
+
+- Las **celebraciones** se definen en `web/src/celebrations.ts`: reglas anuales fijas (Navidad, Sant Esteve, Fin de Año, Reyes, Santos Inocentes, Halloween, Sant Jordi, Sant Joan, Diada) y móviles (Carnaval, Semana Santa y Pascua, mediante Domingo de Pascua). La temporada **Navidades** cubre el 24 de diciembre al 6 de enero del año siguiente.
+- Las fechas personalizadas de cumpleaños y aniversario proceden de Ajustes, sin crear eventos duplicados cada año. Los nombres y las fechas se actualizan automáticamente cuando cambian los Ajustes.
+- La asociación automática se calcula desde `Photo.takenOn`, normalmente obtenida de EXIF. **No se duplica la imagen**: una misma foto puede estar asociada a Navidades, Navidad, un viaje y un momento al mismo tiempo.
+- En la ficha de foto se puede **incluir manualmente** una celebración, o **excluir** una asignación automática, o devolverla al comportamiento «Según fecha». Estas dos listas (`celebrationIncludeIds` y `celebrationExcludeIds`) son opcionales en cada `Photo` y se guardan en IndexedDB mediante `savePhoto`.
+- **Álbum y Favoritos** ahora tienen filtros combinables de celebración, temporada/año, viaje/recuerdo/evento y búsqueda textual. Por ejemplo, «Navidades 2025–2026» más «Viaje a Andorra». No cambia las asociaciones originales ni el contenido de `memoryIds`.
+- Se consideran **temporadas** los rangos que agrupan varias fechas; «Navidad» es específicamente el 25 de diciembre. «Puente de diciembre» se utiliza como categoría de archivo personal, **no implica que cada fecha sea festivo laboral**.
+- Al editar la fecha de una foto, la asociación automática se recalcula desde la nueva fecha civil; las inclusiones/exclusiones manuales se conservan. Las celebraciones de fotografías antiguas aparecen automáticamente sin migración ni procesado masivo.
+- Las nuevas relaciones viven en el navegador, todavía **no se sincronizan con servidor**. No elimines los datos del navegador ni presupongas que existe copia de seguridad remota.
+- El calendario muestra las celebraciones del día seleccionado y los contornos de viaje/evento y día seleccionado usan ahora **3 px** en la vista mensual (2 px en minimapas).
+
