@@ -4,6 +4,7 @@ import { registerSW } from 'virtual:pwa-register';
 import App from './App';
 import 'leaflet/dist/leaflet.css';
 import './styles.css';
+import './memrly-redesign.css';
 
 registerSW({ immediate: true });
 ReactDOM.createRoot(document.getElementById('root')!).render(
