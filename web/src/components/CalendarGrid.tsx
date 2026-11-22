@@ -51,18 +51,22 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
             {holiday&&<span className={'holiday-symbol holiday-symbol-'+holiday.theme} aria-hidden="true">{holiday.theme==='christmas'?'✶':holiday.theme==='carnival'?'🎭':holiday.theme==='pranks'?'🤭':holiday.theme==='autumn'?'🍂':holiday.theme==='spring'?'✿':holiday.theme==='bridge'?'↔':holiday.theme==='summer'?'☀':'★'}</span>}
           </button>;
         })}
-        {spans.map((m,i)=>{
-          const begin=m.startDate<=week[0]?0:week.indexOf(m.startDate);
-          const finish=m.endDate>=week[6]?6:week.indexOf(m.endDate);
-          if(begin<0||finish<begin)return null;
-          return <div key={m.id} className={'memrly-range memrly-range-'+m.kind} style={{
-            gridColumn:`${begin+1} / span ${finish-begin+1}`,
-            gridRow:1,margin:`${2+i*4}px`,
-            zIndex:3+i
-          }} title={category(m)+': '+m.title}>
-            <span className="memrly-range-label">{category(m)}: {m.title}</span>
-          </div>;
-        })}
+        {/* Las franjas están fuera del flujo de las 7 celdas: no generan filas implícitas. */}
+        {spans.length>0&&<div className="memrly-week-ranges" aria-hidden="true">
+          {spans.map((m,i)=>{
+            const begin=m.startDate<=week[0]?0:week.indexOf(m.startDate);
+            const finish=m.endDate>=week[6]?6:week.indexOf(m.endDate);
+            if(begin<0||finish<begin)return null;
+            return <div key={m.id} className={'memrly-range memrly-range-'+m.kind} style={{
+              gridColumn:`${begin+1} / span ${finish-begin+1}`,
+              gridRow:1,
+              inset:`${2+i*4}px`,
+              zIndex:3+i
+            }} title={category(m)+': '+m.title}>
+              <span className="memrly-range-label">{category(m)}: {m.title}</span>
+            </div>;
+          })}
+        </div>}
       </div>;
     })}
   </div>;
