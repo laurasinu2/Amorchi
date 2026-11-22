@@ -687,3 +687,49 @@ h1,h2,h3,h4,p,small{color:inherit}
   .memrly-calendar-grid .memrly-week-ranges{gap:3px}
   .memrly-calendar-grid .memrly-range-label{font-size:.44rem;padding:1px 2px;max-width:calc(100% - 3px)}
 }
+
+/* 2026-11-22: el borde de viaje, recuerdo o evento es exactamente el mismo
+   que el del día seleccionado. Nada puede sobresalir de la celda. */
+.memrly-calendar-grid .calendar-day:is(.selected,.memrly-in-range){
+  outline:2px solid var(--memrly-navy);
+  outline-offset:-2px;
+  border-radius:9px;
+  box-shadow:none;
+}
+.memrly-calendar-grid .calendar-day:is(.selected,.memrly-in-range).holiday-border{
+  border-color:var(--memrly-navy);
+  outline-offset:-2px;
+}
+.memrly-calendar-grid .calendar-day.memrly-in-range .day-number{
+  background:var(--memrly-navy);
+  color:white;
+}
+.memrly-calendar-grid .calendar-day .memrly-day-event-tag{
+  position:absolute;
+  z-index:8;
+  bottom:3px;
+  right:3px;
+  display:block;
+  width:max-content;
+  max-width:calc(100% - 6px);
+  padding:3px 5px;
+  border-radius:5px;
+  background:var(--memrly-navy);
+  color:white;
+  font-size:clamp(.5rem,.67vw,.65rem);
+  font-weight:700;
+  line-height:1.1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  pointer-events:none;
+}
+.memrly-calendar-grid.compact .calendar-day:is(.selected,.memrly-in-range){
+  outline-width:1px;
+  outline-offset:-1px;
+  border-radius:5px;
+}
+@media(max-width:760px){
+  .memrly-calendar-grid .calendar-day:is(.selected,.memrly-in-range){border-radius:7px}
+  .memrly-calendar-grid .calendar-day .memrly-day-event-tag{font-size:.49rem;padding:2px 3px}
+}
