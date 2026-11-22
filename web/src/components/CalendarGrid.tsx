@@ -3,14 +3,15 @@ import { covers, dateLabel, monthWeeks } from '../dates';
 import { PhotoView } from './PhotoView';
 import { occasionsOn } from '../specialDates';
 import { holidaysOn } from '../traditionalDates';
+import { calendarSegments } from '../calendarSegments';
 
 const weekdays=['L','M','X','J','V','S','D'];
 const category=(m:Memory)=>m.kind==='trip'?'Viaje':m.kind==='event'?'Evento':'Recuerdo';
 
 /**
- * Cada día de un intervalo tiene exactamente el mismo marco que un día seleccionado.
- * No utilizamos elementos extra en el CSS grid: evita que un viaje largo cambie las
- * filas o que el contorno sobresalga por debajo del calendario.
+ * Cada viaje, evento o momento tiene UN marco exterior por tramo semanal.
+ * Los marcos se dibujan en una capa absoluta sobre las siete celdas
+ * (sin generar filas extra). La selección del día se dibuja por encima.
  */
 export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=false,selectedDay}:{
   year:number;month:number;photos:Photo[];memories:Memory[];settings:AppSettings;
@@ -24,15 +25,19 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
   return <div className={'calendar-grid memrly-calendar-grid '+(compact?'compact':'')}>
     <div className="week-names">{weekdays.map((name,i)=><span key={i}>{name}</span>)}</div>
     {weeks.map((week,index)=>{
-      const spans=memories.filter(m=>m.startDate<=week[6]&&m.endDate>=week[0])
-        .sort((a,b)=>a.kind===b.kind?a.startDate.localeCompare(b.startDate):a.kind==='trip'?-1:b.kind==='trip'?1:a.kind==='event'?-1:1);
+      const spans=memories
+        .filter(m=>m.startDate<=week[6]&&m.endDate>=week[0])
+        .sort((a,b)=>a.kind===b.kind?a.startDate.localeCompare(b.startDate):a.kind==='trip'?-1:b.kind==='trip'?1:a.kind==='event'?-1:1)
+        .map(memory=>({memory,segment:calendarSegments(memory.startDate,memory.endDate,year,month).find(part=>part.week===index)}))
+        .filter((item):item is {memory:Memory;segment:{week:number;startColumn:number;endColumn:number}}=>Boolean(item.segment))
+        .slice(0,compact?1:3);
       // Etiqueta breve al final del tramo visible de cada semana.
       const tagByDay=new Map<string,Memory>();
       if(!compact){
         const visible=week.filter(day=>Number(day.slice(5,7))===month+1);
         const firstVisible=visible[0],lastVisible=visible.at(-1);
         if(firstVisible&&lastVisible){
-          for(const m of spans){
+          for(const {memory:m} of spans){
             const finalDay=m.endDate<lastVisible?m.endDate:lastVisible;
             if(finalDay>=firstVisible&&!tagByDay.has(finalDay))tagByDay.set(finalDay,m);
           }
@@ -63,6 +68,19 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
             {tagByDay.has(day)&&<span className="memrly-day-event-tag" aria-hidden="true">{category(tagByDay.get(day)!)}: {tagByDay.get(day)!.title}</span>}
           </button>;
         })}
+        {spans.length>0&&<div className="memrly-week-ranges" aria-hidden="true">
+          {spans.map(({memory,segment},i)=><div
+            key={memory.id}
+            className={'memrly-range memrly-range-'+memory.kind}
+            title={category(memory)+': '+memory.title}
+            style={{
+              gridColumn:`${segment.startColumn+1} / ${segment.endColumn+2}`,
+              gridRow:1,
+              // Recuadros concéntricos solo si hay recuerdos solapados.
+              margin:`${1+i*3}px`,
+            }}
+          />)}
+        </div>}
       </div>;
     })}
   </div>;
