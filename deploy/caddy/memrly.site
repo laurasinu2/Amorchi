@@ -1,0 +1,14 @@
+# EXTRA Caddy site block. Do not replace or change GeoCauce's existing block.
+# Both domain names share HTTPS/443 via Caddy SNI/Host matching.
+# Prerequisites: memrly.duckdns.org A -> VPS, GeoCauce Caddy web and
+# Memrly frontend on the dedicated memrly-edge Docker network.
+memrly.duckdns.org {
+    encode zstd gzip
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        Strict-Transport-Security "max-age=31536000"
+    }
+    reverse_proxy memrly-web:8080
+}

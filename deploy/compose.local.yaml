@@ -1,0 +1,5 @@
+# Local-only override: bind a test HTTP port to loopback, never publish publicly.
+services:
+  web:
+    ports:
+      - "127.0.0.1:18080:8080"
