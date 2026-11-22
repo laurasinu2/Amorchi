@@ -8,9 +8,9 @@ const weekdays=['L','M','X','J','V','S','D'];
 const category=(m:Memory)=>m.kind==='trip'?'Viaje':m.kind==='event'?'Evento':'Recuerdo';
 
 /**
- * Rangos de varios días dibujados como una sola caja continua por semana.
- * Si cruzan al lunes siguiente, se conectan visualmente mediante otra caja.
- * Los números de los días incluidos llevan su propio resaltado.
+ * Cada día de un intervalo tiene exactamente el mismo marco que un día seleccionado.
+ * No utilizamos elementos extra en el CSS grid: evita que un viaje largo cambie las
+ * filas o que el contorno sobresalga por debajo del calendario.
  */
 export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=false,selectedDay}:{
   year:number;month:number;photos:Photo[];memories:Memory[];settings:AppSettings;
@@ -26,15 +26,15 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
     {weeks.map((week,index)=>{
       const spans=memories.filter(m=>m.startDate<=week[6]&&m.endDate>=week[0])
         .sort((a,b)=>a.kind===b.kind?a.startDate.localeCompare(b.startDate):a.kind==='trip'?-1:b.kind==='trip'?1:a.kind==='event'?-1:1);
-      // Colocamos el nombre al final del tramo visible de esta semana.
-      // No se crea ninguna capa superpuesta que pueda alterar el tamaño de los días.
+      // Etiqueta breve al final del tramo visible de cada semana.
       const tagByDay=new Map<string,Memory>();
       if(!compact){
-        const lastVisible=week.filter(day=>Number(day.slice(5,7))===month+1).at(-1);
-        if(lastVisible){
+        const visible=week.filter(day=>Number(day.slice(5,7))===month+1);
+        const firstVisible=visible[0],lastVisible=visible.at(-1);
+        if(firstVisible&&lastVisible){
           for(const m of spans){
             const finalDay=m.endDate<lastVisible?m.endDate:lastVisible;
-            if(!tagByDay.has(finalDay))tagByDay.set(finalDay,m);
+            if(finalDay>=firstVisible&&!tagByDay.has(finalDay))tagByDay.set(finalDay,m);
           }
         }
       }
@@ -63,9 +63,6 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
             {tagByDay.has(day)&&<span className="memrly-day-event-tag" aria-hidden="true">{category(tagByDay.get(day)!)}: {tagByDay.get(day)!.title}</span>}
           </button>;
         })}
-      </div>;
-          })}
-        </div>}
       </div>;
     })}
   </div>;
