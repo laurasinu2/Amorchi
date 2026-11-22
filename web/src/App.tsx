@@ -143,7 +143,7 @@ export default function App(){
   const selectedMemory=memories.find(m=>m.id===selectedMemoryId);
   const selectedPhoto=photos.find(p=>p.id===selectedPhotoId);
   const mainTitle=({inicio:'Inicio',anios:'Nuestros años',calendario:'Calendario',dia:'Calendario',viajes:'Viajes',recuerdos:'Recuerdos',lugares:'Mapa de recuerdos',personas:'Personas y mascotas',colecciones:'Colecciones',album:'Galería',buscar:'Buscar',favoritos:'Favoritos',papelera:'Papelera',ajustes:'Ajustes',memoria:selectedMemory?.title||'Recuerdo'} as Record<Page,string>)[page];
-  return <div className="app-shell">
+  return <div className={'app-shell page-'+page}>
     <aside className={'sidebar '+(menu?'mobile-open':'')}>
       <div className="sidebar-logo"><img className="sidebar-app-icon" src="/brand/recuerdos-app.webp" alt="" /><div><strong>Recuerdos</strong><small>ÁLBUM AMORCHI</small></div></div>
       <nav className="sidebar-nav" aria-label="Navegación principal">

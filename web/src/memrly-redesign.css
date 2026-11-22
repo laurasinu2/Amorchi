@@ -375,3 +375,315 @@ h1,h2,h3,h4,p,small{color:inherit}
   .memrly-year-metrics .memrly-stat{flex-direction:row;text-align:left;gap:3px}
   .memrly-year-metrics .memrly-stat-icon{width:14px;height:14px}
 }
+
+/* 2026-11-22: Corrección de la cuadrícula mensual.
+ * Los contornos de intervalos son overlays absolutos, nunca items de grid:
+ * no pueden desplazar 7 días a una nueva fila ni aumentar la altura semanal.
+ */
+.memrly-calendar-grid .calendar-week{position:relative;isolation:isolate}
+.memrly-calendar-grid .memrly-week-ranges{
+  position:absolute;
+  inset:0;
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  grid-template-rows:minmax(0,1fr);
+  gap:5px;
+  align-items:stretch;
+  pointer-events:none;
+  z-index:4;
+  min-height:0;
+  overflow:visible;
+}
+.memrly-calendar-grid .memrly-week-ranges>.memrly-range{
+  position:relative;
+  width:auto;
+  height:auto;
+  min-width:0;
+  min-height:0;
+  align-self:stretch;
+  margin:2px;
+  border-radius:8px;
+  box-sizing:border-box;
+  pointer-events:none;
+  overflow:hidden;
+}
+.memrly-calendar-grid.compact .memrly-week-ranges{gap:2px}
+.memrly-calendar-grid.compact .memrly-week-ranges>.memrly-range{
+  border-width:1px;
+  margin:1px!important;
+  border-radius:4px;
+}
+.memrly-calendar-grid .memrly-range-label{
+  position:absolute;
+  max-width:calc(100% - 5px);
+  bottom:2px;
+  right:2px;
+  z-index:2;
+  font-size:clamp(.48rem,.65vw,.66rem);
+  padding:3px 5px;
+}
+.memrly-calendar-grid .memrly-calendar-day .day-number{position:relative}
+.memrly-mini-month .memrly-week-ranges>.memrly-range{margin:1px!important}
+
+/* Calendario: el título queda en la columna izquierda y el panel de
+ * resumen comienza a su misma altura, al borde superior de la página. */
+.memrly-calendar-workspace{align-items:start}
+.memrly-calendar-left{
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  align-content:start;
+  gap:15px;
+  min-width:0;
+}
+.memrly-calendar-left>.memrly-screen-intro{min-width:0}
+.memrly-calendar-side{align-self:start}
+.memrly-date-jump-wrap{z-index:10}
+.memrly-jump-popover{z-index:100}
+.memrly-jump-popover select{cursor:pointer}
+.memrly-date-jump{text-transform:none}
+.memrly-date-jump:first-letter{text-transform:uppercase}
+
+/* Inicio y Años deben caber en una pantalla de escritorio: el contenedor
+ * mantiene exactamente el alto disponible bajo la barra superior.
+ * No se bloquea el scroll móvil porque ocultaría fotografías y controles. */
+@media(min-width:761px){
+  .app-shell.page-inicio,.app-shell.page-anios{
+    height:100dvh;
+    min-height:0;
+    overflow:hidden;
+  }
+  .app-shell.page-inicio>.app-content,
+  .app-shell.page-anios>.app-content{
+    display:flex;
+    flex-direction:column;
+    height:100%;
+    min-height:0;
+    min-width:0;
+    overflow:hidden;
+  }
+  .app-shell.page-inicio .topbar,
+  .app-shell.page-anios .topbar{flex:0 0 69px}
+  .app-shell.page-inicio .main-container,
+  .app-shell.page-anios .main-container{
+    width:100%;
+    flex:1 1 auto;
+    min-height:0;
+    min-width:0;
+    max-width:none;
+    padding:clamp(7px,1.2vh,15px) clamp(12px,1.8vw,27px);
+    overflow:hidden;
+  }
+  .app-shell.page-inicio .memrly-home,
+  .app-shell.page-anios .memrly-years{
+    height:100%;
+    min-height:0;
+    overflow:hidden;
+    gap:clamp(5px,.9vh,11px);
+  }
+
+  /* Fila 1 portada, 2 cifras, 3 acciones, 4 recientes, 5 destacados. */
+  .memrly-home{
+    grid-template-rows:
+      minmax(76px,1fr)
+      minmax(60px,.71fr)
+      minmax(55px,.61fr)
+      minmax(82px,1.03fr)
+      minmax(118px,1.46fr);
+  }
+  .memrly-home .memrly-home-cover{
+    height:100%!important;
+    min-height:0;
+    border-radius:14px;
+  }
+  .memrly-home .hero-content{padding:10px 45px 10px 18px}
+  .memrly-home .hero-copy h1{font-size:clamp(1.2rem,2.2vh,2rem)}
+  .memrly-home .hero-copy p{font-size:clamp(.65rem,1.25vh,.85rem)}
+  .memrly-home .memrly-stats-four,
+  .memrly-home .memrly-quick-two,
+  .memrly-home .memrly-feature-grid{height:100%;min-height:0}
+  .memrly-home .memrly-stat{
+    min-height:0;
+    height:100%;
+    padding:clamp(6px,1.1vh,14px) clamp(7px,1.1vw,15px);
+    border-radius:12px;
+  }
+  .memrly-home .memrly-stat-icon{height:clamp(19px,3.1vh,31px);width:clamp(19px,3.1vh,31px)}
+  .memrly-home .memrly-stat-info strong{font-size:clamp(1.12rem,2.8vh,1.8rem)}
+  .memrly-home .memrly-stat-info span{font-size:clamp(.64rem,1.2vh,.82rem)}
+  .memrly-home .memrly-quick-tile{
+    min-height:0;
+    height:100%;
+    padding:clamp(6px,1vh,12px) 11px;
+    gap:8px;
+    border-radius:12px;
+  }
+  .memrly-home .memrly-quick-tile>svg:first-child{height:20px;width:20px}
+  .memrly-home .memrly-quick-tile strong{font-size:clamp(.75rem,1.6vh,.95rem)}
+  .memrly-home .memrly-quick-tile small{font-size:clamp(.6rem,1.15vh,.75rem)}
+  .memrly-home .memrly-section,
+  .memrly-home .memrly-feature-section{
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+    align-content:stretch;
+    min-width:0;
+    min-height:0;
+    overflow:hidden;
+  }
+  .memrly-home .memrly-heading{margin-bottom:clamp(3px,.6vh,8px)}
+  .memrly-home .memrly-heading h2{font-size:clamp(.86rem,1.85vh,1.14rem)}
+  .memrly-home .memrly-recents{
+    min-width:0;
+    min-height:0;
+    height:100%;
+    align-items:center;
+    grid-template-rows:minmax(0,1fr);
+    overflow:hidden;
+  }
+  .memrly-home .memrly-recent-photo{
+    width:auto;
+    height:100%;
+    max-height:100%;
+    max-width:100%;
+    aspect-ratio:1;
+    min-height:0;
+    justify-self:center;
+  }
+  .memrly-home .memrly-feature-card{
+    min-height:0;
+    height:100%;
+    grid-template-columns:minmax(0,40%) minmax(0,60%);
+    overflow:hidden;
+    border-radius:13px;
+  }
+  .memrly-home .memrly-feature-image{
+    min-height:0;
+    min-width:0;
+    height:100%;
+    max-height:100%;
+    overflow:hidden;
+  }
+  .memrly-home .memrly-feature-info{
+    padding:clamp(5px,.9vh,11px) clamp(7px,.9vw,13px);
+    gap:clamp(2px,.5vh,6px);
+    min-height:0;
+    overflow:hidden;
+  }
+  .memrly-home .memrly-feature-info h3{
+    font-size:clamp(.84rem,1.9vh,1.18rem);
+    line-height:1.17;
+    overflow-wrap:anywhere;
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    line-clamp:2;
+    overflow:hidden;
+  }
+  .memrly-home .memrly-feature-info p{
+    font-size:clamp(.65rem,1.25vh,.78rem);
+    line-height:1.18;
+    -webkit-line-clamp:2;
+    line-clamp:2;
+  }
+  .memrly-home .memrly-type{padding:3px 6px;font-size:clamp(.59rem,1.15vh,.72rem)}
+  .memrly-home .memrly-link-button{
+    padding:5px 8px;
+    min-height:24px;
+    margin-top:auto;
+    font-size:clamp(.61rem,1.2vh,.77rem);
+  }
+  .memrly-home .memrly-feature-empty{min-height:0;height:100%}
+
+  /* Años: el resumen no puede forzar el alto de las dos tarjetas. */
+  .memrly-years{
+    grid-template-rows:auto minmax(0,1fr) minmax(72px,.25fr) minmax(94px,.34fr);
+  }
+  .memrly-years .memrly-screen-intro h1{font-size:clamp(1.35rem,2.5vh,1.9rem)}
+  .memrly-years .memrly-screen-intro p{font-size:clamp(.73rem,1.3vh,.9rem)}
+  .memrly-years .memrly-year-top,
+  .memrly-years .memrly-year-cards,
+  .memrly-years .memrly-year-card{min-height:0;height:100%}
+  .memrly-years .memrly-year-card{
+    grid-template-rows:minmax(0,1fr) auto auto;
+  }
+  .memrly-years .memrly-year-photo-wrap{
+    aspect-ratio:auto;
+    height:100%;
+    min-height:0;
+    position:relative;
+  }
+  .memrly-years .memrly-year-photo{height:100%;min-height:0}
+  .memrly-years .memrly-year-number{font-size:clamp(1.2rem,2.7vh,2rem);bottom:8px;left:12px}
+  .memrly-years .memrly-year-metrics{
+    padding:clamp(3px,.55vh,8px) 7px;
+    gap:2px;
+    min-height:0;
+  }
+  .memrly-years .memrly-year-metrics .memrly-stat{
+    min-height:0;
+    padding:2px 3px;
+    gap:4px;
+  }
+  .memrly-years .memrly-year-metrics .memrly-stat-info strong{
+    font-size:clamp(.94rem,2.1vh,1.3rem);
+  }
+  .memrly-years .memrly-year-metrics .memrly-stat-info span{font-size:clamp(.58rem,1.05vh,.7rem)}
+  .memrly-years .memrly-year-cta{
+    min-height:30px;
+    height:clamp(30px,4.1vh,38px);
+    margin:3px auto clamp(4px,.7vh,9px);
+    font-size:.76rem;
+  }
+  .memrly-years .memrly-year-summary{
+    min-height:0;
+    overflow:hidden;
+    padding:clamp(10px,1.35vh,18px);
+    gap:4px;
+  }
+  .memrly-years .memrly-year-summary .memrly-stat{
+    min-height:0;
+    padding:clamp(5px,.8vh,9px) 0;
+  }
+  .memrly-years .memrly-year-summary .memrly-stat-info strong{font-size:clamp(1.15rem,2.5vh,1.55rem)}
+  .memrly-years .memrly-panel{
+    min-height:0;
+    overflow:hidden;
+    padding:clamp(7px,1vh,13px) clamp(10px,1.4vw,17px);
+  }
+  .memrly-years .memrly-heading{margin-bottom:clamp(3px,.7vh,8px)}
+  .memrly-years .memrly-heading h2{font-size:clamp(.87rem,1.6vh,1.16rem)}
+  .memrly-years .memrly-timeline-panel,
+  .memrly-years .memrly-years-featured{
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+    align-content:stretch;
+  }
+  .memrly-years .memrly-timeline{min-height:0;height:100%;padding:5px 0;overflow-x:auto}
+  .memrly-years .memrly-timeline.expanded{overflow-y:auto;max-height:100%;align-content:start}
+  .memrly-years .memrly-timeline-year{height:clamp(26px,4vh,38px);min-width:72px;font-size:.77rem}
+  .memrly-years .memrly-featured-rows{height:100%;min-height:0;align-items:stretch;overflow:hidden}
+  .memrly-years .memrly-featured-small{height:100%;min-height:0;padding:5px;gap:7px}
+  .memrly-years .memrly-featured-thumb{width:clamp(39px,6vh,60px);height:clamp(39px,6vh,60px);flex-basis:clamp(39px,6vh,60px)}
+  .memrly-years .memrly-featured-small strong{font-size:clamp(.73rem,1.4vh,.86rem)}
+}
+
+/* En resoluciones de portátil el resumen general desaparece, como se pidió.
+ * Las dos tarjetas pasan a ocupar todo el ancho de la fila. */
+@media(min-width:761px) and (max-width:1350px){
+  .memrly-years .memrly-year-summary{display:none}
+  .memrly-years .memrly-year-top{grid-template-columns:minmax(0,1fr)}
+}
+@media(min-width:761px) and (max-height:640px){
+  .memrly-home{grid-template-rows:minmax(60px,.9fr) minmax(50px,.7fr) minmax(45px,.55fr) minmax(58px,.95fr) minmax(87px,1.3fr)}
+  .memrly-years{grid-template-rows:auto minmax(0,1fr) minmax(60px,.22fr) minmax(75px,.28fr)}
+  .memrly-years .memrly-screen-intro p{display:none}
+  .memrly-home .memrly-feature-info p{font-size:.64rem}
+}
+
+/* El contenido móvil sigue con scroll natural; las vistas son verticales. */
+@media(max-width:760px){
+  .memrly-calendar-left{gap:12px}
+  .memrly-calendar-main{min-width:0}
+  .memrly-calendar-side{grid-column:auto}
+  .memrly-calendar-grid .memrly-week-ranges{gap:3px}
+  .memrly-calendar-grid .memrly-range-label{font-size:.44rem;padding:1px 2px;max-width:calc(100% - 3px)}
+}
