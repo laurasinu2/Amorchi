@@ -95,3 +95,13 @@ Los iconos/logo actuales siguen como provisionales hasta recibir los nuevos arch
 - Cuando el ancho del escritorio es de 1350 px o menos, se oculta `Tu historia en Memrly` en Años y se da todo el ancho a las dos tarjetas.
 - En Calendario el título forma parte de la columna izquierda y la columna de resumen se alinea desde arriba. El selector del periodo permite escoger **año en una lista desplegable** y mes en otra lista en vista mensual; el rango de años incluye los años presentes en los recuerdos y fotografías.
 - Los ajustes CSS de esta iteración están al final de `web/src/memrly-redesign.css`. Esta modificación no migra ni elimina datos locales.
+
+
+## Nueva identidad Memrly (icono y logotipo)
+
+Los dos archivos PNG proporcionados por el usuario tienen tamaños originales de **1254×1254** (icono cuadrado) y **2048×682** (horizontal). Para instalarlos en `web/public/brand/`, conservar los siguientes nombres:
+
+- `memrly-app.png`: icono cuadrado de la persona con cámara, fondo azul marino.
+- `memrly-horizontal.png`: logotipo alargado con el icono cuadrado y «Memrly».
+
+La interfaz prioriza esos PNG y recurre a los anteriores si aún no están presentes. **Los PNG originales de este mensaje todavía no forman parte de GitHub**: la transferencia de archivos binarios desde el adjunto de ChatGPT falló en esta sesión. Para completar la instalación, copia estos dos PNG al directorio anterior y confirma su subida a la rama de desarrollo. Después actualiza en `web/vite.config.ts` el icono PWA del manifest y en `web/index.html` el favicon, que conservan el icono antiguo por seguridad hasta disponer del nuevo archivo. No borrar los anteriores antes de comprobar la actualización.

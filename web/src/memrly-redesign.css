@@ -733,3 +733,12 @@ h1,h2,h3,h4,p,small{color:inherit}
   .memrly-calendar-grid .calendar-day:is(.selected,.memrly-in-range){border-radius:7px}
   .memrly-calendar-grid .calendar-day .memrly-day-event-tag{font-size:.49rem;padding:2px 3px}
 }
+
+/* Identidad Memrly: se usarán los PNG originales del usuario cuando estén
+   presentes en /public/brand; mientras tanto se conserva el logo anterior. */
+.sidebar-app-icon{background:var(--memrly-navy);border-radius:12px}
+.sidebar-logo strong{font-family:Georgia,serif;letter-spacing:-.03em}
+.topbar-brand-image{max-width:min(24vw,235px);height:clamp(35px,4.4vh,49px);object-fit:contain}
+@media(max-width:760px){
+  .topbar-brand-image{max-width:130px;height:34px}
+}

@@ -9,13 +9,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'brand/recuerdos-horizontal.webp', 'brand/recuerdos-app.webp'],
       manifest: {
-        name: 'Recuerdos · Amorchi',
-        short_name: 'Recuerdos',
+        name: 'Memrly · Amorchi',
+        short_name: 'Memrly',
         description: 'Nuestra historia en fotografías',
         start_url: '/',
         display: 'standalone',
-        background_color: '#faf3ec',
-        theme_color: '#253343',
+        background_color: '#ffffff',
+        theme_color: '#102b49',
         icons: [
           { src: '/brand/recuerdos-app.webp', sizes: '192x192', type: 'image/webp', purpose: 'any' },
           { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }
