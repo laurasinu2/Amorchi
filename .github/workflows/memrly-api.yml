@@ -76,3 +76,13 @@ jobs:
             -f deploy/compose.yaml -f deploy/compose.local.yaml ps
           docker compose --env-file deploy/.env.example \
             -f deploy/compose.yaml -f deploy/compose.local.yaml logs --tail=100
+
+  caddy-bridge-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate safe Caddy recovery script syntax
+        run: bash -n deploy/scripts/ensure-caddy-routing.sh
+      - name: Validate service and timer format
+        run: |
+          systemd-analyze verify deploy/systemd/memrly-caddy-bridge.service deploy/systemd/memrly-caddy-bridge.timer

@@ -188,3 +188,88 @@ los puertos 80/443 ya existentes. No se abre 8443.
 La propia configuración de despliegue de Memrly no publica 80/443 ni 5432.
 Ninguna de estas instrucciones implica la ejecución de comandos en Contabo
 desde ChatGPT.
+
+## Paso adicional: conservación del dominio de Memrly tras actualizar GeoCauce
+
+**Importante:** el contenedor `geocauce-web-1` se recrea en cada despliegue
+mediante `docker compose up -d --build --wait`. El nuevo contenedor pierde la
+conexión manual a `memrly-edge` y carga su Caddyfile original; la integración
+temporal de Memrly desaparecería si no se recuperase.
+
+El mecanismo que se incorpora a **este repositorio Memrly**, pero que todavía
+**NO ESTÁ INSTALADO EN CONTABO**, consiste en:
+
+- `deploy/scripts/ensure-caddy-routing.sh --check`: verifica proyectos Docker,
+  salud HTTPS de GeoCauce, red Memrly, ubicación del Caddyfile y configuración
+  Caddy activa. **No escribe ni modifica nada**.
+- `deploy/scripts/ensure-caddy-routing.sh --apply`: solo cuando es necesario,
+  reconecta `geocauce-web-1` a `memrly-edge` y recupera el bloque de dominio
+  Memrly en el Caddy activo, usando el **Caddyfile de la versión actual** de
+  GeoCauce. Verifica que Memrly sea accesible desde Caddy, valida el candidato
+  con `caddy validate`, hace `caddy reload` **sin reiniciar el contenedor**,
+  y vuelve a comprobar HTTP 200 de GeoCauce. Si falla esta última prueba,
+  intenta volver a cargar el Caddyfile original de la misma versión.
+- `deploy/systemd/memrly-caddy-bridge.{service,timer}`: servicio opcional con
+  temporizador cada minuto para restablecer el dominio después de una
+  recreación. Cuando ambas redes y el dominio ya están correctos, no realiza
+  cambios. Si GeoCauce está detenido o no responde, aborta sin intervenir.
+
+### Instalación en Contabo, SOLO cuando se autorice y después de probar --check
+
+Primero, actualizar únicamente el repositorio Memrly:
+
+```bash
+cd /opt/memrly
+git fetch origin
+git pull --ff-only
+bash -n deploy/scripts/ensure-caddy-routing.sh
+bash deploy/scripts/ensure-caddy-routing.sh --check
+```
+
+**No activar todavía el temporizador.** Revisar primero el resultado y
+confirmar que ambos dominios siguen en HTTP 200.
+
+Una vez aprobado explícitamente el mecanismo persistente, instalar **solo
+unidades nuevas con nombre Memrly**:
+
+```bash
+install -m 0644 deploy/systemd/memrly-caddy-bridge.service /etc/systemd/system/
+install -m 0644 deploy/systemd/memrly-caddy-bridge.timer /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now memrly-caddy-bridge.timer
+systemctl status memrly-caddy-bridge.timer --no-pager
+```
+
+Ninguna unidad reemplaza servicios de GeoCauce. Los datos y volúmenes de
+GeoCauce no forman parte del procedimiento. **Sin embargo, este servicio
+actúa en el proxy compartido y cualquier recarga puede causar una
+interrupción breve. No se puede garantizar riesgo cero de disponibilidad.**
+
+Para desactivar la recuperación automática sin reiniciar GeoCauce:
+
+```bash
+systemctl disable --now memrly-caddy-bridge.timer
+```
+
+Para revertir la **ruta Memrly** en Caddy, solo si fuese necesario tras
+desactivar el temporizador y contando con el impacto en Memrly, ejecutar:
+
+```bash
+docker exec geocauce-web-1 caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
+```
+
+Este último comando devuelve la configuración del Caddyfile original de
+**la versión actual** de GeoCauce; no restaura un release antiguo. El backend
+y los datos de GeoCauce permanecen separados.
+
+### Límites y advertencias
+
+1. El script es deliberadamente conservador: requiere GeoCauce HTTP 200
+   antes de actuar. Si GeoCauce está desplegándose, espera al siguiente ciclo.
+2. No lee credenciales de GeoCauce ni ejecuta `docker compose` sobre él.
+3. Solo un acceso administrador a Docker (root) puede ejecutar el script:
+   no debe exponerse como endpoint REST.
+4. El certificado HTTPS continúa gestionado por Caddy en su volumen actual.
+5. Para un acoplamiento cero entre aplicaciones a largo plazo, la arquitectura
+   ideal es un proxy de entrada independiente de ambos proyectos. Eso requeriría
+   una migración separada y mayor intervención; **no se realiza aquí**.
