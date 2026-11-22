@@ -128,7 +128,7 @@ export async function saveSubject(subject:Subject){
  */
 export async function deletePhoto(photoId:string):Promise<void>{
   const db=await database;
-  const tx=db.transaction(['photos','assets','asset_sizes','operations','memories','settings','collections'],'readwrite');
+  const tx=db.transaction(['photos','assets','asset_sizes','operations','memories','settings','collections','subjects'],'readwrite');
   const photoStore=tx.objectStore('photos');
   const memoryStore=tx.objectStore('memories');
   const settingsStore=tx.objectStore('settings');
@@ -146,6 +146,13 @@ export async function deletePhoto(photoId:string):Promise<void>{
       await operations.put(op('memory',m.id));
     }
   }
+  // Las fichas de personas y mascotas conservan sus datos si se borra su avatar.
+  for(const subject of await tx.objectStore('subjects').getAll()){
+    if(subject.avatarPhotoId===photoId){
+      await tx.objectStore('subjects').put({...subject,avatarPhotoId:undefined});
+      await operations.put(op('subject',subject.id));
+    }
+  }
   // La colección conserva su ficha; únicamente se elimina la foto borrada.
   for(const collection of await tx.objectStore('collections').getAll()){
     if(collection.photoIds.includes(photoId)){
@@ -156,14 +163,15 @@ export async function deletePhoto(photoId:string):Promise<void>{
   const settings=await settingsStore.get('main');
   if(settings){
     const yearCovers=Object.fromEntries(Object.entries(settings.yearCoverPhotoIds||{}).filter(([,id])=>id!==photoId));
-    if(settings.homeCoverPhotoId===photoId||Object.keys(yearCovers).length!==Object.keys(settings.yearCoverPhotoIds||{}).length){
+    if(settings.homeCoverPhotoId===photoId||settings.profilePhotoId===photoId||Object.keys(yearCovers).length!==Object.keys(settings.yearCoverPhotoIds||{}).length){
       const yearPositions={...(settings.yearCoverPositions||{})};
       for(const key of Object.keys(settings.yearCoverPhotoIds||{})){
         if(settings.yearCoverPhotoIds?.[key]===photoId)delete yearPositions[key];
       }
       await settingsStore.put({...settings,yearCoverPhotoIds:yearCovers,yearCoverPositions:yearPositions,
         homeCoverPhotoId:settings.homeCoverPhotoId===photoId?undefined:settings.homeCoverPhotoId,
-        homeCoverPosition:settings.homeCoverPhotoId===photoId?undefined:settings.homeCoverPosition});
+        homeCoverPosition:settings.homeCoverPhotoId===photoId?undefined:settings.homeCoverPosition,
+        profilePhotoId:settings.profilePhotoId===photoId?undefined:settings.profilePhotoId});
       await operations.put(op('settings','main'));
     }
   }

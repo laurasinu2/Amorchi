@@ -11,6 +11,9 @@ export interface ImportantBirthday {
 export interface AppSettings {
   id:'main';
   homeCoverPhotoId?:string;
+  /** Avatar de la cuenta local (la autenticación todavía es futura). */
+  profilePhotoId?:string;
+  profileSubjectId?:string;
   homeCoverPosition?:CoverPosition;
   yearCoverPhotoIds?:Record<string,string>;
   yearCoverPositions?:Record<string,CoverPosition>;
@@ -58,6 +61,7 @@ export interface Subject {
   name: string;
   kind: SubjectKind;
   notes: string;
+  avatarPhotoId?:string;
 }
 
 export interface Photo {

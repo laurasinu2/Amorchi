@@ -99,12 +99,12 @@ export function PlacesPage({memories,onOpen}:{memories:Memory[];onOpen:(id:strin
   </div>;
 }
 
-export function PeoplePage({subjects,photos,onCreate,onView}:{subjects:Subject[];photos:Photo[];onCreate:()=>void;onView:(id:string)=>void}){
+export function PeoplePage({subjects,photos,onCreate,onEdit,onView}:{subjects:Subject[];photos:Photo[];onCreate:()=>void;onEdit:(subject:Subject)=>void;onView:(id:string)=>void}){
   const [selected,setSelected]=useState<string|undefined>(undefined);
   const person=subjects.find(s=>s.id===selected);
   return <div className="page-stack"><div className="page-intro"><span className="eyebrow">QUIÉNES APARECEN</span><div className="intro-actions"><h1>Personas y mascotas</h1><button className="btn primary" onClick={onCreate}><Plus size={16}/> Añadir</button></div></div>
-    {subjects.length?<div className="subjects-grid">{subjects.map(s=><button key={s.id} className={'subject-card '+(selected===s.id?'selected':'')} onClick={()=>setSelected(s.id)}><div className="subject-avatar">{s.kind==='animal'?<PawPrint/>:<Users/>}</div><strong>{s.name}</strong><small>{photos.filter(p=>p.subjectIds.includes(s.id)).length} fotos</small></button>)}</div>:<EmptyState title="Sin personas ni mascotas" description="Crea sus fichas y etiquétalas cuando importes fotos." onAction={onCreate} action="Añadir ficha"/>}
-    {person&&<section className="panel"><SectionTitle title={`Fotos de ${person.name}`}/><PhotoGrid photos={orderPhotos(photos.filter(p=>p.subjectIds.includes(person.id)))} onView={onView}/></section>}
+    {subjects.length?<div className="subjects-grid">{subjects.map(s=><button key={s.id} className={'subject-card '+(selected===s.id?'selected':'')} onClick={()=>setSelected(s.id)}><div className="subject-avatar">{s.avatarPhotoId?<PhotoView id={s.avatarPhotoId} className="memrly-subject-avatar-photo"/>:s.kind==='animal'?<PawPrint/>:<Users/>}</div><strong>{s.name}</strong><small>{photos.filter(p=>p.subjectIds.includes(s.id)).length} fotos</small></button>)}</div>:<EmptyState title="Sin personas ni mascotas" description="Crea sus fichas y etiquétalas cuando importes fotos." onAction={onCreate} action="Añadir ficha"/>}
+    {person&&<section className="panel"><SectionTitle title={`Fotos de ${person.name}`} action="Editar ficha y avatar" onAction={()=>onEdit(person)}/><PhotoGrid photos={orderPhotos(photos.filter(p=>p.subjectIds.includes(person.id)))} onView={onView}/></section>}
   </div>;
 }
 

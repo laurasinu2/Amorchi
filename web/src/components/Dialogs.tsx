@@ -154,24 +154,44 @@ export function MemoryDialog({onClose,onSave,initial,defaultKind,initialDate}:{
   </Dialog>;
 }
 
-export function SubjectDialog({onClose,onSave}:{
+export function SubjectDialog({onClose,onSave,photos,initial}:{
   onClose:()=>void;onSave:(subject:Subject)=>Promise<void>;
+  photos:Photo[];initial?:Subject;
 }){
-  const [kind,setKind]=useState<SubjectKind>('person');
-  const [name,setName]=useState('');
-  const [notes,setNotes]=useState('');
+  const [kind,setKind]=useState<SubjectKind>(initial?.kind||'person');
+  const [name,setName]=useState(initial?.name||'');
+  const [notes,setNotes]=useState(initial?.notes||'');
+  const [avatarPhotoId,setAvatarPhotoId]=useState(initial?.avatarPhotoId||'');
+  const [showPhotos,setShowPhotos]=useState(false);
+  const [photoSearch,setPhotoSearch]=useState('');
+  const avatarChoices=[...photos].filter(p=>[p.filename,p.takenOn,p.place].join(' ').toLowerCase().includes(photoSearch.toLowerCase()))
+    .sort((a,b)=>b.takenOn.localeCompare(a.takenOn)||b.createdAt.localeCompare(a.createdAt)).slice(0,64);
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
   async function submit(e:React.FormEvent){
     e.preventDefault();setBusy(true);
-    try{await onSave({id:createId(),kind,name:name.trim(),notes});onClose();}
+    try{await onSave({id:initial?.id||createId(),kind,name:name.trim(),notes,avatarPhotoId:avatarPhotoId||undefined});onClose();}
     catch(err){setError(String(err));}finally{setBusy(false);}
   }
-  return <Dialog title="Añadir persona o mascota" onClose={onClose}>
+  return <Dialog title={initial?'Editar persona o mascota':'Añadir persona o mascota'} onClose={onClose}>
     <form onSubmit={submit} className="form-stack">
       <div className="segmented"><button type="button" className={kind==='person'?'active':''} onClick={()=>setKind('person')}>Persona</button><button type="button" className={kind==='animal'?'active':''} onClick={()=>setKind('animal')}>Mascota</button></div>
       <label className="field"><span>Nombre</span><input required value={name} onChange={e=>setName(e.target.value)} maxLength={100}/></label>
       <label className="field"><span>Notas (opcional)</span><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={3}/></label>
+      <div className="memrly-avatar-editor">
+        <div className="memrly-avatar-editor-preview">{avatarPhotoId?<PhotoView id={avatarPhotoId} className="memrly-avatar-editor-photo"/>:kind==='animal'?'🐾':'♡'}</div>
+        <div><strong>Foto de perfil</strong><small>Usa una fotografía existente, sin duplicarla.</small>
+          <button type="button" className="btn subtle" onClick={()=>setShowPhotos(v=>!v)}>{showPhotos?'Cerrar selección':'Elegir fotografía'}</button>
+          {avatarPhotoId&&<button type="button" className="memrly-avatar-clear" onClick={()=>setAvatarPhotoId('')}>Quitar foto</button>}
+        </div>
+      </div>
+      {showPhotos&&<div className="memrly-avatar-pick">
+        <input aria-label="Buscar foto de perfil" placeholder="Buscar por fecha, lugar o nombre…" value={photoSearch} onChange={e=>setPhotoSearch(e.target.value)}/>
+        <div className="memrly-avatar-grid">
+          {avatarChoices.map(p=><PhotoView key={p.id} id={p.id} className={'memrly-avatar-choice'+(avatarPhotoId===p.id?' chosen':'')} onClick={()=>{setAvatarPhotoId(p.id);setShowPhotos(false);}}/>)}
+        </div>
+        <small>Mostrando hasta 64 resultados; busca para encontrar fotografías anteriores.</small>
+      </div>}
       {error&&<p className="form-errors">{error}</p>}
       <div className="form-actions"><button className="btn subtle" type="button" onClick={onClose}>Cancelar</button><button className="btn primary" disabled={busy||!name.trim()}>Guardar</button></div>
     </form>

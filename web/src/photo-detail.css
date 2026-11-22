@@ -133,3 +133,22 @@
   .memrly-photo-lightbox{padding:9px}
   .memrly-photo-lightbox .memrly-control-label,.memrly-photo-lightbox .memrly-zoom-instruction{display:none}
 }
+
+/* Foto de perfil local de personas y mascotas, referenciada desde el álbum. */
+.memrly-avatar-editor{display:flex;align-items:center;gap:13px}
+.memrly-avatar-editor-preview{width:70px;height:70px;flex:0 0 70px;border:1px solid var(--border);border-radius:50%;background:var(--memrly-soft);display:grid;place-items:center;overflow:hidden}
+.memrly-avatar-editor-photo,.memrly-subject-avatar-photo{width:100%;height:100%}
+.memrly-avatar-editor>div:last-child{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.memrly-avatar-editor strong,.memrly-avatar-editor small{display:block;width:100%}
+.memrly-avatar-editor strong{font-size:.85rem}
+.memrly-avatar-editor small{font-size:.73rem;color:var(--muted)}
+.memrly-avatar-editor .btn{min-height:33px;padding:7px 10px;font-size:.74rem}
+.memrly-avatar-clear{border:0;background:white;text-decoration:underline;color:var(--memrly-navy);font-size:.75rem}
+.memrly-avatar-pick{display:grid;gap:9px;border:1px solid var(--border);padding:10px;border-radius:12px}
+.memrly-avatar-pick>input{padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:white;color:var(--memrly-navy)}
+.memrly-avatar-grid{max-height:192px;overflow:auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.memrly-avatar-choice{width:100%;aspect-ratio:1;border:2px solid transparent!important;border-radius:8px;min-height:40px}
+.memrly-avatar-choice.chosen{border-color:var(--memrly-navy)!important}
+.memrly-avatar-pick>small{color:var(--muted);font-size:.66rem}
+.subject-avatar .memrly-subject-avatar-photo{border-radius:50%}
+@media(max-width:540px){.memrly-avatar-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}

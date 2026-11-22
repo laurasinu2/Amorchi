@@ -59,6 +59,7 @@ export default function App(){
   const [editMemory,setEditMemory]=useState<Memory|undefined>();
   const [newKind,setNewKind]=useState<MemoryKind>('moment');
   const [subjectOpen,setSubjectOpen]=useState(false);
+  const [editSubject,setEditSubject]=useState<Subject|undefined>();
 
   async function refresh(){
     const library=await loadLibrary();
@@ -135,7 +136,15 @@ export default function App(){
     setSelectedMemoryId(undefined);
     navigate(memory.kind==='trip'?'viajes':'recuerdos');
   }
-  async function commitSubject(subject:Subject){await saveSubject(subject);await refresh();}
+  async function commitSubject(subject:Subject){
+    await saveSubject(subject);
+    // Al crear desde la ficha de foto, se vincula automáticamente.
+    if(page==='foto'&&!editSubject&&selectedPhotoId){
+      const current=photos.find(p=>p.id===selectedPhotoId);
+      if(current&&!current.subjectIds.includes(subject.id))await savePhoto({...current,subjectIds:[...current.subjectIds,subject.id]});
+    }
+    await refresh();
+  }
   async function commitPhoto(photo:Photo){await savePhoto(photo);await refresh();}
   async function commitDeletePhoto(id:string){
     await deletePhoto(id);
@@ -178,9 +187,9 @@ export default function App(){
           {page==='viajes'&&<MemoriesPage memories={memories} photos={photos} onlyTrips onOpen={openMemory} onCreate={()=>createMemory('trip')}/>}
           {page==='recuerdos'&&<MemoriesPage memories={memories} photos={photos} onlyTrips={false} onOpen={openMemory} onCreate={()=>createMemory('moment')}/>}
           {page==='memoria'&&(selectedMemory?<MemoryDetail memory={selectedMemory} memories={memories} photos={photos} subjects={subjects} settings={settings} onChangeCover={()=>setCoverTarget({memoryId:selectedMemory.id})} onDelete={()=>setMemoryToDeleteId(selectedMemory.id)} onViewPhoto={openPhoto} onEdit={()=>{setEditMemory(selectedMemory);setMemoryOpen(true);}} onOpenMemory={openMemory}/>:<EmptyState title="Recuerdo no encontrado" description="Vuelve a tus recuerdos desde el menú." onAction={()=>navigate('recuerdos')} action="Ver recuerdos"/>)}
-          {page==='foto'&&(selectedPhoto?<PhotoDetailPage photo={selectedPhoto} photos={photos} memories={memories} subjects={subjects} settings={settings} onBack={backFromPhoto} onSelect={changePhoto} onSave={commitPhoto} onEdit={()=>setPhotoEditOpen(true)} onOpenMemory={openMemory} onOpenDay={openCalendarDay} onCreateSubject={()=>setSubjectOpen(true)} onDelete={commitDeletePhoto}/>:<EmptyState title="Fotografía no encontrada" description="La fotografía ya no está disponible." onAction={backFromPhoto} action="Volver"/>)}
+          {page==='foto'&&(selectedPhoto?<PhotoDetailPage photo={selectedPhoto} photos={photos} memories={memories} subjects={subjects} settings={settings} onBack={backFromPhoto} onSelect={changePhoto} onSave={commitPhoto} onEdit={()=>setPhotoEditOpen(true)} onOpenMemory={openMemory} onOpenDay={openCalendarDay} onCreateSubject={()=>{setEditSubject(undefined);setSubjectOpen(true);}} onDelete={commitDeletePhoto}/>:<EmptyState title="Fotografía no encontrada" description="La fotografía ya no está disponible." onAction={backFromPhoto} action="Volver"/>)}
           {page==='lugares'&&<PlacesPage memories={memories} onOpen={openMemory}/>}
-          {page==='personas'&&<PeoplePage subjects={subjects} photos={photos} onCreate={()=>setSubjectOpen(true)} onView={openPhoto}/>}
+          {page==='personas'&&<PeoplePage subjects={subjects} photos={photos} onCreate={()=>{setEditSubject(undefined);setSubjectOpen(true);}} onEdit={s=>{setEditSubject(s);setSubjectOpen(true);}} onView={openPhoto}/>}
           {page==='album'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={openPhoto}/>}
           {page==='favoritos'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={openPhoto} filterFavorites/>}
           {page==='buscar'&&<SearchPage photos={photos} memories={memories} onView={openPhoto} onOpen={openMemory}/>}
@@ -200,7 +209,7 @@ export default function App(){
     {importOpen&&<ImportDialog initialDate={importDate} memories={memories} subjects={subjects} onClose={()=>{setImportOpen(false);setImportDate(undefined);}} onCommit={commitImport}/>}
     {memoryOpen&&<MemoryDialog initial={editMemory} initialDate={memoryDate} defaultKind={newKind} onClose={()=>{setMemoryOpen(false);setMemoryDate(undefined);}} onSave={commitMemory}/>}
     {collectionDate&&<AddToCollectionDialog date={collectionDate} photos={photos} collections={collections} onClose={()=>setCollectionDate(undefined)} onSave={commitCollection}/>}
-    {subjectOpen&&<SubjectDialog onClose={()=>setSubjectOpen(false)} onSave={commitSubject}/>}
+    {subjectOpen&&<SubjectDialog initial={editSubject} photos={photos} onClose={()=>{setSubjectOpen(false);setEditSubject(undefined);}} onSave={commitSubject}/>} 
     {selectedPhoto&&photoEditOpen&&<PhotoDialog photo={selectedPhoto} memories={memories} subjects={subjects} settings={settings} onClose={()=>setPhotoEditOpen(false)} onSave={commitPhoto} onDelete={commitDeletePhoto}/>}
   </div>;
 }
