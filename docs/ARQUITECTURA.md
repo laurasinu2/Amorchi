@@ -73,3 +73,15 @@ La eliminación de una fotografía se realiza en una única transacción local I
 `deleteMemory(memoryId)` en `web/src/db.ts` utiliza una sola transacción sobre `memories`, `photos` y `operations`. Desvincula ese ID de todas las fotos, mantiene sus blobs, fechas y demás asociaciones intactas, elimina los `upsert` locales obsoletos y crea operaciones de actualización para las fotos afectadas y una operación `delete` para el recuerdo. El borrado exige una confirmación específica en la interfaz. Si falla la transacción no se considera borrado.
 
 El **28 de diciembre** se incluye como **Día de los Santos Inocentes (bromas)** con borde rosa en el calendario. Se calcula anualmente sin generar eventos de usuario ni filas persistentes adicionales; puede desactivarse junto con las demás celebraciones tradicionales en Ajustes.
+
+## Rediseño Memrly y posición de portadas
+
+Se añaden `web/src/OverviewPages.tsx`, `web/src/CalendarRedesign.tsx` y `web/src/memrly-redesign.css`. El CSS se importa **después** de los estilos anteriores para mantener la compatibilidad de las demás fichas y actualizar el tema a blanco/azul marino. El diseño del Calendario utiliza en escritorio una cuadrícula 5:3 dentro del área principal (aproximadamente 50 % de ancho de pantalla para el calendario cuando la barra lateral ocupa 20 %).
+
+Las posiciones elegidas de portada (`CoverPosition {x,y}`, porcentajes 0-100) quedan en `settings.homeCoverPosition`, `settings.yearCoverPositions` y `memories.coverPosition`. Se aplican mediante `object-position`, sin alterar los blobs originales. Cuando una foto se elimina, también se eliminan sus referencias y puntos focales de las portadas afectadas. Las nuevas preferencias se sincronizarán cuando exista una API, no antes.
+
+## Colecciones (IndexedDB v5)
+
+La tienda `collections` conserva `PhotoCollection {id,title,photoIds,createdAt}`. `AddToCollectionDialog` permite crear una colección o añadir las fotografías de una fecha a una existente. Se evita la duplicación de IDs y de los blobs. Al eliminar una fotografía se eliminan sus referencias de colecciones en la misma transacción. Las modificaciones generan operaciones de entidad `collection` en la cola offline; la API y el esquema de servidor para colecciones quedan pendientes.
+
+**Resumen anual** es una tarjeta de diseño marcada «Próximamente», sin lógica ni generación de resúmenes. No confundir el resumen básico de estadísticas por año con una futura función de selección de destacados.

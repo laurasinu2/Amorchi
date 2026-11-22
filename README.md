@@ -6,22 +6,23 @@ Amorchi es un álbum digital privado para recorrer fotografías, viajes, eventos
 
 Está programada una primera interfaz móvil y de escritorio con:
 
-- Calendario **año / mes / día**. Los días con fotos muestran una miniatura; los viajes y eventos aparecen como franjas de fechas.
+- Calendario **Año / Mes / Lista**, con selector de mes y año, intervalos de viajes/eventos enmarcados sobre varios días, resumen del periodo, día seleccionado y acciones rápidas. Se mantienen fechas especiales y festivos recurrentes.
 - Galería y visor con edición de fecha, lugar, descripción, favoritos, personas, mascotas y asociación a varios recuerdos.
 - Importación múltiple con **previsualización de fecha EXIF/GPS antes de guardar**. Si EXIF no existe, la fecha de modificación se indica expresamente como fallback. Hash SHA-256 para evitar duplicados exactos y miniaturas/visualizaciones WebP.
 - Creación de viajes, eventos, momentos y fichas de personas/animales.
 - Mapa mundial **georreferenciado EPSG:3857** basado en el GeoTIFF aportado por el usuario; visualización Leaflet sin teselas externas, con zoom y marcadores por recuerdos (no por fotografía). Importa una vez el WebP optimizado desde la página de Lugares de cada dispositivo.
-- Barra lateral oscura compacta en ordenador (aproximadamente 1/5 del ancho, sin desplazamiento), portada de Inicio mínima con «Ver años» a la derecha y navegación inferior en móvil.
-- Selección de imagen de fondo desde el menú translúcido «···» en Inicio, portadas de años y fichas de viajes, eventos y momentos.
-- Ajustes de fecha de inicio de relación y cumpleaños propios, de pareja e importantes, con marcadores anuales en el calendario (corazón y número de años dorado).
-- Celebraciones catalanas y tradicionales con bordes temáticos (Navidad, Sant Esteve, Reyes, Halloween/Castanyada, Santos Inocentes y día de las bromas cada 28 de diciembre, Carnaval y Semana Santa según el año, La Purísima, y posible puente de diciembre). Un puente no equivale a un festivo laboral.
+- Interfaz rediseñada en **blanco y azul marino**: logo largo y ruta de la sección en la cabecera; barra lateral oscura de ~1/5 del ancho en escritorio y navegación inferior en móvil. Inicio contiene cuatro estadísticas, dos acciones, fotos recientes y dos destacados. Años muestra dos tarjetas recientes, resumen y línea temporal.
+- Selección de fondo desde «···» en Inicio, portadas de años y recuerdos. Incluye **encuadre horizontal/vertical** con previsualización; se guarda el punto focal, nunca se recorta ni duplica el archivo original.
+- Ajustes de inicio de relación y cumpleaños con marcadores anuales en el calendario (corazón y número de años), respetando el tema azul marino.
+- Celebraciones catalanas y tradicionales con bordes e indicadores en el azul de la interfaz (Navidad, Sant Esteve, Reyes, Halloween/Castanyada, Santos Inocentes y día de las bromas cada 28 de diciembre, Carnaval y Semana Santa según el año, La Purísima, y posible puente de diciembre). Un puente no equivale a un festivo laboral.
 - Borrado de fotografías con confirmación explícita; elimina originales, variantes y referencias de portada del almacenamiento local y deja una operación de borrado pendiente para el servidor.
 - Logos aportados por el usuario, optimizados para la interfaz y el icono instalable. El nombre del repositorio sigue siendo Amorchi.
+- **Colecciones locales de fotografías**: puedes añadir las fotos de un día a una colección existente o crear una nueva desde el Calendario, sin duplicar los archivos. Se conservan en IndexedDB, versión 5.
 - IndexedDB con fotos y metadatos locales; service worker de la PWA para abrir la interfaz sin conexión después de una visita inicial por HTTPS/localhost.
 - Cola persistente de cambios locales **aún sin API de sincronización**.
 - Esquema SQL PostgreSQL y Docker Compose preparados como siguiente etapa.
 
-**Esta versión es de desarrollo, no un sistema de archivo definitivo.** Todavía **NO** tiene inicio de sesión por correo, sincronización con el ordenador, copia de seguridad automática, subida a servidor ni mapa cartográfico detallado. No uses IndexedDB como única copia de fotografías valiosas: un navegador puede borrar datos o aplicar límites de almacenamiento. Mientras no exista la subida al servidor, se guardan los originales en el propio dispositivo.
+**Esta versión es de desarrollo, no un sistema de archivo definitivo.** Todavía **NO** tiene inicio de sesión por correo, sincronización con el ordenador, copia de seguridad automática, subida a servidor ni sincronización remota de colecciones y encuadres. No uses IndexedDB como única copia de fotografías valiosas: un navegador puede borrar datos o aplicar límites de almacenamiento. Mientras no exista la subida al servidor, se guardan los originales en el propio dispositivo.
 
 ## Ejecutar la interfaz
 
@@ -76,3 +77,13 @@ Revisa [ARQUITECTURA.md](docs/ARQUITECTURA.md) para el plan de autenticación, c
 Abre la ficha del recuerdo y pulsa **Eliminar viaje**, **Eliminar evento** o **Eliminar momento** en el panel «Gestionar». La aplicación pide confirmación mostrando cuántas fotografías se desvincularán. **Las fotos no se borran**, permanecen en el álbum y conservan asociaciones con otros recuerdos. Se elimina únicamente la ficha, su intervalo en el calendario y su marcador del mapa.
 
 Los cambios se guardan atómicamente en IndexedDB junto con un marcador de borrado en la cola offline. **La sincronización real todavía no está implementada**: borrar el recuerdo en un dispositivo no lo elimina aún de los demás. La papelera con recuperación no está disponible en esta fase.
+
+## Diseño Memrly (Inicio, Años, Calendario)
+
+- **Inicio:** estadísticas de años con información, fotos, viajes y momentos/eventos; «Resumen anual» queda expresamente **próximamente**, mientras que «Subir fotos» funciona. Galería de hasta 9 fotos cuadradas en escritorio y menos según el ancho de pantalla. Viaje y recuerdo destacado con foto, categoría, título, descripción recortada a dos líneas y enlace a la ficha.
+- **Años:** dos años con información más recientes y estadísticas independientes, portadas configurables, recuentos generales en «Tu historia en Memrly», línea del tiempo navegable y destacados.
+- **Calendario:** tres modalidades, controles previos y siguientes, selector de fecha al pulsar el mes/año, cuadro principal aproximadamente del 50 % del viewport en escritorio si la barra lateral es del 20 %, y panel lateral apilado con resumen, día y acciones. En «Lista» se muestran elementos y celebraciones del año por fecha descendente. Un viaje entre semanas se enmarca por segmentos continuos de cada semana y los números incluidos se resaltan.
+- **Acciones del día:** «Añadir fotos a este día» preselecciona la fecha, «Crear un recuerdo» usa la fecha actual seleccionada y «Añadir a colección» crea/actualiza colecciones con las fotos de ese día (desactivado si aún no hay fotos).
+- La nueva identidad cromática solo usa blanco, azul oscuro y transparencias derivadas para los componentes; las propias imágenes y los símbolos de las festividades pueden tener su color natural.
+
+Los iconos/logo actuales siguen como provisionales hasta recibir los nuevos archivos del diseño.
