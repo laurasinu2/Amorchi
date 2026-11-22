@@ -167,3 +167,16 @@ Si un viaje, evento o recuerdo tiene `startDate === endDate`, su casilla **no mu
 - En ventanas de **1240 px o menos de ancho**, o **menos de 700 px de alto**, los bloques pasan a una columna vertical con scroll natural; a partir de 1241 px con altura suficiente, se mantiene la página de escritorio sin scroll exterior.
 - Los menús flotantes de personas se muestran por encima de las otras tarjetas y se ajustan al ancho de pantalla. El aviso de errores ya no rompe el reparto vertical de filas, gracias a la estructura flex.
 - No se han modificado ni las fotos ni los datos IndexedDB. Las pruebas automatizadas verifican compilación y lógica, no sustituyen una comprobación visual manual en todas las resoluciones.
+
+## Backend REST aislado y HTTPS compartido (rama nueva)
+
+El desarrollo de cuentas de usuario, API privada de fotografías y despliegue con
+**`https://memrly.duckdns.org` en el puerto 443 compartido con GeoCauce**
+vive **exclusivamente** en la rama `feat/memrly-backend-rest-20261122`.
+
+- `server/api/memrly_api/`: FastAPI con registro opcional, acceso y lectura/subida de originales protegida por token.
+- `deploy/compose.yaml`: base PostgreSQL 17, API y web con redes y volúmenes **independientes** de GeoCauce.
+- `deploy/caddy/memrly.site`: nuevo sitio virtual Caddy que se incorporaría junto al de GeoCauce **solamente al autorizar el despliegue**.
+- `deploy/README.md`: [guía paso a paso](deploy/README.md), pruebas locales, inspecciones seguras y límites del proyecto.
+
+**Estado:** código probado en GitHub; no se ha desplegado en Contabo ni se ha modificado GeoCauce. La PWA mantiene su IndexedDB local: aún no integra cuentas ni subida/sincronización remota. La instalación productiva requiere backups, HTTPS, validación de seguridad y autorización aparte.
