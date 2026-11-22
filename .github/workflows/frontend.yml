@@ -1,0 +1,40 @@
+name: Frontend build
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - run: npm run test:dates
+  schema:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: amorchi
+          POSTGRES_USER: amorchi
+          POSTGRES_PASSWORD: password_only_for_ci
+        options: >-
+          --health-cmd "pg_isready -U amorchi -d amorchi"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PostgreSQL schema and idempotent preferences migration
+        run: |
+          docker exec -i ${{ job.services.postgres.id }} psql -U amorchi -d amorchi -v ON_ERROR_STOP=1 < server/db/001_initial.sql
+          docker exec -i ${{ job.services.postgres.id }} psql -U amorchi -d amorchi -v ON_ERROR_STOP=1 < server/db/002_preferences.sql
+          docker exec -i ${{ job.services.postgres.id }} psql -U amorchi -d amorchi -v ON_ERROR_STOP=1 < server/db/002_preferences.sql

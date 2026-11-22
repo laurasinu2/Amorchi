@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <meta name="theme-color" content="#102b49"/>
+    <meta name="description" content="Amorchi, nuestra historia en fotografías, recuerdos y viajes."/>
+    <link rel="icon" id="memrly-favicon" type="image/svg+xml" href="/brand/memrly-app.svg"/>
+    <link rel="apple-touch-icon" id="memrly-touch-icon" href="/brand/memrly-app.svg"/>
+    <script>
+      // El navegador y la PWA priorizan el icono PNG proporcionado cuando existe.
+      // No cambiamos a la recreación SVG a menos que falte el archivo original.
+      (() => {
+        const original = new Image();
+        original.onload = () => {
+          const favicon = document.getElementById('memrly-favicon');
+          const touch = document.getElementById('memrly-touch-icon');
+          if (favicon) { favicon.setAttribute('href', '/brand/memrly-app.png'); favicon.setAttribute('type','image/png'); }
+          if (touch) touch.setAttribute('href', '/brand/memrly-app.png');
+        };
+        original.src = '/brand/memrly-app.png';
+      })();
+    </script>
+    <title>Memrly · Amorchi</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

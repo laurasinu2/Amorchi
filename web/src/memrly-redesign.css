@@ -1,0 +1,950 @@
+/* Memrly UI: blanco + azul marino como únicos colores cromáticos de la interfaz.
+   Los matices translúcidos son variantes de ese mismo azul. */
+:root{
+ --ink:#102b49;--muted:#526781;--warm:#fff;--accent:#102b49;
+ --accent-dark:#0b2541;--green:#102b49;--border:rgba(16,43,73,.16);
+ --shadow:0 5px 16px rgba(16,43,73,.06);
+ --memrly-navy:#102b49;--memrly-soft:rgba(16,43,73,.055);
+}
+body,.app-content{background:#fff;color:var(--memrly-navy)}
+.app-content{background:#fff}
+.topbar{background:rgba(255,255,255,.97);border-bottom:1px solid var(--border)}
+.topbar-brand-image{max-width:210px;height:41px}
+.topbar-divider{height:26px;width:1px;background:var(--memrly-navy);opacity:.4;display:block}
+.topbar-add,.btn.primary{background:var(--memrly-navy);box-shadow:none;color:white}
+.btn.primary:hover,.topbar-add:hover{background:#0b2036}
+.btn.light,.btn.subtle{color:var(--memrly-navy);background:white;border:1px solid var(--border)}
+.sidebar{background:var(--memrly-navy);color:white;box-shadow:none}
+.sidebar:after{display:none}
+.sidebar-logo strong,.sidebar-link{color:white}
+.sidebar-logo small,.sidebar-foot,.sidebar-sync small{color:rgba(255,255,255,.7)}
+.sidebar-link:hover{background:rgba(255,255,255,.12)}
+.sidebar-link.active{color:var(--memrly-navy);background:white}
+.sidebar-nav hr{background:rgba(255,255,255,.25)}
+.sidebar-sync{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
+.sync-indicator,.sync-indicator.offline{color:var(--memrly-navy)}
+.sync-indicator b{background:var(--memrly-soft);color:var(--memrly-navy)}
+.icon-button,.icon-button:hover{background:white;border-color:var(--border);color:var(--memrly-navy)}
+.main-container{background:#fff;max-width:none;padding-top:24px}
+a,.text-link,.memrly-section-action{color:var(--memrly-navy)}
+h1,h2,h3,h4,p,small{color:inherit}
+.muted-text,.page-intro p,.helper-text,.panel p{color:var(--muted)}
+.eyebrow,.text-link{color:var(--memrly-navy)}
+.panel,.year-card,.month-wide,.month-card,.stat,.memory-card,.subject-card,.location-list button,
+.dialog,.empty-state,.settings-cards .panel,.photo-day-section{
+ background:white;border:1px solid var(--border);box-shadow:var(--shadow);color:var(--memrly-navy)
+}
+.pill,.pill.kind,.pill.trip,.pill.event,.pill.moment,.chip,.segmented{
+ background:var(--memrly-soft);color:var(--memrly-navy);border-color:var(--border)
+}
+.chip.selected,.segmented button.active{background:var(--memrly-navy);color:white;box-shadow:none}
+.segmented button{color:var(--memrly-navy)}
+.placeholder,.placeholder.trip,.placeholder.event,.memrly-image-placeholder{background:var(--memrly-soft);color:var(--memrly-navy)}
+.photo-view{background:var(--memrly-soft);color:var(--memrly-navy)}
+.world-map,.dialog,.upload-zone,.search-field,.field input,.field select,.field textarea{background:white;color:var(--memrly-navy);border-color:var(--border)}
+.world-map-tools,.subject-avatar,.empty-icon,.warning-note{color:var(--memrly-navy)}
+.subject-avatar,.empty-icon,.warning-note{background:var(--memrly-soft)}
+.form-errors,.delete-confirmation{border-color:var(--memrly-navy);background:var(--memrly-soft);color:var(--memrly-navy)}
+.warning-note{border-color:var(--border)}
+.form-errors p,.delete-confirmation p{color:var(--memrly-navy)}
+.cover-dots,.year-card .cover-dots{background:rgba(16,43,73,.52);color:white;border:1px solid rgba(255,255,255,.6)}
+.cover-dots:hover{background:var(--memrly-navy)}
+.cover-dropdown{background:white;border-color:var(--border);color:var(--memrly-navy)}
+.cover-dropdown button{color:var(--memrly-navy)}
+.cover-dropdown button:hover{background:var(--memrly-soft)}
+.btn.danger,.btn.danger-outline{background:var(--memrly-navy);color:white;border-color:var(--memrly-navy)}
+.btn.danger-outline{background:white;color:var(--memrly-navy)}
+.upload-zone,.preview-row img,.import-file,.detected-meta,.traditions-switch,.birthday-person,.birthday-entry{background:var(--memrly-soft);color:var(--memrly-navy);border-color:var(--border)}
+.calendar-grid .calendar-day.holiday-border{--holiday-ring:var(--memrly-navy);--holiday-surface:var(--memrly-soft)}
+.holiday-symbol,.holiday-symbol-christmas,.holiday-symbol-spring,.holiday-symbol-carnival,
+.holiday-symbol-autumn,.holiday-symbol-bridge,.holiday-symbol-pranks{color:var(--memrly-navy)}
+.calendar-anniversary{background:var(--memrly-navy);color:white;border-color:white}
+.calendar-anniversary .anniversary-heart,.calendar-anniversary .anniversary-count{color:white}
+.special-day-icon,.special-day-count,.traditional-day-event{background:var(--memrly-soft);border-color:var(--memrly-navy);color:var(--memrly-navy)}
+.traditional-day-event{--holiday-ring:var(--memrly-navy);--holiday-surface:var(--memrly-soft)}
+.day-special-panel .special-day-event.anniversary{color:var(--memrly-navy)}
+.mobile-bottom{background:white;border-color:var(--border)}
+.mobile-bottom button{color:var(--memrly-navy)}
+.mobile-bottom button.active{background:var(--memrly-soft);color:var(--memrly-navy)}
+.add-tab svg{background:var(--memrly-navy)}
+.hero-content h1 em{color:white}
+.cover-choice.chosen{border-color:var(--memrly-navy)}
+.cover-choice-check{background:var(--memrly-navy)}
+.cover-frame-preview{height:170px;overflow:hidden;border-radius:13px;border:1px solid var(--border)}
+.cover-framing{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(195px,1fr);gap:17px;padding:12px;border:1px solid var(--border);border-radius:15px;margin-top:8px}
+.cover-frame-photo{width:100%;height:100%}
+.cover-frame-controls{display:grid;gap:10px;align-content:center}
+.cover-frame-controls strong{display:flex;align-items:center;gap:7px;font-size:.88rem}
+.cover-frame-controls label{display:grid;gap:4px;color:var(--memrly-navy);font-size:.78rem;font-weight:700}
+.cover-frame-controls input{width:100%;accent-color:var(--memrly-navy)}
+.cover-frame-controls button{justify-self:start}
+.collection-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.collection-card{display:flex;align-items:center;text-align:left;gap:11px;padding:10px;background:white;border:1px solid var(--border);border-radius:15px;color:var(--memrly-navy)}
+.collection-card.active{outline:2px solid var(--memrly-navy)}
+.collection-card-image{width:82px;height:76px;flex:0 0 82px;border-radius:10px}
+.collection-card>span{display:grid;gap:5px;min-width:0;flex:1}
+.collection-card strong{font-size:.9rem;overflow-wrap:anywhere}
+.collection-card small{color:var(--muted)}
+.collection-day-preview{display:flex;gap:7px;overflow-x:auto}
+.collection-mini-photo{width:95px;height:85px;flex:0 0 95px;border-radius:9px}
+.collection-from-today{justify-self:start}
+.collection-detail{display:grid;gap:12px}
+
+/* Pantallas Inicio, Años y Calendario */
+.memrly-screen{display:grid;gap:17px;min-width:0;align-content:start;color:var(--memrly-navy)}
+.memrly-screen h1,.memrly-screen h2,.memrly-screen h3{font-family:inherit;font-weight:750;letter-spacing:-.025em}
+.memrly-screen h2{font-size:clamp(1.04rem,1.25vw,1.27rem)}
+.memrly-screen-intro h1{font-size:clamp(1.75rem,2.2vw,2.4rem);margin:0 0 5px}
+.memrly-screen-intro p{color:var(--muted);font-size:.9rem;margin:0}
+.memrly-panel{background:white;border:1px solid var(--border);border-radius:17px;padding:17px;min-width:0;box-shadow:var(--shadow)}
+.memrly-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
+.memrly-heading h2{margin:0}
+.memrly-section-action{display:inline-flex;gap:7px;align-items:center;padding:5px 0;white-space:nowrap;background:none;border:0;font-size:.79rem;font-weight:700}
+.memrly-section-action:hover{text-decoration:underline}
+.memrly-image-placeholder{display:flex;align-items:center;justify-content:center}
+
+/* INICIO */
+.memrly-home-cover{height:clamp(128px,15vh,190px)!important;background:var(--memrly-navy);border:1px solid var(--border)}
+.memrly-home-cover:after{background:linear-gradient(90deg,rgba(16,43,73,.86),rgba(16,43,73,.25))}
+.memrly-home-cover .hero-content{padding:18px 62px 18px 27px;justify-content:flex-start;align-items:center}
+.memrly-home-cover .hero-copy h1{font-size:clamp(1.65rem,2.6vw,2.45rem);margin:0 0 5px;color:white}
+.memrly-home-cover .hero-copy p{font-size:.82rem;color:white;margin:0}
+.memrly-stats-four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.memrly-stat{display:flex;align-items:center;gap:clamp(8px,1.3vw,17px);min-width:0;padding:16px 19px;min-height:clamp(98px,11vh,132px);background:#fff;border:1px solid var(--border);border-radius:17px;box-shadow:var(--shadow)}
+.memrly-stat-icon{color:var(--memrly-navy);width:clamp(26px,2.6vw,35px);height:clamp(26px,2.6vw,35px);stroke-width:1.7;flex-shrink:0}
+.memrly-stat-info{display:grid;gap:3px;min-width:0}
+.memrly-stat-info strong{font-size:clamp(1.45rem,2.1vw,2rem);line-height:1;font-weight:850;font-variant-numeric:tabular-nums}
+.memrly-stat-info span{font-size:clamp(.68rem,.85vw,.84rem);color:var(--muted);line-height:1.2}
+.memrly-quick-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.memrly-quick-tile{display:flex;align-items:center;gap:15px;padding:14px 18px;min-height:82px;border:1px solid var(--border);border-radius:16px;background:white;text-align:left;color:var(--memrly-navy);box-shadow:var(--shadow)}
+.memrly-quick-tile>svg:first-child{flex:0 0 auto;width:25px;height:25px}
+.memrly-quick-tile>span{display:grid;gap:5px;flex:1;min-width:0}
+.memrly-quick-tile strong{font-size:.97rem;font-weight:750}
+.memrly-quick-tile small{font-size:.75rem;color:var(--muted);line-height:1.25}
+.memrly-quick-tile>svg:last-child{width:18px;color:var(--memrly-navy)}
+.memrly-quick-tile:not(.is-soon):hover,.memrly-link-button:hover,.memrly-year-cta:hover{background:var(--memrly-soft)}
+.memrly-quick-tile.is-soon{cursor:default}
+.memrly-section{min-width:0}
+.memrly-recents{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:9px}
+.memrly-recent-photo{display:block;width:100%;aspect-ratio:1/1;height:auto;border-radius:13px}
+.memrly-empty-row{min-height:110px;border:1px dashed var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;gap:12px;padding:17px;flex-wrap:wrap}
+.memrly-empty-row span{font-size:.86rem;color:var(--muted)}
+.memrly-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.memrly-feature-section{min-width:0}
+.memrly-feature-card{display:grid;grid-template-columns:minmax(0,42%) minmax(0,58%);min-height:185px;border:1px solid var(--border);border-radius:17px;overflow:hidden;box-shadow:var(--shadow)}
+.memrly-feature-image{width:100%;height:100%;min-height:185px}
+.memrly-feature-info{display:flex;flex-direction:column;gap:7px;padding:16px 18px;min-width:0}
+.memrly-type{display:inline-flex;align-items:center;gap:7px;width:max-content;padding:5px 9px;background:var(--memrly-soft);border-radius:99px;font-size:.7rem;font-weight:750}
+.memrly-feature-info h3{font-size:clamp(1rem,1.25vw,1.28rem);margin:0;line-height:1.23;overflow-wrap:anywhere}
+.memrly-feature-info p{color:var(--muted);font-size:.8rem;line-height:1.38;margin:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+.memrly-link-button{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;color:var(--memrly-navy);background:white;border:1px solid var(--border);border-radius:10px;padding:8px 11px;font-weight:750;font-size:.78rem;margin-top:auto}
+.memrly-feature-empty{display:grid;justify-items:center;align-content:center;gap:10px;border:1px dashed var(--border);border-radius:17px;min-height:185px;text-align:center;color:var(--memrly-navy)}
+.memrly-feature-empty span{font-size:.8rem;color:var(--muted)}
+.memrly-feature-empty .memrly-link-button{margin-top:0;justify-self:center}
+
+/* AÑOS */
+.memrly-year-top{display:grid;grid-template-columns:minmax(0,2fr) minmax(235px,1fr);gap:14px;align-items:stretch}
+.memrly-year-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;min-width:0}
+.memrly-year-card{display:grid;grid-template-rows:auto 1fr auto;min-width:0;border:1px solid var(--border);background:white;border-radius:17px;box-shadow:var(--shadow);overflow:hidden}
+.memrly-year-photo-wrap{position:relative;min-width:0;aspect-ratio:1.8/1;background:var(--memrly-soft)}
+.memrly-year-photo{width:100%;height:100%;position:absolute;inset:0}
+.memrly-year-photo-wrap:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(0deg,rgba(16,43,73,.7),transparent);pointer-events:none}
+.memrly-year-number{position:absolute;z-index:3;bottom:13px;left:16px;font-size:clamp(1.5rem,2.4vw,2.7rem);font-weight:800;color:white;text-shadow:0 2px 6px rgba(16,43,73,.2)}
+.memrly-year-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:14px 10px 7px}
+.memrly-year-metrics .memrly-stat{border:0;box-shadow:none;padding:5px 3px;min-height:53px;gap:5px}
+.memrly-year-metrics .memrly-stat-icon{width:20px;height:20px}
+.memrly-year-metrics .memrly-stat-info strong{font-size:1.1rem}
+.memrly-year-metrics .memrly-stat-info span{font-size:.63rem}
+.memrly-year-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:90%;min-height:40px;margin:8px auto 15px;border:1px solid var(--memrly-navy);background:white;color:var(--memrly-navy);border-radius:99px;font-size:.83rem;font-weight:800}
+.memrly-year-photo-wrap .cover-actions{top:8px;right:8px}
+.memrly-year-summary{display:grid;align-content:start;gap:7px;padding:22px 20px;border:1px solid var(--border);border-radius:17px;box-shadow:var(--shadow)}
+.memrly-year-summary h2{margin:0}
+.memrly-year-summary p{font-size:.84rem;color:var(--muted);margin:0 0 7px}
+.memrly-year-summary-stats{display:grid;gap:6px}
+.memrly-year-summary .memrly-stat{box-shadow:none;border:0;border-top:1px solid var(--border);min-height:70px;border-radius:0;padding:10px 0}
+.memrly-year-summary .memrly-stat-icon{width:24px;height:24px}
+.memrly-year-summary .memrly-stat-info strong{font-size:1.55rem}
+.memrly-year-no-data{display:grid;justify-items:center;gap:10px;align-content:center;grid-column:1/-1;min-height:260px;border:1px dashed var(--border);border-radius:16px}
+.memrly-year-no-data span{font-size:.8rem;color:var(--muted)}
+.memrly-timeline-panel,.memrly-years-featured{display:grid;gap:5px}
+.memrly-timeline{display:flex;align-items:center;overflow-x:auto;padding:13px 0 15px;gap:0;min-width:0}
+.memrly-timeline.expanded{flex-wrap:wrap;row-gap:9px}
+.memrly-timeline-unit{display:flex;align-items:center;flex-shrink:0}
+.memrly-timeline-dot{display:block;flex:0 0 10px;width:10px;height:10px;background:var(--memrly-navy);border-radius:50%}
+.memrly-timeline-line{height:2px;flex:0 0 23px;width:23px;background:var(--memrly-navy)}
+.memrly-timeline-year{min-width:82px;height:39px;border:1px solid var(--memrly-navy);border-radius:12px;background:white;color:var(--memrly-navy);font-weight:800;font-size:.9rem}
+.memrly-timeline-year:hover{background:var(--memrly-navy);color:white}
+.memrly-featured-rows{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.memrly-featured-small{display:flex;align-items:center;gap:10px;min-width:0;padding:8px;background:white;border:1px solid var(--border);border-radius:13px;text-align:left;color:var(--memrly-navy)}
+.memrly-featured-thumb{flex:0 0 66px;width:66px;height:66px;border-radius:10px}
+.memrly-featured-small>span{display:grid;gap:4px;min-width:0;flex:1}
+.memrly-featured-small small{color:var(--muted);font-size:.7rem}
+.memrly-featured-small strong{font-size:.84rem;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+
+/* CALENDARIO: 5/8 del área de contenido = aprox. 50 % del viewport,
+   cuando la barra lateral ocupa un 20 %. */
+.memrly-calendar-workspace{display:grid;grid-template-columns:minmax(0,5fr) minmax(275px,3fr);gap:15px;align-items:start}
+.memrly-calendar-main{padding:15px;display:grid;gap:15px}
+.memrly-calendar-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.memrly-calendar-period{display:flex;align-items:center;gap:6px;min-width:0}
+.memrly-nav-round{display:grid;place-items:center;width:31px;height:31px;border:1px solid var(--border);border-radius:50%;background:white;color:var(--memrly-navy)}
+.memrly-date-jump-wrap{position:relative}
+.memrly-date-jump{display:flex;align-items:center;gap:7px;padding:7px 6px;border:0;background:white;color:var(--memrly-navy);font-size:clamp(.96rem,1.35vw,1.18rem);font-weight:800;text-transform:capitalize;white-space:nowrap}
+.memrly-jump-popover{position:absolute;top:calc(100% + 7px);left:0;z-index:40;width:230px;padding:13px;display:grid;gap:10px;background:white;border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 30px rgba(16,43,73,.17)}
+.memrly-jump-popover label{display:grid;gap:5px;font-size:.75rem;font-weight:750}
+.memrly-jump-popover select,.memrly-jump-popover input{width:100%;min-width:0;border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--memrly-navy);background:white}
+.memrly-calendar-switch{display:flex;gap:3px;padding:3px;border:1px solid var(--border);border-radius:12px;background:white}
+.memrly-calendar-switch button{min-width:45px;padding:8px 12px;border:0;border-radius:9px;background:white;color:var(--memrly-navy);font-size:.77rem;font-weight:750}
+.memrly-calendar-switch button.active{background:var(--memrly-navy);color:white}
+.memrly-month-calendar{display:grid;gap:13px}
+.memrly-calendar-grid .week-names{font-size:.76rem;color:var(--muted);font-weight:700;gap:5px}
+.memrly-calendar-grid .calendar-week{grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:auto;align-items:stretch;gap:5px;margin-bottom:5px}
+.memrly-calendar-grid .calendar-day{aspect-ratio:1/.89;border:1px solid var(--border);background:white;color:var(--memrly-navy);border-radius:9px;min-height:0;min-width:0;padding:6px}
+.memrly-calendar-grid .calendar-day.with-photo{color:white;background:var(--memrly-soft)}
+.memrly-calendar-grid .calendar-day.with-photo:after{background:linear-gradient(180deg,rgba(16,43,73,.38),transparent 65%)}
+.memrly-calendar-grid .calendar-day.selected{outline:2px solid var(--memrly-navy);outline-offset:1px}
+.memrly-calendar-grid .calendar-day.muted{opacity:.24}
+.memrly-calendar-grid .calendar-day .day-number{font-size:.82rem;padding:2px 4px;border-radius:7px;text-shadow:none}
+.memrly-calendar-grid .calendar-day .memrly-number-mark{background:var(--memrly-navy);color:white}
+.memrly-calendar-grid .calendar-day.holiday-border{border:2px solid var(--memrly-navy);box-shadow:none}
+.memrly-calendar-grid .calendar-day .holiday-symbol{z-index:5;color:var(--memrly-navy);border-color:var(--memrly-navy)}
+.memrly-calendar-grid .calendar-day .calendar-anniversary{z-index:7;border-color:white;background:var(--memrly-navy)}
+.memrly-calendar-grid .calendar-day .calendar-birthday{z-index:5}
+.memrly-range{position:relative;align-self:stretch;border:2px solid var(--memrly-navy);border-radius:10px;background:transparent;pointer-events:none;min-width:0}
+.memrly-range-label{position:absolute;bottom:2px;right:3px;display:block;padding:2px 5px;max-width:94%;border-radius:6px;background:var(--memrly-navy);color:white;font-size:.55rem;line-height:1.1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.memrly-calendar-key{display:flex;gap:15px;flex-wrap:wrap;color:var(--muted);font-size:.72rem}
+.memrly-calendar-key span{display:flex;align-items:center;gap:5px}
+.memrly-calendar-key i{width:12px;height:12px;border:1px solid var(--memrly-navy);border-radius:3px;display:inline-block}
+.memrly-calendar-key span:nth-child(2) i{border-width:2px}
+.memrly-calendar-key span:nth-child(3) i{outline:1px solid var(--memrly-navy);outline-offset:2px}
+.memrly-calendar-side{display:grid;gap:13px;min-width:0}
+.memrly-calendar-side h2{font-size:1.03rem;margin:0 0 5px}
+.memrly-calendar-side p{margin:0;color:var(--muted);font-size:.8rem}
+.memrly-calendar-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:18px}
+.memrly-calendar-kpis>div{display:grid;justify-items:center;align-content:start;gap:6px;min-width:0;text-align:center}
+.memrly-calendar-kpis svg{width:22px;height:22px}
+.memrly-calendar-kpis strong{font-size:clamp(1.05rem,1.5vw,1.6rem);font-weight:850;font-variant-numeric:tabular-nums}
+.memrly-calendar-kpis span{font-size:.64rem;line-height:1.15;color:var(--muted);overflow-wrap:anywhere}
+.memrly-selected-day{display:grid;gap:11px}
+.memrly-selected-day h2{margin:0}
+.memrly-day-subtitle{text-transform:capitalize}
+.memrly-day-main-photo{overflow:hidden;border-radius:10px;background:var(--memrly-soft)}
+.memrly-day-preview{width:100%;height:clamp(130px,15vw,205px);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px}
+.memrly-day-preview span{font-size:.78rem;color:var(--muted)}
+.memrly-day-info{display:grid;gap:10px}
+.memrly-day-info>div{display:flex;gap:9px;align-items:flex-start;min-width:0;color:var(--memrly-navy);font-size:.77rem}
+.memrly-day-info svg{flex-shrink:0}
+.memrly-day-info span{line-height:1.4;overflow-wrap:anywhere}
+.memrly-day-holidays{display:flex;flex-wrap:wrap;gap:5px;padding-top:9px;border-top:1px solid var(--border)}
+.memrly-day-holidays span{padding:5px 8px;border:1px solid var(--border);border-radius:99px;background:var(--memrly-soft);font-size:.69rem}
+.memrly-calendar-actions{display:grid;gap:9px}
+.memrly-calendar-actions button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;background:white;border:1px solid var(--border);border-radius:11px;color:var(--memrly-navy);font-size:.77rem;font-weight:750;text-align:left}
+.memrly-calendar-actions button svg:last-child{margin-left:auto}
+.memrly-calendar-actions button:hover:not(:disabled){background:var(--memrly-soft)}
+.memrly-calendar-actions button:disabled{opacity:.45}
+.memrly-mini-months{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.memrly-mini-month{border:1px solid var(--border);border-radius:12px;padding:10px 7px;min-width:0}
+.memrly-mini-month-title{display:flex;width:100%;justify-content:space-between;align-items:center;background:white;border:0;text-transform:capitalize;color:var(--memrly-navy);font-size:.82rem;font-weight:800;padding:0 2px 7px}
+.memrly-mini-month .memrly-calendar-grid .week-names{font-size:.56rem;padding:2px 0 5px;gap:2px}
+.memrly-mini-month .memrly-calendar-grid .calendar-week{gap:2px;margin-bottom:2px}
+.memrly-mini-month .memrly-calendar-grid .calendar-day{aspect-ratio:1.1;padding:1px;border-radius:5px}
+.memrly-mini-month .memrly-calendar-grid .calendar-day .day-number{font-size:.55rem;padding:1px 2px;border-radius:3px}
+.memrly-mini-month .memrly-range{border-width:1px;margin:1px!important}
+.memrly-mini-month .memrly-range-label{display:none}
+.memrly-mini-month .holiday-symbol,.memrly-mini-month .calendar-birthday{display:none}
+.memrly-mini-month .calendar-anniversary{font-size:.4rem;padding:0}
+.memrly-date-list{display:grid;gap:7px;max-height:69vh;overflow:auto}
+.memrly-date-row{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid var(--border);border-radius:11px;background:white;color:var(--memrly-navy);text-align:left}
+.memrly-date-row.active{border-color:var(--memrly-navy);background:var(--memrly-soft)}
+.memrly-date-row-text{min-width:0;flex:1;display:grid;gap:6px}
+.memrly-date-row-text strong{font-size:.82rem;text-transform:capitalize}
+.memrly-date-row-labels{display:flex;gap:4px;flex-wrap:wrap}
+.memrly-date-row-labels span{font-size:.64rem;color:var(--muted);background:var(--memrly-soft);padding:4px 6px;border-radius:6px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.memrly-date-row-image{height:49px;width:49px;flex:0 0 49px;border-radius:8px}
+.memrly-date-row>small{white-space:nowrap;font-size:.7rem;color:var(--muted)}
+
+/* Adaptación progresiva */
+@media(max-width:1490px){
+ .memrly-recents{grid-template-columns:repeat(8,minmax(0,1fr))}
+ .memrly-recent-photo:nth-child(n+9){display:none}
+}
+@media(max-width:1280px){
+ .memrly-recents{grid-template-columns:repeat(7,minmax(0,1fr))}
+ .memrly-recent-photo:nth-child(n+8){display:none}
+ .memrly-feature-card{grid-template-columns:42% 58%}
+ .memrly-feature-info{padding:13px}
+ .memrly-calendar-workspace{grid-template-columns:minmax(0,5fr) minmax(260px,3fr)}
+ .memrly-calendar-main{padding:12px}
+ .memrly-mini-months{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .memrly-year-top{grid-template-columns:minmax(0,1.8fr) minmax(215px,1fr)}
+ .memrly-year-metrics .memrly-stat{gap:3px}
+ .memrly-year-metrics .memrly-stat-icon{width:16px;height:16px}
+}
+@media(max-width:1050px){
+ .memrly-calendar-workspace{grid-template-columns:1fr}
+ .memrly-calendar-side{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .memrly-calendar-actions{grid-column:1/-1}
+ .memrly-mini-months{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .memrly-year-top{grid-template-columns:1fr}
+ .memrly-year-summary-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .memrly-year-summary .memrly-stat{border:0;min-height:62px}
+ .memrly-feature-card{min-height:170px}
+ .memrly-feature-image{min-height:170px}
+}
+@media(max-width:760px){
+ .app-content,.main-container{background:white}
+ .topbar-brand-image{height:33px;max-width:150px}
+ .topbar-divider{display:none}
+ .memrly-screen{gap:13px}
+ .memrly-screen h2{font-size:1.05rem}
+ .memrly-home-cover{height:130px!important}
+ .memrly-home-cover .hero-content{padding:14px 45px 14px 18px}
+ .memrly-home-cover .hero-copy h1{font-size:1.45rem}
+ .memrly-home-cover .hero-copy p{display:block;font-size:.7rem}
+ .memrly-stats-four{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .memrly-stat{min-height:81px;padding:11px 13px;gap:11px}
+ .memrly-stat-icon{width:24px;height:24px}
+ .memrly-stat-info strong{font-size:1.42rem}
+ .memrly-stat-info span{font-size:.73rem}
+ .memrly-quick-two{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .memrly-quick-tile{padding:11px;gap:8px;min-height:78px}
+ .memrly-quick-tile>svg:first-child{width:20px;height:20px}
+ .memrly-quick-tile>svg:last-child{width:14px;height:14px}
+ .memrly-quick-tile strong{font-size:.78rem}
+ .memrly-quick-tile small{font-size:.65rem}
+ .memrly-recents{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+ .memrly-recent-photo:nth-child(n+6){display:none}
+ .memrly-feature-grid{grid-template-columns:1fr;gap:15px}
+ .memrly-feature-card{grid-template-columns:40% 60%;min-height:160px}
+ .memrly-feature-image{min-height:160px}
+ .memrly-feature-info{padding:13px}
+ .memrly-feature-info h3{font-size:1rem}
+ .memrly-feature-info p{font-size:.76rem}
+ .memrly-screen-intro h1{font-size:1.7rem}
+ .memrly-year-cards{gap:9px}
+ .memrly-year-card .memrly-year-number{font-size:1.5rem;left:10px;bottom:8px}
+ .memrly-year-metrics{padding:8px 4px}
+ .memrly-year-metrics .memrly-stat{flex-direction:column;text-align:center;min-height:58px;padding:3px}
+ .memrly-year-metrics .memrly-stat-info strong{font-size:1rem}
+ .memrly-year-metrics .memrly-stat-info span{font-size:.61rem}
+ .memrly-year-cta{min-height:35px;margin:5px auto 9px}
+ .memrly-year-summary{padding:15px}
+ .memrly-year-summary .memrly-stat{flex-direction:column;text-align:center;padding:6px 2px}
+ .memrly-year-summary .memrly-stat-info strong{font-size:1.3rem}
+ .memrly-featured-rows{grid-template-columns:1fr;gap:7px}
+ .memrly-calendar-side{grid-template-columns:1fr}
+ .memrly-calendar-main{padding:11px}
+ .memrly-calendar-toolbar{gap:7px}
+ .memrly-calendar-switch button{padding:7px 9px;min-width:38px;font-size:.72rem}
+ .memrly-date-jump{font-size:.97rem}
+ .memrly-calendar-grid .calendar-week{gap:3px;margin-bottom:3px}
+ .memrly-calendar-grid .calendar-day{aspect-ratio:.84;border-radius:7px;padding:3px}
+ .memrly-calendar-grid .calendar-day .day-number{font-size:.71rem;padding:2px}
+ .memrly-range-label{font-size:.46rem;padding:2px;bottom:1px;right:1px}
+ .memrly-mini-months{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .memrly-mini-month{padding:7px 5px}
+ .memrly-calendar-kpis strong{font-size:1.34rem}
+ .memrly-day-preview{height:180px}
+ .cover-framing{grid-template-columns:1fr}
+ .collection-cards{grid-template-columns:1fr}
+}
+@media(max-width:400px){
+ .memrly-recents{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .memrly-recent-photo:nth-child(n+5){display:none}
+ .memrly-quick-tile>svg:first-child{display:none}
+ .memrly-calendar-period{gap:2px}
+ .memrly-nav-round{width:26px;height:26px}
+ .memrly-calendar-switch button{min-width:34px;padding:6px}
+ .memrly-mini-months{grid-template-columns:1fr}
+ .memrly-year-cards{grid-template-columns:1fr}
+ .memrly-year-photo-wrap{aspect-ratio:2/1}
+ .memrly-year-metrics .memrly-stat{flex-direction:row;text-align:left}
+}
+@media(prefers-reduced-motion:reduce){
+ .memrly-screen *{scroll-behavior:auto!important;animation:none!important}
+}
+
+/* El encuadre del selector replica la forma aproximada de cada portada. */
+.cover-frame-preview{min-height:0;max-height:none;height:auto;aspect-ratio:3/1;position:relative}
+.cover-frame-preview.preview-home{aspect-ratio:7/1;min-height:95px}
+.cover-frame-preview.preview-year{aspect-ratio:1.8/1;max-height:240px}
+.cover-frame-preview.preview-memory{aspect-ratio:3.4/1;min-height:120px}
+.cover-frame-preview .cover-frame-photo{width:100%;height:100%;position:absolute;inset:0}
+@media(max-width:760px){
+  .cover-frame-preview.preview-home{aspect-ratio:3.4/1}
+  .memrly-year-metrics .memrly-stat{flex-direction:row;text-align:left;gap:3px}
+  .memrly-year-metrics .memrly-stat-icon{width:14px;height:14px}
+}
+
+/* 2026-11-22: Corrección de la cuadrícula mensual.
+ * Los contornos de intervalos son overlays absolutos, nunca items de grid:
+ * no pueden desplazar 7 días a una nueva fila ni aumentar la altura semanal.
+ */
+.memrly-calendar-grid .calendar-week{position:relative;isolation:isolate}
+.memrly-calendar-grid .memrly-week-ranges{
+  position:absolute;
+  inset:0;
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  grid-template-rows:minmax(0,1fr);
+  gap:5px;
+  align-items:stretch;
+  pointer-events:none;
+  z-index:4;
+  min-height:0;
+  overflow:visible;
+}
+.memrly-calendar-grid .memrly-week-ranges>.memrly-range{
+  position:relative;
+  width:auto;
+  height:auto;
+  min-width:0;
+  min-height:0;
+  align-self:stretch;
+  margin:2px;
+  border-radius:8px;
+  box-sizing:border-box;
+  pointer-events:none;
+  overflow:hidden;
+}
+.memrly-calendar-grid.compact .memrly-week-ranges{gap:2px}
+.memrly-calendar-grid.compact .memrly-week-ranges>.memrly-range{
+  border-width:1px;
+  margin:1px!important;
+  border-radius:4px;
+}
+.memrly-calendar-grid .memrly-range-label{
+  position:absolute;
+  max-width:calc(100% - 5px);
+  bottom:2px;
+  right:2px;
+  z-index:2;
+  font-size:clamp(.48rem,.65vw,.66rem);
+  padding:3px 5px;
+}
+.memrly-calendar-grid .memrly-calendar-day .day-number{position:relative}
+.memrly-mini-month .memrly-week-ranges>.memrly-range{margin:1px!important}
+
+/* Calendario: el título queda en la columna izquierda y el panel de
+ * resumen comienza a su misma altura, al borde superior de la página. */
+.memrly-calendar-workspace{align-items:start}
+.memrly-calendar-left{
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  align-content:start;
+  gap:15px;
+  min-width:0;
+}
+.memrly-calendar-left>.memrly-screen-intro{min-width:0}
+.memrly-calendar-side{align-self:start}
+.memrly-date-jump-wrap{z-index:10}
+.memrly-jump-popover{z-index:100}
+.memrly-jump-popover select{cursor:pointer}
+.memrly-date-jump{text-transform:none}
+.memrly-date-jump:first-letter{text-transform:uppercase}
+
+/* Inicio y Años deben caber en una pantalla de escritorio: el contenedor
+ * mantiene exactamente el alto disponible bajo la barra superior.
+ * No se bloquea el scroll móvil porque ocultaría fotografías y controles. */
+@media(min-width:761px){
+  .app-shell.page-inicio,.app-shell.page-anios{
+    height:100dvh;
+    min-height:0;
+    overflow:hidden;
+  }
+  .app-shell.page-inicio>.app-content,
+  .app-shell.page-anios>.app-content{
+    display:flex;
+    flex-direction:column;
+    height:100%;
+    min-height:0;
+    min-width:0;
+    overflow:hidden;
+  }
+  .app-shell.page-inicio .topbar,
+  .app-shell.page-anios .topbar{flex:0 0 69px}
+  .app-shell.page-inicio .main-container,
+  .app-shell.page-anios .main-container{
+    width:100%;
+    flex:1 1 auto;
+    min-height:0;
+    min-width:0;
+    max-width:none;
+    padding:clamp(7px,1.2vh,15px) clamp(12px,1.8vw,27px);
+    overflow:hidden;
+  }
+  .app-shell.page-inicio .memrly-home,
+  .app-shell.page-anios .memrly-years{
+    height:100%;
+    min-height:0;
+    overflow:hidden;
+    gap:clamp(5px,.9vh,11px);
+  }
+
+  /* Fila 1 portada, 2 cifras, 3 acciones, 4 recientes, 5 destacados. */
+  .memrly-home{
+    grid-template-rows:
+      minmax(76px,1fr)
+      minmax(60px,.71fr)
+      minmax(55px,.61fr)
+      minmax(82px,1.03fr)
+      minmax(118px,1.46fr);
+  }
+  .memrly-home .memrly-home-cover{
+    height:100%!important;
+    min-height:0;
+    border-radius:14px;
+  }
+  .memrly-home .hero-content{padding:10px 45px 10px 18px}
+  .memrly-home .hero-copy h1{font-size:clamp(1.2rem,2.2vh,2rem)}
+  .memrly-home .hero-copy p{font-size:clamp(.65rem,1.25vh,.85rem)}
+  .memrly-home .memrly-stats-four,
+  .memrly-home .memrly-quick-two,
+  .memrly-home .memrly-feature-grid{height:100%;min-height:0}
+  .memrly-home .memrly-stat{
+    min-height:0;
+    height:100%;
+    padding:clamp(6px,1.1vh,14px) clamp(7px,1.1vw,15px);
+    border-radius:12px;
+  }
+  .memrly-home .memrly-stat-icon{height:clamp(19px,3.1vh,31px);width:clamp(19px,3.1vh,31px)}
+  .memrly-home .memrly-stat-info strong{font-size:clamp(1.12rem,2.8vh,1.8rem)}
+  .memrly-home .memrly-stat-info span{font-size:clamp(.64rem,1.2vh,.82rem)}
+  .memrly-home .memrly-quick-tile{
+    min-height:0;
+    height:100%;
+    padding:clamp(6px,1vh,12px) 11px;
+    gap:8px;
+    border-radius:12px;
+  }
+  .memrly-home .memrly-quick-tile>svg:first-child{height:20px;width:20px}
+  .memrly-home .memrly-quick-tile strong{font-size:clamp(.75rem,1.6vh,.95rem)}
+  .memrly-home .memrly-quick-tile small{font-size:clamp(.6rem,1.15vh,.75rem)}
+  .memrly-home .memrly-section,
+  .memrly-home .memrly-feature-section{
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+    align-content:stretch;
+    min-width:0;
+    min-height:0;
+    overflow:hidden;
+  }
+  .memrly-home .memrly-heading{margin-bottom:clamp(3px,.6vh,8px)}
+  .memrly-home .memrly-heading h2{font-size:clamp(.86rem,1.85vh,1.14rem)}
+  .memrly-home .memrly-recents{
+    min-width:0;
+    min-height:0;
+    height:100%;
+    align-items:center;
+    grid-template-rows:minmax(0,1fr);
+    overflow:hidden;
+  }
+  .memrly-home .memrly-recent-photo{
+    width:auto;
+    height:100%;
+    max-height:100%;
+    max-width:100%;
+    aspect-ratio:1;
+    min-height:0;
+    justify-self:center;
+  }
+  .memrly-home .memrly-feature-card{
+    min-height:0;
+    height:100%;
+    grid-template-columns:minmax(0,40%) minmax(0,60%);
+    overflow:hidden;
+    border-radius:13px;
+  }
+  .memrly-home .memrly-feature-image{
+    min-height:0;
+    min-width:0;
+    height:100%;
+    max-height:100%;
+    overflow:hidden;
+  }
+  .memrly-home .memrly-feature-info{
+    padding:clamp(5px,.9vh,11px) clamp(7px,.9vw,13px);
+    gap:clamp(2px,.5vh,6px);
+    min-height:0;
+    overflow:hidden;
+  }
+  .memrly-home .memrly-feature-info h3{
+    font-size:clamp(.84rem,1.9vh,1.18rem);
+    line-height:1.17;
+    overflow-wrap:anywhere;
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    line-clamp:2;
+    overflow:hidden;
+  }
+  .memrly-home .memrly-feature-info p{
+    font-size:clamp(.65rem,1.25vh,.78rem);
+    line-height:1.18;
+    -webkit-line-clamp:2;
+    line-clamp:2;
+  }
+  .memrly-home .memrly-type{padding:3px 6px;font-size:clamp(.59rem,1.15vh,.72rem)}
+  .memrly-home .memrly-link-button{
+    padding:5px 8px;
+    min-height:24px;
+    margin-top:auto;
+    font-size:clamp(.61rem,1.2vh,.77rem);
+  }
+  .memrly-home .memrly-feature-empty{min-height:0;height:100%}
+
+  /* Años: el resumen no puede forzar el alto de las dos tarjetas. */
+  .memrly-years{
+    grid-template-rows:auto minmax(0,1fr) minmax(72px,.25fr) minmax(94px,.34fr);
+  }
+  .memrly-years .memrly-screen-intro h1{font-size:clamp(1.35rem,2.5vh,1.9rem)}
+  .memrly-years .memrly-screen-intro p{font-size:clamp(.73rem,1.3vh,.9rem)}
+  .memrly-years .memrly-year-top,
+  .memrly-years .memrly-year-cards,
+  .memrly-years .memrly-year-card{min-height:0;height:100%}
+  .memrly-years .memrly-year-card{
+    grid-template-rows:minmax(0,1fr) auto auto;
+  }
+  .memrly-years .memrly-year-photo-wrap{
+    aspect-ratio:auto;
+    height:100%;
+    min-height:0;
+    position:relative;
+  }
+  .memrly-years .memrly-year-photo{height:100%;min-height:0}
+  .memrly-years .memrly-year-number{font-size:clamp(1.2rem,2.7vh,2rem);bottom:8px;left:12px}
+  .memrly-years .memrly-year-metrics{
+    padding:clamp(3px,.55vh,8px) 7px;
+    gap:2px;
+    min-height:0;
+  }
+  .memrly-years .memrly-year-metrics .memrly-stat{
+    min-height:0;
+    padding:2px 3px;
+    gap:4px;
+  }
+  .memrly-years .memrly-year-metrics .memrly-stat-info strong{
+    font-size:clamp(.94rem,2.1vh,1.3rem);
+  }
+  .memrly-years .memrly-year-metrics .memrly-stat-info span{font-size:clamp(.58rem,1.05vh,.7rem)}
+  .memrly-years .memrly-year-cta{
+    min-height:30px;
+    height:clamp(30px,4.1vh,38px);
+    margin:3px auto clamp(4px,.7vh,9px);
+    font-size:.76rem;
+  }
+  .memrly-years .memrly-year-summary{
+    min-height:0;
+    overflow:hidden;
+    padding:clamp(10px,1.35vh,18px);
+    gap:4px;
+  }
+  .memrly-years .memrly-year-summary .memrly-stat{
+    min-height:0;
+    padding:clamp(5px,.8vh,9px) 0;
+  }
+  .memrly-years .memrly-year-summary .memrly-stat-info strong{font-size:clamp(1.15rem,2.5vh,1.55rem)}
+  .memrly-years .memrly-panel{
+    min-height:0;
+    overflow:hidden;
+    padding:clamp(7px,1vh,13px) clamp(10px,1.4vw,17px);
+  }
+  .memrly-years .memrly-heading{margin-bottom:clamp(3px,.7vh,8px)}
+  .memrly-years .memrly-heading h2{font-size:clamp(.87rem,1.6vh,1.16rem)}
+  .memrly-years .memrly-timeline-panel,
+  .memrly-years .memrly-years-featured{
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+    align-content:stretch;
+  }
+  .memrly-years .memrly-timeline{min-height:0;height:100%;padding:5px 0;overflow-x:auto}
+  .memrly-years .memrly-timeline.expanded{overflow-y:auto;max-height:100%;align-content:start}
+  .memrly-years .memrly-timeline-year{height:clamp(26px,4vh,38px);min-width:72px;font-size:.77rem}
+  .memrly-years .memrly-featured-rows{height:100%;min-height:0;align-items:stretch;overflow:hidden}
+  .memrly-years .memrly-featured-small{height:100%;min-height:0;padding:5px;gap:7px}
+  .memrly-years .memrly-featured-thumb{width:clamp(39px,6vh,60px);height:clamp(39px,6vh,60px);flex-basis:clamp(39px,6vh,60px)}
+  .memrly-years .memrly-featured-small strong{font-size:clamp(.73rem,1.4vh,.86rem)}
+}
+
+/* En resoluciones de portátil el resumen general desaparece, como se pidió.
+ * Las dos tarjetas pasan a ocupar todo el ancho de la fila. */
+@media(min-width:761px) and (max-width:1350px){
+  .memrly-years .memrly-year-summary{display:none}
+  .memrly-years .memrly-year-top{grid-template-columns:minmax(0,1fr)}
+}
+@media(min-width:761px) and (max-height:640px){
+  .memrly-home{grid-template-rows:minmax(60px,.9fr) minmax(50px,.7fr) minmax(45px,.55fr) minmax(58px,.95fr) minmax(87px,1.3fr)}
+  .memrly-years{grid-template-rows:auto minmax(0,1fr) minmax(60px,.22fr) minmax(75px,.28fr)}
+  .memrly-years .memrly-screen-intro p{display:none}
+  .memrly-home .memrly-feature-info p{font-size:.64rem}
+}
+
+/* El contenido móvil sigue con scroll natural; las vistas son verticales. */
+@media(max-width:760px){
+  .memrly-calendar-left{gap:12px}
+  .memrly-calendar-main{min-width:0}
+  .memrly-calendar-side{grid-column:auto}
+  .memrly-calendar-grid .memrly-week-ranges{gap:3px}
+  .memrly-calendar-grid .memrly-range-label{font-size:.44rem;padding:1px 2px;max-width:calc(100% - 3px)}
+}
+
+/* Intervalos del calendario: UN marco por tramo semanal.
+   El overlay hereda la separación real del grid de fechas, sin márgenes entre
+   los días y sin modificar la posición ni el tamaño de sus casillas.
+   No usar las clases antiguas .memrly-range ni .memrly-range-bridge. */
+.memrly-calendar-grid .calendar-week{
+  position:relative;
+  isolation:isolate;
+}
+.memrly-calendar-grid .memrly-interval-layer{
+  position:absolute;
+  inset:0;
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  grid-template-rows:minmax(0,1fr);
+  column-gap:inherit;
+  row-gap:0;
+  pointer-events:none;
+  z-index:5;
+}
+.memrly-calendar-grid .memrly-interval-outline{
+  box-sizing:border-box;
+  position:relative;
+  min-width:0;
+  min-height:0;
+  align-self:stretch;
+  border:2px solid var(--memrly-navy);
+  border-radius:9px;
+  background:transparent;
+  pointer-events:none;
+  overflow:visible;
+}
+/* Los días interiores conservan únicamente su borde de celda neutro. */
+.memrly-calendar-grid .calendar-day.memrly-in-range:not(.selected){
+  border:1px solid var(--border);
+  border-radius:9px;
+  overflow:hidden;
+  outline:none;
+  box-shadow:none;
+}
+.memrly-calendar-grid .calendar-day.memrly-in-range .day-number{
+  background:var(--memrly-navy);
+  color:white;
+}
+/* La selección domina el contorno del viaje pero no afecta a los otros días. */
+.memrly-calendar-grid .calendar-day.selected,
+.memrly-calendar-grid .calendar-day.memrly-in-range.selected{
+  position:relative;
+  z-index:12;
+  border:2px solid var(--memrly-navy);
+  border-radius:9px;
+  outline:2px solid var(--memrly-navy);
+  outline-offset:-2px;
+  box-shadow:inset 0 0 0 1px white;
+}
+/* Etiqueta en la caja del tramo, no en la última celda.
+   Se ajusta al nombre; puede ocupar dos líneas en un tramo estrecho. */
+.memrly-calendar-grid .memrly-interval-tag{
+  box-sizing:border-box;
+  position:absolute;
+  right:3px;
+  bottom:3px;
+  z-index:1;
+  display:block;
+  width:max-content;
+  max-width:min(390px,70vw);
+  padding:4px 7px;
+  border-radius:6px;
+  background:var(--memrly-navy);
+  color:white;
+  font-size:clamp(.55rem,.73vw,.71rem);
+  font-weight:750;
+  line-height:1.16;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  text-align:left;
+  box-shadow:0 1px 3px rgba(16,43,73,.18);
+}
+.memrly-calendar-grid.compact .memrly-interval-outline,
+.memrly-mini-month .memrly-interval-outline{
+  border-width:1px;
+  border-radius:5px;
+}
+.memrly-calendar-grid.compact .calendar-day.selected{
+  border-radius:5px;
+  outline-width:1px;
+}
+@media(max-width:760px){
+  .memrly-calendar-grid .memrly-interval-outline{border-radius:7px}
+  .memrly-calendar-grid .memrly-interval-tag{
+    max-width:min(260px,75vw);
+    font-size:.52rem;
+    padding:2px 4px;
+  }
+}
+/* Identidad Memrly: se usarán los PNG originales del usuario cuando estén
+   presentes en /public/brand; mientras tanto se conserva el logo anterior. */
+.sidebar-app-icon{background:var(--memrly-navy);border-radius:12px}
+.sidebar-logo strong{font-family:Georgia,serif;letter-spacing:-.03em}
+.topbar-brand-image{max-width:min(24vw,235px);height:clamp(35px,4.4vh,49px);object-fit:contain}
+@media(max-width:760px){
+  .topbar-brand-image{max-width:130px;height:34px}
+}
+
+/* Celebraciones recurrentes: filtros combinables, ediciones manuales y lectura clara. */
+.celebration-explorer{display:grid;gap:13px;min-width:0}
+.celebration-explorer-intro{display:flex;align-items:flex-start;gap:12px}
+.celebration-explorer-intro>svg{flex-shrink:0;margin-top:3px}
+.celebration-explorer-intro h2{margin:0 0 5px;font-size:1.09rem}
+.celebration-explorer-intro p{margin:0;color:var(--muted);font-size:.81rem;line-height:1.5}
+.celebration-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.celebration-filters label{display:grid;gap:6px;min-width:0}
+.celebration-filters label>span:first-child{font-size:.73rem;font-weight:750;color:var(--memrly-navy)}
+.celebration-filters select,.celebration-filters input,.celebration-add-row select,
+.celebration-editor-row select{width:100%;min-width:0;border:1px solid var(--border);border-radius:9px;background:white;color:var(--memrly-navy);padding:10px 9px;font-size:.79rem}
+.celebration-filters select:disabled{opacity:.45}
+.celebration-search-input{display:flex;align-items:center;gap:7px;border:1px solid var(--border);border-radius:9px;padding-left:9px;overflow:hidden}
+.celebration-search-input input{border:0;padding-left:0;outline:0;flex:1}
+.celebration-shortcuts{display:flex;gap:7px;flex-wrap:wrap}
+.celebration-chip,.celebration-clear{border:1px solid var(--border);border-radius:99px;padding:7px 11px;color:var(--memrly-navy);background:white;font-size:.75rem;font-weight:750}
+.celebration-chip.selected{background:var(--memrly-navy);color:white}
+.celebration-clear{margin-left:auto;text-decoration:underline}
+.celebration-active{background:var(--memrly-soft);border:1px solid var(--border);border-radius:10px;margin:0;padding:9px 12px;font-size:.82rem;color:var(--memrly-navy)}
+.celebration-associations{display:grid;gap:11px;padding:13px;border:1px solid var(--border);border-radius:13px;background:white}
+.celebration-associations-title{display:grid;gap:5px}
+.celebration-associations-title>strong{font-size:.9rem}
+.celebration-associations-title>small{line-height:1.45;font-size:.76rem;color:var(--muted)}
+.celebration-editor-rows{display:grid;gap:7px}
+.celebration-editor-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(140px,43%);align-items:center;gap:12px;padding:9px;border:1px solid var(--border);border-radius:10px}
+.celebration-editor-row>span{display:grid;gap:3px;min-width:0}
+.celebration-editor-row strong{font-size:.83rem;overflow-wrap:anywhere}
+.celebration-editor-row small{font-size:.71rem;color:var(--muted)}
+.celebration-editor-row select{padding:7px 9px}
+.celebration-add-row{display:flex;align-items:center;gap:8px}
+.celebration-add-row>select{flex:1}
+.celebration-add-row>.btn{flex-shrink:0}
+@media(max-width:1100px){.celebration-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){
+ .celebration-filters{grid-template-columns:1fr}
+ .celebration-editor-row{grid-template-columns:1fr;gap:7px}
+ .celebration-clear{margin-left:0}
+}
+
+/* El marco del viaje vuelve EXACTAMENTE a 2 px (1 px en minimapas).
+   Solamente el día seleccionado conserva el trazo reforzado de 3 px. */
+.memrly-calendar-grid .memrly-interval-outline{border-width:2px}
+.memrly-calendar-grid.compact .memrly-interval-outline,
+.memrly-mini-month .memrly-interval-outline{border-width:1px}
+.memrly-calendar-grid .calendar-day.selected,
+.memrly-calendar-grid .calendar-day.memrly-in-range.selected{
+  border-width:3px;
+  outline:2px solid var(--memrly-navy);
+  outline-offset:-4px;
+}
+.memrly-calendar-grid.compact .calendar-day.selected,
+.memrly-mini-month .calendar-day.selected{border-width:2px;outline-width:1px;outline-offset:-2px}
+
+/* Fechas destacadas. Los colores se reservan para las celebraciones y nunca
+   alteran el marco exterior de los viajes ni sus etiquetas. */
+.memrly-calendar-grid .calendar-day.holiday-christmas{--memrly-occasion-ring:#c8434f}
+.memrly-calendar-grid .calendar-day.holiday-spring{--memrly-occasion-ring:#388757}
+.memrly-calendar-grid .calendar-day.holiday-carnival{--memrly-occasion-ring:#8d59c9}
+.memrly-calendar-grid .calendar-day.holiday-autumn{--memrly-occasion-ring:#c57032}
+.memrly-calendar-grid .calendar-day.holiday-national{--memrly-occasion-ring:#aa5965}
+.memrly-calendar-grid .calendar-day.holiday-bridge{--memrly-occasion-ring:#3486af}
+.memrly-calendar-grid .calendar-day.holiday-summer{--memrly-occasion-ring:#d19521}
+.memrly-calendar-grid .calendar-day.holiday-pranks{--memrly-occasion-ring:#b853a4}
+.memrly-calendar-grid .calendar-day.memrly-special-birthday{--memrly-occasion-ring:#9160c8}
+.memrly-calendar-grid .calendar-day.memrly-special-anniversary{--memrly-occasion-ring:#ee1783}
+
+/* Primero el viaje en azul marino; luego el aro del día festivo, individual.
+   Este selector también gana cuando el día pertenece a un viaje. */
+.memrly-calendar-grid .calendar-day:is(.holiday-border,.memrly-special-birthday,.memrly-special-anniversary):not(.selected),
+.memrly-calendar-grid .calendar-day.memrly-in-range:is(.holiday-border,.memrly-special-birthday,.memrly-special-anniversary):not(.selected){
+  position:relative;
+  z-index:7;
+  border:2px solid var(--memrly-occasion-ring);
+  outline:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.8);
+  border-radius:9px;
+}
+
+/* El seleccionado mantiene el marco azul de 3px y el festivo muestra además
+   un segundo aro exterior de color. Rosa fuerte tiene prioridad sobre otros
+   festivos cuando coinciden con el aniversario de pareja. */
+.memrly-calendar-grid .calendar-day.selected:is(.holiday-border,.memrly-special-birthday,.memrly-special-anniversary),
+.memrly-calendar-grid .calendar-day.memrly-in-range.selected:is(.holiday-border,.memrly-special-birthday,.memrly-special-anniversary){
+  position:relative;
+  z-index:12;
+  border:3px solid var(--memrly-navy);
+  outline:2px solid var(--memrly-occasion-ring);
+  outline-offset:1px;
+  box-shadow:inset 0 0 0 1px white;
+}
+.memrly-calendar-grid .calendar-day .holiday-symbol{
+  color:var(--memrly-occasion-ring,var(--memrly-navy));
+  border-color:currentColor;
+}
+.memrly-calendar-key .memrly-key-holiday i{border:2px solid #8d59c9}
+.memrly-calendar-key .memrly-key-anniversary i{border:2px solid #ee1783}
+
+@media(max-width:760px){
+  .memrly-calendar-grid .calendar-day:is(.holiday-border,.memrly-special-birthday,.memrly-special-anniversary):not(.selected){
+    border-width:2px;
+    border-radius:7px;
+  }
+}
+.memrly-calendar-grid.compact .calendar-day:is(.holiday-border,.memrly-special-birthday,.memrly-special-anniversary):not(.selected),
+.memrly-mini-month .calendar-day:is(.holiday-border,.memrly-special-birthday,.memrly-special-anniversary):not(.selected){
+  border-width:1px;
+  border-radius:5px;
+}
+.memrly-calendar-grid.compact .calendar-day.selected:is(.holiday-border,.memrly-special-birthday,.memrly-special-anniversary),
+.memrly-mini-month .calendar-day.selected:is(.holiday-border,.memrly-special-birthday,.memrly-special-anniversary){
+  border-width:2px;
+  outline-width:1px;
+  outline-offset:0;
+  border-radius:5px;
+}
+
+/* Identidad Memrly: logotipo vectorial azul oscuro, reemplaza Recuerdos. */
+.topbar-brand-image{width:clamp(160px,19vw,245px);max-width:245px;height:45px;object-fit:contain;object-position:left center}
+.sidebar-app-icon{object-fit:contain;background:transparent;border-radius:12px}
+@media(max-width:760px){.topbar-brand-image{width:clamp(115px,32vw,165px);height:37px}}
+
+/* Recuerdos, viajes y eventos de UNA sola fecha: sustituimos la etiqueta
+   superpuesta por un pequeño icono de categoría, sin alterar el contorno. */
+.memrly-calendar-grid .memrly-interval-icon{
+  position:absolute;
+  bottom:3px;
+  display:grid;
+  place-items:center;
+  width:20px;
+  height:20px;
+  box-sizing:border-box;
+  border-radius:6px;
+  background:var(--memrly-navy);
+  color:white;
+  border:1px solid rgba(255,255,255,.85);
+  box-shadow:0 1px 3px rgba(16,43,73,.2);
+  pointer-events:none;
+  line-height:1;
+}
+.memrly-calendar-grid .memrly-interval-icon svg{
+  display:block;
+  width:14px;
+  height:14px;
+  stroke-width:2.25;
+}
+.memrly-calendar-grid.compact .memrly-interval-icon,
+.memrly-mini-month .memrly-interval-icon{
+  width:13px;
+  height:13px;
+  bottom:1px;
+  border-radius:3px;
+}
+.memrly-calendar-grid.compact .memrly-interval-icon svg,
+.memrly-mini-month .memrly-interval-icon svg{
+  width:9px;
+  height:9px;
+}
