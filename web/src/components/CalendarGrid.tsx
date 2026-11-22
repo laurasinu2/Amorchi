@@ -3,15 +3,15 @@ import { covers, dateLabel, monthWeeks } from '../dates';
 import { PhotoView } from './PhotoView';
 import { occasionsOn } from '../specialDates';
 import { holidaysOn } from '../traditionalDates';
-import { calendarSegments } from '../calendarSegments';
+import { calendarCellEdges, calendarSegments } from '../calendarSegments';
 
 const weekdays=['L','M','X','J','V','S','D'];
 const category=(m:Memory)=>m.kind==='trip'?'Viaje':m.kind==='event'?'Evento':'Recuerdo';
 
 /**
- * Cada viaje, evento o momento tiene UN marco exterior por tramo semanal.
- * Los marcos se dibujan en una capa absoluta sobre las siete celdas
- * (sin generar filas extra). La selección del día se dibuja por encima.
+ * Un tramo semanal comparte únicamente el contorno EXTERIOR de sus casillas.
+ * Las casillas interiores no tienen bordes verticales. Esto mantiene el marco
+ * perfectamente alineado con las fotografías y con el día seleccionado.
  */
 export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=false,selectedDay}:{
   year:number;month:number;photos:Photo[];memories:Memory[];settings:AppSettings;
@@ -46,6 +46,11 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
       return <div className="calendar-week" key={index}>
         {week.map(day=>{
           const current=Number(day.slice(5,7))===month+1;
+          const column=week.indexOf(day);
+          const edges=calendarCellEdges(spans.map(({segment})=>segment),index,column);
+          const inRange=edges.inRange;
+          const isRangeStart=edges.left;
+          const isRangeEnd=edges.right;
           const photo=coverByDate.get(day);
           const matches=memories.filter(m=>covers(m.startDate,m.endDate,day));
           const specials=occasionsOn(day,settings);
@@ -56,7 +61,12 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
           const label=[dateLabel(day),...matches.map(m=>category(m)+': '+m.title),...specials.map(s=>s.label),...holidays.map(h=>h.title)].join(' · ');
           return <button type="button" key={day} className={[
               'calendar-day',current?'':'muted',photo?'with-photo':'',
-              matches.length?'has-event memrly-in-range':'',selectedDay===day?'selected':'',
+              matches.length?'has-event':'',
+              inRange?'memrly-in-range':'',
+              inRange&&isRangeStart?'memrly-range-first':'',
+              inRange&&isRangeEnd?'memrly-range-last':'',
+              inRange&&!isRangeEnd?'memrly-range-bridged':'',
+              selectedDay===day?'selected':'',
               holiday?'holiday-border holiday-'+holiday.theme:'',
               anniversary?'has-anniversary':''
             ].join(' ')} title={label} aria-label={label} onClick={()=>onDay(day)}>
@@ -66,21 +76,9 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
             {birthday&&<span className="calendar-birthday" aria-hidden="true">🎂</span>}
             {holiday&&<span className={'holiday-symbol holiday-symbol-'+holiday.theme} aria-hidden="true">{holiday.theme==='christmas'?'✶':holiday.theme==='carnival'?'🎭':holiday.theme==='pranks'?'🤭':holiday.theme==='autumn'?'🍂':holiday.theme==='spring'?'✿':holiday.theme==='bridge'?'↔':holiday.theme==='summer'?'☀':'★'}</span>}
             {tagByDay.has(day)&&<span className="memrly-day-event-tag" aria-hidden="true">{category(tagByDay.get(day)!)}: {tagByDay.get(day)!.title}</span>}
+            {inRange&&!isRangeEnd&&<span className="memrly-range-bridge" aria-hidden="true"/>}
           </button>;
         })}
-        {spans.length>0&&<div className="memrly-week-ranges" aria-hidden="true">
-          {spans.map(({memory,segment},i)=><div
-            key={memory.id}
-            className={'memrly-range memrly-range-'+memory.kind}
-            title={category(memory)+': '+memory.title}
-            style={{
-              gridColumn:`${segment.startColumn+1} / ${segment.endColumn+2}`,
-              gridRow:1,
-              // Recuadros concéntricos solo si hay recuerdos solapados.
-              margin:`${1+i*3}px`,
-            }}
-          />)}
-        </div>}
       </div>;
     })}
   </div>;

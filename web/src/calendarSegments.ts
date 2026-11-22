@@ -21,3 +21,14 @@ export function calendarSegments(start:string,end:string,year:number,month:numbe
     return left<0||right<left?[]:[{startColumn:left,endColumn:right,week:index}];
   });
 }
+
+/** Banderas de borde de la celda, calculadas sobre los segmentos semanales. */
+export function calendarCellEdges(segments:CalendarSegment[],week:number,column:number){
+  const segment=segments.find(s=>s.week===week&&s.startColumn<=column&&column<=s.endColumn);
+  return {
+    inRange:Boolean(segment),
+    left:Boolean(segment&&segment.startColumn===column),
+    right:Boolean(segment&&segment.endColumn===column),
+    bridge:Boolean(segment&&column<segment.endColumn),
+  };
+}

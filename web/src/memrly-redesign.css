@@ -688,90 +688,131 @@ h1,h2,h3,h4,p,small{color:inherit}
   .memrly-calendar-grid .memrly-range-label{font-size:.44rem;padding:1px 2px;max-width:calc(100% - 3px)}
 }
 
-/* Marco exterior compartido, una sola caja por tramo de semana.
-   La capa es absoluta y no participa en las filas de los siete días. */
+/* Las casillas dibujan el contorno conjunto usando sus PROPIOS límites.
+ * No hay overlay desajustado ni columnas artificiales. Los puentes horizontales
+ * unen la línea superior e inferior a través del espacio entre dos casillas. */
 .memrly-calendar-grid .calendar-week{
+  --memrly-cell-gap:5px;
   position:relative;
   isolation:isolate;
 }
-.memrly-calendar-grid .memrly-week-ranges{
-  position:absolute;
-  inset:0;
-  display:grid;
-  grid-template-columns:repeat(7,minmax(0,1fr));
-  grid-template-rows:minmax(0,1fr);
-  gap:inherit; /* idéntica separación entre columnas que las siete fechas */
-  pointer-events:none;
-  z-index:4;
-}
-.memrly-calendar-grid .memrly-week-ranges>.memrly-range{
+.memrly-calendar-grid.compact .calendar-week,
+.memrly-mini-month .memrly-calendar-grid .calendar-week{--memrly-cell-gap:2px}
+.memrly-calendar-grid .calendar-day.memrly-in-range{
+  position:relative;
+  z-index:2;
   box-sizing:border-box;
-  min-height:0;
-  min-width:0;
-  width:auto;
-  height:auto;
-  border:2px solid var(--memrly-navy);
-  border-radius:9px;
-  background:transparent;
-  pointer-events:none;
-  box-shadow:none;
-}
-.memrly-calendar-grid.compact .memrly-week-ranges>.memrly-range,
-.memrly-mini-month .memrly-week-ranges>.memrly-range{
-  border-width:1px;
-  border-radius:5px;
-}
-/* Los días interiores mantienen bordes neutros: no hay divisiones AZULES. */
-.memrly-calendar-grid .calendar-day.memrly-in-range:not(.selected){
-  border:1px solid var(--border);
+  overflow:visible;
+  border-top:2px solid var(--memrly-navy);
+  border-bottom:2px solid var(--memrly-navy);
+  border-left:2px solid transparent;
+  border-right:2px solid transparent;
+  border-radius:0;
   outline:none;
   box-shadow:none;
+}
+.memrly-calendar-grid .calendar-day.memrly-range-first{
+  border-left-color:var(--memrly-navy);
+  border-top-left-radius:9px;
+  border-bottom-left-radius:9px;
+}
+.memrly-calendar-grid .calendar-day.memrly-range-last{
+  border-right-color:var(--memrly-navy);
+  border-top-right-radius:9px;
+  border-bottom-right-radius:9px;
 }
 .memrly-calendar-grid .calendar-day.memrly-in-range .day-number{
   background:var(--memrly-navy);
   color:white;
 }
-/* El seleccionado siempre tiene su propio marco COMPLETO, delante del viaje. */
-.memrly-calendar-grid .calendar-day.selected{
+.memrly-calendar-grid .calendar-day.memrly-in-range .day-backdrop{
+  border-radius:inherit;
+  overflow:hidden;
+}
+.memrly-calendar-grid .calendar-day .memrly-range-bridge{
+  position:absolute;
+  top:-2px;
+  right:calc(-1 * var(--memrly-cell-gap) - 1px);
+  width:calc(var(--memrly-cell-gap) + 2px);
+  height:calc(100% + 4px);
+  z-index:5;
+  border-top:2px solid var(--memrly-navy);
+  border-bottom:2px solid var(--memrly-navy);
+  pointer-events:none;
+  box-sizing:border-box;
+}
+/* La selección siempre sobresale con sus cuatro lados y cuatro esquinas. */
+.memrly-calendar-grid .calendar-day.selected,
+.memrly-calendar-grid .calendar-day.memrly-in-range.selected{
   position:relative;
-  z-index:7;
+  z-index:12;
+  border:2px solid var(--memrly-navy);
+  border-radius:9px;
   outline:2px solid var(--memrly-navy);
   outline-offset:-2px;
   box-shadow:inset 0 0 0 1px white;
 }
-.memrly-calendar-grid .calendar-day.selected.holiday-border{
-  border-color:var(--memrly-navy);
-}
 .memrly-calendar-grid .calendar-day .memrly-day-event-tag{
   position:absolute;
-  z-index:8;
+  z-index:14;
   bottom:3px;
   right:3px;
   display:block;
   width:max-content;
-  max-width:calc(100% - 6px);
-  padding:3px 5px;
-  border-radius:5px;
+  max-width:min(420px,75vw);
+  padding:4px 7px;
+  border-radius:6px;
   background:var(--memrly-navy);
   color:white;
-  font-size:clamp(.5rem,.67vw,.65rem);
+  font-size:clamp(.55rem,.72vw,.7rem);
   font-weight:700;
-  line-height:1.1;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  line-height:1.15;
+  white-space:normal;
+  overflow:visible;
+  overflow-wrap:anywhere;
+  text-overflow:clip;
+  text-align:left;
   pointer-events:none;
+  box-shadow:0 1px 3px rgba(16,43,73,.2);
 }
-.memrly-calendar-grid.compact .calendar-day.selected{
-  outline-width:1px;
-  outline-offset:-1px;
+.memrly-calendar-grid.compact .calendar-day.memrly-in-range{
+  border-top-width:1px;
+  border-bottom-width:1px;
+  border-left-width:1px;
+  border-right-width:1px;
 }
+.memrly-calendar-grid.compact .calendar-day.memrly-range-first{
+  border-top-left-radius:5px;
+  border-bottom-left-radius:5px;
+}
+.memrly-calendar-grid.compact .calendar-day.memrly-range-last{
+  border-top-right-radius:5px;
+  border-bottom-right-radius:5px;
+}
+.memrly-calendar-grid.compact .calendar-day .memrly-range-bridge{
+  top:-1px;
+  height:calc(100% + 2px);
+  border-top-width:1px;
+  border-bottom-width:1px;
+}
+.memrly-calendar-grid.compact .calendar-day.selected{border-radius:5px;outline-width:1px}
 @media(max-width:760px){
-  .memrly-calendar-grid .calendar-day.selected{border-radius:7px}
+  .memrly-calendar-grid .calendar-week{--memrly-cell-gap:3px}
+  .memrly-mini-month .memrly-calendar-grid .calendar-week{--memrly-cell-gap:2px}
   .memrly-calendar-grid .calendar-day .memrly-day-event-tag{
-    font-size:.49rem;
-    padding:2px 3px;
+    max-width:min(280px,75vw);
+    font-size:.52rem;
+    padding:2px 4px;
   }
+  .memrly-calendar-grid .calendar-day.memrly-range-first{
+    border-top-left-radius:7px;
+    border-bottom-left-radius:7px;
+  }
+  .memrly-calendar-grid .calendar-day.memrly-range-last{
+    border-top-right-radius:7px;
+    border-bottom-right-radius:7px;
+  }
+  .memrly-calendar-grid .calendar-day.selected{border-radius:7px}
 }
 
 /* Identidad Memrly: se usarán los PNG originales del usuario cuando estén
