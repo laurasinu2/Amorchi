@@ -1,5 +1,7 @@
 export type MemoryKind = 'trip' | 'event' | 'moment';
 export type SubjectKind = 'person' | 'animal';
+/** Coordenadas del punto focal de una portada, en porcentajes de 0 a 100. */
+export interface CoverPosition { x:number; y:number }
 export interface ImportantBirthday {
   id:string;
   name:string;
@@ -9,7 +11,9 @@ export interface ImportantBirthday {
 export interface AppSettings {
   id:'main';
   homeCoverPhotoId?:string;
+  homeCoverPosition?:CoverPosition;
   yearCoverPhotoIds?:Record<string,string>;
+  yearCoverPositions?:Record<string,CoverPosition>;
   relationshipStartedOn:string;
   myName:string;
   myBirthday:string;
@@ -38,6 +42,7 @@ export interface Memory {
   longitude?: number;
   favorite: boolean;
   coverPhotoId?: string;
+  coverPosition?:CoverPosition;
   createdAt: string;
 }
 
