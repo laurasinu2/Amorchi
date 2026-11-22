@@ -95,3 +95,13 @@ Los IDs de las celebraciones están en `web/src/celebrations.ts`, sin depender d
 Las asociaciones manuales son dos atributos opcionales de `Photo`: `celebrationIncludeIds?:string[]` y `celebrationExcludeIds?:string[]`. Se actualizan de forma inmutable desde el editor de foto y se persisten mediante la operación habitual `savePhoto`, que mantiene la cola local. `photoCelebrations` resuelve las exclusiones con prioridad sobre la coincidencia automática. Un cambio de fecha recalcula automáticamente las celebraciones pero no borra las decisiones manuales.
 
 **Pendiente para el futuro servidor:** exponer el catálogo/versionado de reglas y sincronizar esas listas de excepciones junto con fotos, preferencias de fechas y colecciones. No se ha ejecutado migración PostgreSQL ni traslado de fotografías en esta iteración.
+
+## Navegación y representación de fotografías (noviembre 2026)
+
+- `Page` incorpora `'foto'` además de las secciones anteriores. `App.tsx` conserva en `photoReturnPage` el destino de retorno; la selección de miniaturas solo cambia `selectedPhotoId`, evitando perder la sección de origen. `photoEditOpen` controla el antiguo `PhotoDialog` exclusivamente en la acción «Editar».
+- `PhotoDetailPage.tsx` consume `getPhotoAsset(id,'preview')` para la vista normal y `getPhotoAsset(id,'original')` en el visor ampliado. Los `objectURL` se liberan al desmontar o al cambiar de foto. No se generan ni se suben duplicados.
+- `photoRelations.ts` define `relatedPhotos` (mismo día o cualquier `memoryId` compartido, sin duplicados y en orden cronológico) y `relatedMemories` (enlaces directos o intervalo que cubra la fecha). Pruebas: `photoRelations.test.mjs`.
+- `web/src/photo-detail.css` gestiona distribución 5:3, zoom/encuadre, fullscreen y responsive. En escritorio a partir de 1025×620 px se desactiva el scroll externo; listas y menús extensos se desplazan internamente.
+- `Subject.avatarPhotoId?`, `AppSettings.profilePhotoId?` y `AppSettings.profileSubjectId?` referencian fotos existentes sin crear nuevas copias. Se editan en el diálogo de personas/mascotas y en Ajustes. Borrar una foto limpia los IDs de avatar y perfil mediante la misma transacción IndexedDB, sin borrar las fichas ni los demás vínculos.
+- `navigator.share({files})` utiliza el archivo original cuando el navegador lo permite. El fallback descarga el archivo. No existen URLs públicas de fotografías.
+- La API remota y la autenticación siguen pendientes; avatares, favoritos, foto de perfil y asociaciones nuevas se guardan localmente y se registran en la cola de operaciones.

@@ -125,3 +125,21 @@ La interfaz prioriza esos PNG y recurre a los anteriores si aún no están prese
 - Los días de festivos y tradiciones ahora tienen un **contorno individual de color** según su categoría: rojo para Navidad, verde para primavera/Semana Santa, violeta para Carnaval, naranja para otoño, amarillo para verano, etc. Los cumpleaños se distinguen en violeta.
 - El **aniversario de pareja** tiene prioridad y utiliza un **rosa fuerte (#ee1783)**, independientemente de otros festivos o viajes que coincidan ese día.
 - El día seleccionado se resalta con 3 px azul marino (2 px en calendarios pequeños). Si también es festivo o aniversario, conserva su marco azul y añade un **segundo aro exterior** del color correspondiente, sin ocultar el estado de selección.
+
+## Ficha de fotografía (vista dedicada)
+
+Todas las fotografías que se abren desde Inicio, Calendario, Álbum, Favoritos, Personas y mascotas, Colecciones, Buscar y las fichas de viajes/eventos/recuerdos presentan ahora una **página de detalle**; la edición sigue utilizando el modal anterior. La navegación «Volver» regresa a la sección desde la que se abrió la foto.
+
+La cabecera de la ficha incluye: volver, título «Fotografía», favorito (persistencia inmediata), compartir, editar y menú «···». El menú ofrece **descargar el original**, **abrir el día en Calendario** y **eliminar fotografía** con confirmación explícita.
+
+En escritorio, la vista se divide en dos columnas en proporción **5:3 del área de contenido**. Con la barra lateral del 20 %, la imagen ocupa aproximadamente el 50 % de la anchura total de ventana. La columna izquierda muestra el archivo con ajuste `contain` (sin recortar el original), ampliar con fondo traslúcido y cierre, zoom del 100 % al 500 %, arrastre del encuadre cuando está ampliado, y hasta nueve miniaturas visibles con flechas para avanzar por **todas** las fotos del mismo día o de un recuerdo/viaje compartido.
+
+La columna derecha contiene detalles (fecha, lugar, recuerdos/viajes/eventos vinculados y personas/mascotas con sus avatares), asociación directa de personas (+) y un segundo panel con hasta **tres relaciones** que se cruzan con la fecha, priorizando las asociaciones explícitas. «Ver todas las relaciones» solo aparece cuando existen más de tres, con desplazamiento **interno** de la lista, no de la página.
+
+Desde **Personas y mascotas** se pueden crear y editar fichas con una foto de perfil **referenciada por ID de fotografía existente**. Al crear una persona desde una foto, se vincula automáticamente a esa foto. En **Ajustes** se puede configurar la foto de perfil local y opcionalmente relacionar el perfil con una persona existente. Estas opciones no implican inicio de sesión ni sincronización en un servidor.
+
+La interfaz utiliza la altura disponible **sin scroll vertical en ordenadores de al menos 1025 px de ancho y 620 px de alto**. En móviles, tablets o ventanas muy bajas, las columnas se apilan y se permite desplazamiento para no ocultar acciones.
+
+La acción Compartir usa la API nativa del dispositivo cuando admite archivos; como alternativa descarga el original para poder enviarlo manualmente. No se genera un enlace público ni se suben fotos a ningún servicio.
+
+Los datos siguen residiendo en IndexedDB. El código de selección de relacionadas se prueba en `web/tests/photoRelations.test.mjs`, y las referencias de avatar se limpian cuando se elimina la foto correspondiente, conservando las fichas.
