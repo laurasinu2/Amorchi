@@ -4,6 +4,7 @@ import type { AppSettings, Memory, Photo } from './types';
 import { dateLabel, kindName, localISO, monthLabel } from './dates';
 import { holidaysOn } from './traditionalDates';
 import { occasionsOn } from './specialDates';
+import { automaticCelebrationIds, celebrationCatalog, photoCelebrations } from './celebrations';
 import { CalendarGrid } from './components/CalendarGrid';
 import { PhotoView } from './components/PhotoView';
 
@@ -41,6 +42,12 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,settin
   const dayMemories=memories.filter(m=>m.startDate<=selectedDay&&m.endDate>=selectedDay);
   const daySpecials=occasionsOn(selectedDay,settings);
   const dayHolidays=settings.showTraditions===false?[]:holidaysOn(selectedDay);
+  const allCelebrations=celebrationCatalog(settings);
+  const dayCelebrationIds=new Set([
+    ...automaticCelebrationIds(selectedDay,settings),
+    ...dayPhotos.flatMap(p=>photoCelebrations(p,settings).map(c=>c.id))
+  ]);
+  const dayCelebrations=allCelebrations.filter(c=>dayCelebrationIds.has(c.id));
   const dayPlace=displayLocation(dayPhotos.find(p=>p.place)?.place||'',dayPhotos[0]?.latitude,dayPhotos[0]?.longitude)||
     (dayMemories.find(m=>m.place)?.place||'Sin ubicación');
   const monthTitle=monthLabel(year,month);
@@ -196,8 +203,10 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,settin
             <div><ImageIcon size={17}/><span>{dayPhotos.length} {dayPhotos.length===1?'fotografía':'fotografías'}</span></div>
             <div><MapPin size={17}/><span>{dayPlace}</span></div>
           </div>
-          {(daySpecials.length>0||dayHolidays.length>0)&&<div className="memrly-day-holidays">
-            {[...daySpecials.map(x=>x.label),...dayHolidays.map(x=>x.title)].map((value,i)=><span key={i}>{value}</span>)}
+          {(daySpecials.length>0||dayHolidays.length>0||dayCelebrations.length>0)&&<div className="memrly-day-holidays">
+            {dayCelebrations.map(c=><span key={c.id} title={c.description}>{c.title}</span>)}
+            {dayHolidays.filter(h=>!dayCelebrations.some(c=>c.title===h.title)).map(h=><span key={'holiday:'+h.id}>{h.title}</span>)}
+            {daySpecials.map(o=><span key={'special:'+o.id}>{o.label}</span>)}
           </div>}
         </section>
 

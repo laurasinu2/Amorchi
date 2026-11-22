@@ -790,3 +790,55 @@ h1,h2,h3,h4,p,small{color:inherit}
 @media(max-width:760px){
   .topbar-brand-image{max-width:130px;height:34px}
 }
+
+/* Celebraciones recurrentes: filtros combinables, ediciones manuales y lectura clara. */
+.celebration-explorer{display:grid;gap:13px;min-width:0}
+.celebration-explorer-intro{display:flex;align-items:flex-start;gap:12px}
+.celebration-explorer-intro>svg{flex-shrink:0;margin-top:3px}
+.celebration-explorer-intro h2{margin:0 0 5px;font-size:1.09rem}
+.celebration-explorer-intro p{margin:0;color:var(--muted);font-size:.81rem;line-height:1.5}
+.celebration-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.celebration-filters label{display:grid;gap:6px;min-width:0}
+.celebration-filters label>span:first-child{font-size:.73rem;font-weight:750;color:var(--memrly-navy)}
+.celebration-filters select,.celebration-filters input,.celebration-add-row select,
+.celebration-editor-row select{width:100%;min-width:0;border:1px solid var(--border);border-radius:9px;background:white;color:var(--memrly-navy);padding:10px 9px;font-size:.79rem}
+.celebration-filters select:disabled{opacity:.45}
+.celebration-search-input{display:flex;align-items:center;gap:7px;border:1px solid var(--border);border-radius:9px;padding-left:9px;overflow:hidden}
+.celebration-search-input input{border:0;padding-left:0;outline:0;flex:1}
+.celebration-shortcuts{display:flex;gap:7px;flex-wrap:wrap}
+.celebration-chip,.celebration-clear{border:1px solid var(--border);border-radius:99px;padding:7px 11px;color:var(--memrly-navy);background:white;font-size:.75rem;font-weight:750}
+.celebration-chip.selected{background:var(--memrly-navy);color:white}
+.celebration-clear{margin-left:auto;text-decoration:underline}
+.celebration-active{background:var(--memrly-soft);border:1px solid var(--border);border-radius:10px;margin:0;padding:9px 12px;font-size:.82rem;color:var(--memrly-navy)}
+.celebration-associations{display:grid;gap:11px;padding:13px;border:1px solid var(--border);border-radius:13px;background:white}
+.celebration-associations-title{display:grid;gap:5px}
+.celebration-associations-title>strong{font-size:.9rem}
+.celebration-associations-title>small{line-height:1.45;font-size:.76rem;color:var(--muted)}
+.celebration-editor-rows{display:grid;gap:7px}
+.celebration-editor-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(140px,43%);align-items:center;gap:12px;padding:9px;border:1px solid var(--border);border-radius:10px}
+.celebration-editor-row>span{display:grid;gap:3px;min-width:0}
+.celebration-editor-row strong{font-size:.83rem;overflow-wrap:anywhere}
+.celebration-editor-row small{font-size:.71rem;color:var(--muted)}
+.celebration-editor-row select{padding:7px 9px}
+.celebration-add-row{display:flex;align-items:center;gap:8px}
+.celebration-add-row>select{flex:1}
+.celebration-add-row>.btn{flex-shrink:0}
+@media(max-width:1100px){.celebration-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){
+ .celebration-filters{grid-template-columns:1fr}
+ .celebration-editor-row{grid-template-columns:1fr;gap:7px}
+ .celebration-clear{margin-left:0}
+}
+
+/* Un trazo ligeramente más grueso en el viaje/evento y en el día seleccionado. */
+.memrly-calendar-grid .memrly-interval-outline{border-width:3px}
+.memrly-calendar-grid .calendar-day.selected,
+.memrly-calendar-grid .calendar-day.memrly-in-range.selected{
+  border-width:3px;
+  outline:2px solid var(--memrly-navy);
+  outline-offset:-4px;
+}
+.memrly-calendar-grid.compact .memrly-interval-outline,
+.memrly-mini-month .memrly-interval-outline{border-width:2px}
+.memrly-calendar-grid.compact .calendar-day.selected,
+.memrly-mini-month .calendar-day.selected{border-width:2px;outline-width:1px;outline-offset:-2px}
