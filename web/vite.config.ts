@@ -1,3 +1,4 @@
+// @ts-expect-error Vite ejecuta este archivo en Node; el tsconfig web no incorpora los tipos Node.
 import { existsSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
