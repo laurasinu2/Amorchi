@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg', 'brand/recuerdos-horizontal.webp', 'brand/recuerdos-app.webp'],
+      includeAssets: ['brand/memrly-horizontal.svg', 'brand/memrly-app.svg'],
       manifest: {
         name: 'Memrly · Amorchi',
         short_name: 'Memrly',
@@ -17,8 +17,7 @@ export default defineConfig({
         background_color: '#ffffff',
         theme_color: '#102b49',
         icons: [
-          { src: '/brand/recuerdos-app.webp', sizes: '192x192', type: 'image/webp', purpose: 'any' },
-          { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }
+          { src: '/brand/memrly-app.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }
         ]
       },
       workbox: {

@@ -165,7 +165,7 @@ export default function App(){
   const mainTitle=({inicio:'Inicio',anios:'Nuestros años',calendario:'Calendario',dia:'Calendario',viajes:'Viajes',recuerdos:'Recuerdos',lugares:'Mapa de recuerdos',personas:'Personas y mascotas',colecciones:'Colecciones',album:'Galería',buscar:'Buscar',favoritos:'Favoritos',papelera:'Papelera',ajustes:'Ajustes',foto:'Fotografía',memoria:selectedMemory?.title||'Recuerdo'} as Record<Page,string>)[page];
   return <div className={'app-shell page-'+page}>
     <aside className={'sidebar '+(menu?'mobile-open':'')}>
-      <div className="sidebar-logo"><img className="sidebar-app-icon" src="/brand/memrly-app.png" alt="" onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src='/brand/recuerdos-app.webp';}} /><div><strong>Memrly</strong><small>ÁLBUM AMORCHI</small></div></div>
+      <div className="sidebar-logo"><img className="sidebar-app-icon" src="/brand/memrly-app.svg" alt="" /><div><strong>Memrly</strong><small>ÁLBUM AMORCHI</small></div></div>
       <nav className="sidebar-nav" aria-label="Navegación principal">
         {sidebarItems.map((item,i)=><div key={item.page}>
           {(i===7||i===10)&&<hr/>}
@@ -176,7 +176,7 @@ export default function App(){
     </aside>
     {menu&&<button className="menu-scrim" aria-label="Cerrar menú" onClick={()=>setMenu(false)}/>}
     <div className="app-content">
-      <header className="topbar"><div className="topbar-left"><button className="icon-button mobile-menu" aria-label="Abrir menú" onClick={()=>setMenu(true)}><Menu/></button><img className="topbar-brand-image" src="/brand/memrly-horizontal.png" alt="Memrly, álbum Amorchi" onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src='/brand/recuerdos-horizontal.webp';}} /><span className="breadcrumbs">/ {mainTitle}</span></div><div className="topbar-right"><span className={'sync-indicator '+(!isOnline?'offline':'')} title="Servidor aún no conectado">{isOnline?<CloudUpload size={16}/>:<WifiOff size={16}/>}<span>{!isOnline?'Sin conexión':'Datos locales'}</span><b>{pending}</b></span><span className="topbar-divider" aria-hidden="true"/> <button className="btn topbar-add" onClick={()=>openImport()}><Plus size={17}/> Subir fotos</button></div></header>
+      <header className="topbar"><div className="topbar-left"><button className="icon-button mobile-menu" aria-label="Abrir menú" onClick={()=>setMenu(true)}><Menu/></button><img className="topbar-brand-image" src="/brand/memrly-horizontal.svg" alt="Memrly, álbum Amorchi" /><span className="breadcrumbs">/ {mainTitle}</span></div><div className="topbar-right"><span className={'sync-indicator '+(!isOnline?'offline':'')} title="Servidor aún no conectado">{isOnline?<CloudUpload size={16}/>:<WifiOff size={16}/>}<span>{!isOnline?'Sin conexión':'Datos locales'}</span><b>{pending}</b></span><span className="topbar-divider" aria-hidden="true"/> <button className="btn topbar-add" onClick={()=>openImport()}><Plus size={17}/> Subir fotos</button></div></header>
       <main className="main-container">
         {!ready?<div className="empty-state"><h2>Abriendo tus recuerdos...</h2></div>:<>
           {error&&<div className="form-errors" role="alert">{error}</div>}

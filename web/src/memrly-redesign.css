@@ -906,3 +906,8 @@ h1,h2,h3,h4,p,small{color:inherit}
   outline-offset:0;
   border-radius:5px;
 }
+
+/* Identidad Memrly: logotipo vectorial azul oscuro, reemplaza Recuerdos. */
+.topbar-brand-image{width:clamp(160px,19vw,245px);max-width:245px;height:45px;object-fit:contain;object-position:left center}
+.sidebar-app-icon{object-fit:contain;background:transparent;border-radius:12px}
+@media(max-width:760px){.topbar-brand-image{width:clamp(115px,32vw,165px);height:37px}}

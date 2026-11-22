@@ -143,3 +143,7 @@ La interfaz utiliza la altura disponible **sin scroll vertical en ordenadores de
 La acción Compartir usa la API nativa del dispositivo cuando admite archivos; como alternativa descarga el original para poder enviarlo manualmente. No se genera un enlace público ni se suben fotos a ningún servicio.
 
 Los datos siguen residiendo en IndexedDB. El código de selección de relacionadas se prueba en `web/tests/photoRelations.test.mjs`, y las referencias de avatar se limpian cuando se elimina la foto correspondiente, conservando las fichas.
+
+## Logotipo e iconos de Memrly (22/11/2026)
+
+Se ha retirado la identidad de «Recuerdos» de la cabecera, barra lateral, favicon y manifiesto de la PWA. Los recursos vectoriales `web/public/brand/memrly-app.svg` y `web/public/brand/memrly-horizontal.svg` son **recreaciones provisionales** del logo cuadrado azul marino con fotógrafo y del logo largo «Memrly» aportados en el chat. No sustituyen los archivos PNG originales del usuario, que deberán añadirse como recursos cuando se disponga de transferencia binaria al repositorio. Se mantiene la identidad en azul marino y blanco; no se alteran fotografías ni datos de IndexedDB.
