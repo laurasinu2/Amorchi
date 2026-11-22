@@ -46,6 +46,13 @@ export interface Memory {
   createdAt: string;
 }
 
+export interface PhotoCollection {
+  id:string;
+  title:string;
+  photoIds:string[];
+  createdAt:string;
+}
+
 export interface Subject {
   id: string;
   name: string;
@@ -75,7 +82,7 @@ export interface Photo {
 export interface LocalOperation {
   id: string;
   type: 'upsert' | 'delete';
-  entity: 'photo' | 'memory' | 'subject' | 'settings';
+  entity: 'photo' | 'memory' | 'subject' | 'settings' | 'collection';
   entityId: string;
   createdAt: string;
 }

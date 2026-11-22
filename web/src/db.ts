@@ -2,7 +2,7 @@ import { openDB, type DBSchema } from 'idb';
 import * as exifr from 'exifr';
 import { sha256 } from 'js-sha256';
 import { createId } from './id';
-import { defaultSettings, type ImportOptions, type LocalOperation, type Memory, type Photo, type Subject, type AppSettings } from './types';
+import { defaultSettings, type ImportOptions, type LocalOperation, type Memory, type Photo, type Subject, type AppSettings, type PhotoCollection } from './types';
 import { localISO } from './dates';
 import { unlinkMemory } from './memoryLinks';
 
@@ -17,8 +17,9 @@ interface AmorchiSchema extends DBSchema {
   operations: { key: string; value: LocalOperation };
   settings: { key: string; value: AppSettings };
   map_assets: { key: string; value: Asset };
+  collections: { key: string; value: PhotoCollection };
 }
-const database = openDB<AmorchiSchema>('amorchi-local-v1', 4, {
+const database = openDB<AmorchiSchema>('amorchi-local-v1', 5, {
   upgrade(db) {
     if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos', { keyPath: 'id' });
     if(!db.objectStoreNames.contains('memories')) db.createObjectStore('memories', { keyPath: 'id' });
@@ -28,6 +29,7 @@ const database = openDB<AmorchiSchema>('amorchi-local-v1', 4, {
     if(!db.objectStoreNames.contains('asset_sizes')) db.createObjectStore('asset_sizes', { keyPath: 'key' });
     if(!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'id' });
     if(!db.objectStoreNames.contains('map_assets')) db.createObjectStore('map_assets', { keyPath: 'key' });
+    if(!db.objectStoreNames.contains('collections')) db.createObjectStore('collections', { keyPath: 'id' });
   }
 });
 
@@ -37,10 +39,18 @@ const op = (entity: LocalOperation['entity'],entityId:string):LocalOperation=>({
 
 export async function loadLibrary() {
   const db=await database;
-  const [photos,memories,subjects,operations,settings]=await Promise.all([
-    db.getAll('photos'),db.getAll('memories'),db.getAll('subjects'),db.getAll('operations'),db.get('settings','main')
+  const [photos,memories,subjects,operations,settings,collections]=await Promise.all([
+    db.getAll('photos'),db.getAll('memories'),db.getAll('subjects'),db.getAll('operations'),db.get('settings','main'),db.getAll('collections')
   ]);
-  return {photos,memories,subjects,operations,settings:settings||defaultSettings};
+  return {photos,memories,subjects,operations,settings:settings||defaultSettings,collections};
+}
+
+export async function saveCollection(collection:PhotoCollection):Promise<void>{
+  const db=await database;
+  const tx=db.transaction(['collections','operations'],'readwrite');
+  await tx.objectStore('collections').put(collection);
+  await tx.objectStore('operations').put(op('collection',collection.id));
+  await tx.done;
 }
 
 export async function saveSettings(settings:AppSettings){
@@ -118,7 +128,7 @@ export async function saveSubject(subject:Subject){
  */
 export async function deletePhoto(photoId:string):Promise<void>{
   const db=await database;
-  const tx=db.transaction(['photos','assets','asset_sizes','operations','memories','settings'],'readwrite');
+  const tx=db.transaction(['photos','assets','asset_sizes','operations','memories','settings','collections'],'readwrite');
   const photoStore=tx.objectStore('photos');
   const memoryStore=tx.objectStore('memories');
   const settingsStore=tx.objectStore('settings');
@@ -134,6 +144,13 @@ export async function deletePhoto(photoId:string):Promise<void>{
     if(m.coverPhotoId===photoId){
       await memoryStore.put({...m,coverPhotoId:undefined});
       await operations.put(op('memory',m.id));
+    }
+  }
+  // La colección conserva su ficha; únicamente se elimina la foto borrada.
+  for(const collection of await tx.objectStore('collections').getAll()){
+    if(collection.photoIds.includes(photoId)){
+      await tx.objectStore('collections').put({...collection,photoIds:collection.photoIds.filter(id=>id!==photoId)});
+      await operations.put(op('collection',collection.id));
     }
   }
   const settings=await settingsStore.get('main');
