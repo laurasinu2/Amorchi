@@ -1,0 +1,135 @@
+
+/* Ficha individual de fotografía. Identidad: blanco y azul marino. */
+.memrly-photo-detail{display:grid;grid-template-rows:auto minmax(0,1fr);gap:12px;min-height:0;min-width:0;color:var(--memrly-navy);height:100%;align-content:start}
+.memrly-photo-header{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+.memrly-photo-heading,.memrly-photo-toolbar{display:flex;align-items:center;gap:9px}
+.memrly-photo-heading h1{font-family:inherit;font-size:clamp(1.22rem,1.6vw,1.65rem);margin:0;line-height:1.15;font-weight:800}
+.memrly-photo-toolbar{gap:7px}
+.memrly-photo-icon-btn{display:grid;place-items:center;flex:0 0 auto;width:40px;height:40px;border-radius:11px;background:#fff;border:1px solid var(--border);color:var(--memrly-navy);cursor:pointer}
+.memrly-photo-icon-btn:hover,.memrly-photo-icon-btn.active{background:var(--memrly-soft)}
+.memrly-photo-icon-btn.active{color:var(--memrly-navy);border-color:var(--memrly-navy)}
+.memrly-photo-icon-btn:disabled,.memrly-photo-strip-arrow:disabled{opacity:.32;cursor:not-allowed}
+.memrly-photo-menu-wrap,.memrly-person-add-wrap{position:relative;flex:0 0 auto}
+.memrly-photo-popup{position:absolute;right:0;top:calc(100% + 7px);width:max-content;min-width:220px;max-width:min(300px,85vw);padding:6px;border:1px solid var(--border);border-radius:13px;background:white;z-index:75;box-shadow:0 10px 26px rgba(16,43,73,.17);display:grid;gap:2px;color:var(--memrly-navy)}
+.memrly-photo-popup>button{display:flex;align-items:center;gap:8px;min-height:39px;padding:8px 11px;background:white;border:0;border-radius:8px;font-size:.81rem;text-align:left;color:var(--memrly-navy)}
+.memrly-photo-popup>button:hover:not(:disabled){background:var(--memrly-soft)}
+.memrly-photo-popup>button:disabled{opacity:.45}
+.memrly-photo-notice{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 12px;font-size:.79rem;border:1px solid var(--border);border-radius:10px;background:var(--memrly-soft);color:var(--memrly-navy)}
+.memrly-photo-notice button{border:0;background:transparent;color:inherit;display:grid;place-items:center}
+.memrly-photo-columns{display:grid;grid-template-columns:minmax(0,5fr) minmax(290px,3fr);gap:14px;min-width:0;min-height:0;align-items:stretch}
+.memrly-photo-visual{display:grid;grid-template-rows:minmax(0,1fr) auto auto;gap:10px;min-width:0;min-height:0;padding:13px;border:1px solid var(--border);border-radius:17px;background:white;box-shadow:var(--shadow)}
+.memrly-photo-frame{position:relative;min-width:0;min-height:0;overflow:hidden;border-radius:12px;background:rgba(16,43,73,.06)}
+.memrly-zoom-stage{width:100%;height:100%;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:rgba(16,43,73,.04);touch-action:none;user-select:none}
+.memrly-zoom-stage.can-drag{cursor:grab}
+.memrly-zoom-stage.can-drag:active{cursor:grabbing}
+.memrly-zoom-stage img{width:100%;height:100%;object-fit:contain;display:block;will-change:transform;pointer-events:none;transform-origin:center center}
+.memrly-zoom-placeholder{padding:24px;text-align:center;color:var(--muted);font-size:.83rem}
+.memrly-photo-expand{position:absolute;right:12px;top:12px;z-index:2;width:37px;height:37px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.5);background:rgba(16,43,73,.68);color:white;border-radius:10px}
+.memrly-photo-expand:hover{background:var(--memrly-navy)}
+.memrly-zoom-controls{display:flex;align-items:center;justify-content:center;gap:9px;min-height:38px;color:var(--memrly-navy);font-size:.75rem}
+.memrly-control-label{font-weight:750;white-space:nowrap}
+.memrly-zoom-controls>button{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid var(--border);background:white;border-radius:8px;color:var(--memrly-navy)}
+.memrly-zoom-controls>button:disabled{opacity:.35}
+.memrly-zoom-controls input{accent-color:var(--memrly-navy);min-width:35px;max-width:170px;flex:1}
+.memrly-zoom-controls output{min-width:41px;text-align:center;font-variant-numeric:tabular-nums}
+.memrly-zoom-instruction{font-size:.67rem;color:var(--muted);white-space:nowrap}
+.memrly-photo-strip{display:grid;grid-template-rows:auto minmax(0,1fr);min-height:94px;gap:6px;min-width:0}
+.memrly-photo-strip-title{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.memrly-photo-strip-title strong{font-size:.86rem}
+.memrly-photo-strip-title small{color:var(--muted);font-size:.7rem}
+.memrly-photo-strip-track{display:flex;align-items:stretch;min-width:0;gap:7px;min-height:62px;max-height:85px}
+.memrly-photo-strip-arrow{width:31px;flex:0 0 31px;display:grid;place-items:center;border:1px solid var(--border);border-radius:10px;background:white;color:var(--memrly-navy)}
+.memrly-photo-strip-items{flex:1;min-width:0;display:flex;align-items:stretch;justify-content:center;gap:7px;overflow:hidden}
+.memrly-photo-strip-thumb{width:clamp(48px,5.7vw,82px);height:100%;max-width:calc(100% / 3);flex:0 1 auto;border-radius:9px;border:2px solid transparent!important;background:var(--memrly-soft)}
+.memrly-photo-strip-thumb.selected{border-color:var(--memrly-navy)!important}
+.memrly-photo-sidebar{display:grid;grid-template-rows:minmax(0,1.2fr) minmax(0,.8fr);gap:12px;min-width:0;min-height:0}
+.memrly-photo-panel{display:flex;flex-direction:column;min-width:0;min-height:0;padding:clamp(12px,1.2vw,18px);background:white;border:1px solid var(--border);border-radius:17px;box-shadow:var(--shadow);gap:10px}
+.memrly-photo-panel h2{margin:0;font-family:inherit;font-size:clamp(.99rem,1.2vw,1.2rem);font-weight:800}
+.memrly-photo-detail-rows{display:flex;flex-direction:column;justify-content:space-between;gap:2px;flex:1;min-height:0}
+.memrly-photo-detail-row{display:flex;gap:10px;align-items:flex-start;padding:clamp(6px,.85vh,12px) 0;border-bottom:1px solid var(--border);min-width:0}
+.memrly-photo-detail-row:last-child{border-bottom:0}
+.memrly-photo-detail-row>svg{color:var(--memrly-navy);width:19px;height:19px;flex:0 0 19px;margin-top:2px}
+.memrly-photo-detail-row>div{display:grid;gap:5px;min-width:0;flex:1}
+.memrly-photo-detail-row strong{font-size:.78rem;font-weight:800}
+.memrly-photo-detail-row span:not(.memrly-person-item):not(.memrly-empty-small){color:var(--muted);font-size:clamp(.68rem,.86vw,.82rem);overflow-wrap:anywhere;line-height:1.4}
+.memrly-people-list{display:flex;align-items:center;gap:7px;max-width:100%;min-width:0;overflow:visible;flex-wrap:wrap}
+.memrly-person-item{display:flex;align-items:center;gap:5px;max-width:108px;min-width:0}
+.memrly-person-item small{font-size:.65rem;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.memrly-person-avatar{width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:var(--memrly-soft);border:1px solid var(--border);display:grid;place-items:center;overflow:hidden}
+.memrly-person-avatar-photo{width:100%;height:100%;border-radius:50%}
+.memrly-person-add{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:white;border:1px dashed var(--memrly-navy);color:var(--memrly-navy)}
+.memrly-people-popup{right:0;top:calc(100% + 7px);min-width:225px;max-height:230px;overflow-y:auto}
+.memrly-people-popup>strong{font-size:.77rem;padding:6px 10px}
+.memrly-empty-small{font-size:.78rem;color:var(--muted);line-height:1.45}
+.memrly-photo-relation-list{flex:1;min-height:0;overflow-y:auto;display:grid;align-content:start;gap:6px}
+.memrly-relation-item{display:flex;align-items:center;gap:9px;min-width:0;padding:5px;border:1px solid var(--border);background:#fff;border-radius:10px;text-align:left;color:var(--memrly-navy)}
+.memrly-relation-item:hover{background:var(--memrly-soft)}
+.memrly-relation-cover{display:grid;place-items:center;flex:0 0 clamp(38px,4.2vw,53px);width:clamp(38px,4.2vw,53px);height:clamp(38px,4.2vw,53px);border-radius:8px;background:var(--memrly-soft);overflow:hidden}
+.memrly-relation-image{width:100%;height:100%;border-radius:8px}
+.memrly-relation-item>span{display:grid;gap:3px;min-width:0;flex:1}
+.memrly-relation-item small{font-size:.64rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.memrly-relation-item strong{font-size:.78rem;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
+.memrly-all-relations{display:flex;align-items:center;justify-content:center;gap:8px;min-height:35px;width:100%;border:1px solid var(--memrly-navy);border-radius:10px;background:white;color:var(--memrly-navy);font-weight:750;font-size:.78rem}
+.memrly-all-relations:hover{background:var(--memrly-soft)}
+.memrly-photo-lightbox{position:fixed;inset:0;z-index:230;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:11px;padding:17px;background:rgba(5,18,39,.85);backdrop-filter:blur(7px);color:white}
+.memrly-photo-lightbox-top{display:flex;align-items:center;justify-content:space-between;gap:15px;font-size:.79rem}
+.memrly-photo-lightbox-top>span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.memrly-lightbox-close{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.45);border-radius:10px;padding:9px 13px;color:white}
+.memrly-photo-lightbox-image{min-height:0;min-width:0;overflow:hidden}
+.memrly-photo-lightbox .memrly-zoom-stage{background:transparent}
+.memrly-photo-lightbox .memrly-zoom-controls{color:white}
+.memrly-photo-lightbox .memrly-zoom-controls>button{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.5);color:white}
+.memrly-photo-lightbox .memrly-zoom-controls input{accent-color:white}
+.memrly-photo-lightbox .memrly-zoom-instruction{color:rgba(255,255,255,.76)}
+.memrly-photo-confirm-backdrop{position:fixed;inset:0;z-index:250;display:grid;place-items:center;padding:15px;background:rgba(9,26,44,.63)}
+.memrly-photo-confirm{display:grid;gap:16px;background:white;border:1px solid var(--border);border-radius:16px;padding:22px;width:min(440px,100%);box-shadow:0 20px 80px rgba(0,0,0,.2)}
+.memrly-photo-confirm h2{margin:0;font-size:1.2rem}
+.memrly-photo-confirm p{margin:0;font-size:.86rem;color:var(--muted);line-height:1.5}
+.memrly-photo-confirm-actions{display:flex;justify-content:flex-end;gap:10px}
+.memrly-photo-confirm-actions>button{padding:10px 13px;border:1px solid var(--border);background:white;color:var(--memrly-navy);border-radius:9px;font-weight:750}
+.memrly-photo-confirm-actions>button:last-child{background:var(--memrly-navy);color:white}
+@media(min-width:1025px) and (min-height:620px){
+  .app-shell.page-foto{height:100dvh;min-height:0;overflow:hidden}
+  .app-shell.page-foto>.app-content{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden}
+  .app-shell.page-foto .topbar{flex:0 0 69px}
+  .app-shell.page-foto .main-container{
+    flex:1 1 auto;max-width:none;width:100%;min-height:0;overflow:hidden;
+    padding:clamp(9px,1.25vh,18px) clamp(13px,1.8vw,26px);
+  }
+}
+@media(max-width:1220px){
+  .memrly-photo-columns{grid-template-columns:minmax(0,5fr) minmax(270px,3fr);gap:10px}
+  .memrly-photo-sidebar{gap:10px}
+  .memrly-photo-panel{padding:11px}
+  .memrly-zoom-instruction{display:none}
+  .memrly-photo-strip-items{gap:4px}
+  .memrly-photo-strip-thumb:nth-child(n+8){display:none}
+  .memrly-photo-detail-row{padding:6px 0}
+}
+@media(max-width:1024px), (max-height:619px){
+  .app-shell.page-foto,.app-shell.page-foto>.app-content,.app-shell.page-foto .main-container{overflow:visible;height:auto}
+  .memrly-photo-detail{height:auto;display:grid;grid-template-rows:auto auto;gap:14px}
+  .memrly-photo-columns{grid-template-columns:1fr;gap:14px}
+  .memrly-photo-visual{grid-template-rows: minmax(280px,45vh) auto auto}
+  .memrly-photo-sidebar{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto;align-items:start}
+  .memrly-photo-panel{height:auto;max-height:none;padding:16px}
+  .memrly-photo-relation-list{max-height:270px}
+  .memrly-photo-strip-items{justify-content:flex-start;overflow-x:auto}
+  .memrly-photo-strip-thumb{flex:0 0 72px;width:72px;max-width:none}
+}
+@media(max-width:700px){
+  .memrly-photo-sidebar{grid-template-columns:1fr}
+  .memrly-photo-header{gap:5px}
+  .memrly-photo-heading{gap:6px}
+  .memrly-photo-icon-btn{width:35px;height:35px;border-radius:9px}
+  .memrly-photo-toolbar{gap:4px}
+  .memrly-photo-heading h1{font-size:1.15rem}
+  .memrly-photo-visual{grid-template-rows:minmax(250px,48vh) auto auto;padding:10px}
+  .memrly-zoom-controls{gap:5px}
+  .memrly-control-label{display:none}
+  .memrly-photo-strip-title{align-items:flex-start}
+  .memrly-photo-strip-title small{font-size:.62rem}
+  .memrly-photo-strip-thumb{width:63px;flex-basis:63px}
+  .memrly-photo-lightbox{padding:9px}
+  .memrly-photo-lightbox .memrly-control-label,.memrly-photo-lightbox .memrly-zoom-instruction{display:none}
+}
