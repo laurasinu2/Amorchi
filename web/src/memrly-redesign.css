@@ -688,60 +688,50 @@ h1,h2,h3,h4,p,small{color:inherit}
   .memrly-calendar-grid .memrly-range-label{font-size:.44rem;padding:1px 2px;max-width:calc(100% - 3px)}
 }
 
-/* Las casillas dibujan el contorno conjunto usando sus PROPIOS límites.
- * No hay overlay desajustado ni columnas artificiales. Los puentes horizontales
- * unen la línea superior e inferior a través del espacio entre dos casillas. */
+/* Intervalos del calendario: UN marco por tramo semanal.
+   El overlay hereda la separación real del grid de fechas, sin márgenes entre
+   los días y sin modificar la posición ni el tamaño de sus casillas.
+   No usar las clases antiguas .memrly-range ni .memrly-range-bridge. */
 .memrly-calendar-grid .calendar-week{
-  --memrly-cell-gap:5px;
   position:relative;
   isolation:isolate;
 }
-.memrly-calendar-grid.compact .calendar-week,
-.memrly-mini-month .memrly-calendar-grid .calendar-week{--memrly-cell-gap:2px}
-.memrly-calendar-grid .calendar-day.memrly-in-range{
-  position:relative;
-  z-index:2;
+.memrly-calendar-grid .memrly-interval-layer{
+  position:absolute;
+  inset:0;
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  grid-template-rows:minmax(0,1fr);
+  column-gap:inherit;
+  row-gap:0;
+  pointer-events:none;
+  z-index:5;
+}
+.memrly-calendar-grid .memrly-interval-outline{
   box-sizing:border-box;
+  position:relative;
+  min-width:0;
+  min-height:0;
+  align-self:stretch;
+  border:2px solid var(--memrly-navy);
+  border-radius:9px;
+  background:transparent;
+  pointer-events:none;
   overflow:visible;
-  border-top:2px solid var(--memrly-navy);
-  border-bottom:2px solid var(--memrly-navy);
-  border-left:2px solid transparent;
-  border-right:2px solid transparent;
-  border-radius:0;
+}
+/* Los días interiores conservan únicamente su borde de celda neutro. */
+.memrly-calendar-grid .calendar-day.memrly-in-range:not(.selected){
+  border:1px solid var(--border);
+  border-radius:9px;
+  overflow:hidden;
   outline:none;
   box-shadow:none;
-}
-.memrly-calendar-grid .calendar-day.memrly-range-first{
-  border-left-color:var(--memrly-navy);
-  border-top-left-radius:9px;
-  border-bottom-left-radius:9px;
-}
-.memrly-calendar-grid .calendar-day.memrly-range-last{
-  border-right-color:var(--memrly-navy);
-  border-top-right-radius:9px;
-  border-bottom-right-radius:9px;
 }
 .memrly-calendar-grid .calendar-day.memrly-in-range .day-number{
   background:var(--memrly-navy);
   color:white;
 }
-.memrly-calendar-grid .calendar-day.memrly-in-range .day-backdrop{
-  border-radius:inherit;
-  overflow:hidden;
-}
-.memrly-calendar-grid .calendar-day .memrly-range-bridge{
-  position:absolute;
-  top:-2px;
-  right:calc(-1 * var(--memrly-cell-gap) - 1px);
-  width:calc(var(--memrly-cell-gap) + 2px);
-  height:calc(100% + 4px);
-  z-index:5;
-  border-top:2px solid var(--memrly-navy);
-  border-bottom:2px solid var(--memrly-navy);
-  pointer-events:none;
-  box-sizing:border-box;
-}
-/* La selección siempre sobresale con sus cuatro lados y cuatro esquinas. */
+/* La selección domina el contorno del viaje pero no afecta a los otros días. */
 .memrly-calendar-grid .calendar-day.selected,
 .memrly-calendar-grid .calendar-day.memrly-in-range.selected{
   position:relative;
@@ -752,69 +742,46 @@ h1,h2,h3,h4,p,small{color:inherit}
   outline-offset:-2px;
   box-shadow:inset 0 0 0 1px white;
 }
-.memrly-calendar-grid .calendar-day .memrly-day-event-tag{
+/* Etiqueta en la caja del tramo, no en la última celda.
+   Se ajusta al nombre; puede ocupar dos líneas en un tramo estrecho. */
+.memrly-calendar-grid .memrly-interval-tag{
+  box-sizing:border-box;
   position:absolute;
-  z-index:14;
-  bottom:3px;
   right:3px;
+  bottom:3px;
+  z-index:1;
   display:block;
   width:max-content;
-  max-width:min(420px,75vw);
+  max-width:min(390px,70vw);
   padding:4px 7px;
   border-radius:6px;
   background:var(--memrly-navy);
   color:white;
-  font-size:clamp(.55rem,.72vw,.7rem);
-  font-weight:700;
-  line-height:1.15;
+  font-size:clamp(.55rem,.73vw,.71rem);
+  font-weight:750;
+  line-height:1.16;
   white-space:normal;
-  overflow:visible;
   overflow-wrap:anywhere;
-  text-overflow:clip;
   text-align:left;
-  pointer-events:none;
-  box-shadow:0 1px 3px rgba(16,43,73,.2);
+  box-shadow:0 1px 3px rgba(16,43,73,.18);
 }
-.memrly-calendar-grid.compact .calendar-day.memrly-in-range{
-  border-top-width:1px;
-  border-bottom-width:1px;
-  border-left-width:1px;
-  border-right-width:1px;
+.memrly-calendar-grid.compact .memrly-interval-outline,
+.memrly-mini-month .memrly-interval-outline{
+  border-width:1px;
+  border-radius:5px;
 }
-.memrly-calendar-grid.compact .calendar-day.memrly-range-first{
-  border-top-left-radius:5px;
-  border-bottom-left-radius:5px;
+.memrly-calendar-grid.compact .calendar-day.selected{
+  border-radius:5px;
+  outline-width:1px;
 }
-.memrly-calendar-grid.compact .calendar-day.memrly-range-last{
-  border-top-right-radius:5px;
-  border-bottom-right-radius:5px;
-}
-.memrly-calendar-grid.compact .calendar-day .memrly-range-bridge{
-  top:-1px;
-  height:calc(100% + 2px);
-  border-top-width:1px;
-  border-bottom-width:1px;
-}
-.memrly-calendar-grid.compact .calendar-day.selected{border-radius:5px;outline-width:1px}
 @media(max-width:760px){
-  .memrly-calendar-grid .calendar-week{--memrly-cell-gap:3px}
-  .memrly-mini-month .memrly-calendar-grid .calendar-week{--memrly-cell-gap:2px}
-  .memrly-calendar-grid .calendar-day .memrly-day-event-tag{
-    max-width:min(280px,75vw);
+  .memrly-calendar-grid .memrly-interval-outline{border-radius:7px}
+  .memrly-calendar-grid .memrly-interval-tag{
+    max-width:min(260px,75vw);
     font-size:.52rem;
     padding:2px 4px;
   }
-  .memrly-calendar-grid .calendar-day.memrly-range-first{
-    border-top-left-radius:7px;
-    border-bottom-left-radius:7px;
-  }
-  .memrly-calendar-grid .calendar-day.memrly-range-last{
-    border-top-right-radius:7px;
-    border-bottom-right-radius:7px;
-  }
-  .memrly-calendar-grid .calendar-day.selected{border-radius:7px}
 }
-
 /* Identidad Memrly: se usarán los PNG originales del usuario cuando estén
    presentes en /public/brand; mientras tanto se conserva el logo anterior. */
 .sidebar-app-icon{background:var(--memrly-navy);border-radius:12px}

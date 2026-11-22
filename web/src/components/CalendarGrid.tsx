@@ -3,15 +3,15 @@ import { covers, dateLabel, monthWeeks } from '../dates';
 import { PhotoView } from './PhotoView';
 import { occasionsOn } from '../specialDates';
 import { holidaysOn } from '../traditionalDates';
-import { calendarCellEdges, calendarSegments } from '../calendarSegments';
+import { calendarSegments } from '../calendarSegments';
 
 const weekdays=['L','M','X','J','V','S','D'];
 const category=(m:Memory)=>m.kind==='trip'?'Viaje':m.kind==='event'?'Evento':'Recuerdo';
 
 /**
- * Un tramo semanal comparte únicamente el contorno EXTERIOR de sus casillas.
- * Las casillas interiores no tienen bordes verticales. Esto mantiene el marco
- * perfectamente alineado con las fotografías y con el día seleccionado.
+ * El contorno de un recuerdo es UNA caja por semana, calculada con las mismas
+ * columnas y gap del grid real. No hay bordes individuales ni puentes por casilla.
+ * La selección de un día tiene una capa superior e independiente.
  */
 export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=false,selectedDay}:{
   year:number;month:number;photos:Photo[];memories:Memory[];settings:AppSettings;
@@ -31,26 +31,11 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
         .map(memory=>({memory,segment:calendarSegments(memory.startDate,memory.endDate,year,month).find(part=>part.week===index)}))
         .filter((item):item is {memory:Memory;segment:{week:number;startColumn:number;endColumn:number}}=>Boolean(item.segment))
         .slice(0,compact?1:3);
-      // Etiqueta breve al final del tramo visible de cada semana.
-      const tagByDay=new Map<string,Memory>();
-      if(!compact){
-        const visible=week.filter(day=>Number(day.slice(5,7))===month+1);
-        const firstVisible=visible[0],lastVisible=visible.at(-1);
-        if(firstVisible&&lastVisible){
-          for(const {memory:m} of spans){
-            const finalDay=m.endDate<lastVisible?m.endDate:lastVisible;
-            if(finalDay>=firstVisible&&!tagByDay.has(finalDay))tagByDay.set(finalDay,m);
-          }
-        }
-      }
       return <div className="calendar-week" key={index}>
         {week.map(day=>{
           const current=Number(day.slice(5,7))===month+1;
           const column=week.indexOf(day);
-          const edges=calendarCellEdges(spans.map(({segment})=>segment),index,column);
-          const inRange=edges.inRange;
-          const isRangeStart=edges.left;
-          const isRangeEnd=edges.right;
+          const inRange=spans.some(({segment})=>column>=segment.startColumn&&column<=segment.endColumn);
           const photo=coverByDate.get(day);
           const matches=memories.filter(m=>covers(m.startDate,m.endDate,day));
           const specials=occasionsOn(day,settings);
@@ -63,9 +48,6 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
               'calendar-day',current?'':'muted',photo?'with-photo':'',
               matches.length?'has-event':'',
               inRange?'memrly-in-range':'',
-              inRange&&isRangeStart?'memrly-range-first':'',
-              inRange&&isRangeEnd?'memrly-range-last':'',
-              inRange&&!isRangeEnd?'memrly-range-bridged':'',
               selectedDay===day?'selected':'',
               holiday?'holiday-border holiday-'+holiday.theme:'',
               anniversary?'has-anniversary':''
@@ -75,10 +57,24 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
             {anniversary&&<span className="calendar-anniversary" aria-hidden="true"><span className="anniversary-heart">♥</span><span className="anniversary-count">{anniversary.years===0?'Inicio':`${anniversary.years}º`}</span></span>}
             {birthday&&<span className="calendar-birthday" aria-hidden="true">🎂</span>}
             {holiday&&<span className={'holiday-symbol holiday-symbol-'+holiday.theme} aria-hidden="true">{holiday.theme==='christmas'?'✶':holiday.theme==='carnival'?'🎭':holiday.theme==='pranks'?'🤭':holiday.theme==='autumn'?'🍂':holiday.theme==='spring'?'✿':holiday.theme==='bridge'?'↔':holiday.theme==='summer'?'☀':'★'}</span>}
-            {tagByDay.has(day)&&<span className="memrly-day-event-tag" aria-hidden="true">{category(tagByDay.get(day)!)}: {tagByDay.get(day)!.title}</span>}
-            {inRange&&!isRangeEnd&&<span className="memrly-range-bridge" aria-hidden="true"/>}
+
           </button>;
         })}
+        {/* Capa ABSOLUTA: una sola caja que abarca desde el primer al último
+            día del tramo, incluidos sus huecos internos; sin afectar al grid. */}
+        {spans.length>0&&<div className="memrly-interval-layer" aria-hidden="true">
+          {spans.map(({memory,segment},i)=><div
+            key={memory.id}
+            className={'memrly-interval-outline memrly-interval-'+memory.kind}
+            style={{
+              gridColumn:`${segment.startColumn+1} / ${segment.endColumn+2}`,
+              gridRow:1,
+              margin:`${i*3}px`,
+            }}
+          >
+            {!compact&&<span className="memrly-interval-tag">{category(memory)}: {memory.title}</span>}
+          </div>)}
+        </div>}
       </div>;
     })}
   </div>;

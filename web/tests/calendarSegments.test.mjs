@@ -34,19 +34,8 @@ test('Fechas inválidas o fuera del mes: ningún marco',()=>{
   assert.deepEqual(calendarSegments('2026-08-12','2026-08-09',2026,7),[]);
 });
 
-import { calendarCellEdges } from '../src/calendarSegments.ts';
-
-test('Tramo de varios días: solo primero con borde izquierdo y último derecho',()=>{
-  const segments=calendarSegments('2026-08-10','2026-08-14',2026,7);
-  const states=Array.from({length:5},(_,column)=>calendarCellEdges(segments,2,column));
-  assert.deepEqual(states.map(x=>x.left),[true,false,false,false,false]);
-  assert.deepEqual(states.map(x=>x.right),[false,false,false,false,true]);
-  assert.deepEqual(states.map(x=>x.bridge),[true,true,true,true,false]);
-  assert.deepEqual(states.map(x=>x.inRange),[true,true,true,true,true]);
-  assert.equal(calendarCellEdges(segments,2,5).inRange,false);
-});
-test('Al cruzar domingo, el borde cierra el domingo y se abre el lunes',()=>{
-  const segments=calendarSegments('2026-08-09','2026-08-14',2026,7);
-  assert.deepEqual(calendarCellEdges(segments,1,6),{inRange:true,left:true,right:true,bridge:false});
-  assert.deepEqual(calendarCellEdges(segments,2,0),{inRange:true,left:true,right:false,bridge:true});
+test('Viaje de la captura 10 a 15 de agosto: un solo rectángulo de 6 columnas',()=>{
+  assert.deepEqual(calendarSegments('2026-08-10','2026-08-15',2026,7),[
+    {week:2,startColumn:0,endColumn:5}
+  ]);
 });
