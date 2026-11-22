@@ -3,7 +3,6 @@ import { covers, dateLabel, monthWeeks } from '../dates';
 import { PhotoView } from './PhotoView';
 import { occasionsOn } from '../specialDates';
 import { holidaysOn } from '../traditionalDates';
-import { calendarSegments } from '../calendarSegments';
 
 const weekdays=['L','M','X','J','V','S','D'];
 const category=(m:Memory)=>m.kind==='trip'?'Viaje':m.kind==='event'?'Evento':'Recuerdo';
@@ -26,8 +25,19 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
     <div className="week-names">{weekdays.map((name,i)=><span key={i}>{name}</span>)}</div>
     {weeks.map((week,index)=>{
       const spans=memories.filter(m=>m.startDate<=week[6]&&m.endDate>=week[0])
-        .sort((a,b)=>a.kind===b.kind?a.startDate.localeCompare(b.startDate):a.kind==='trip'?-1:b.kind==='trip'?1:a.kind==='event'?-1:1)
-        .slice(0,compact?1:3);
+        .sort((a,b)=>a.kind===b.kind?a.startDate.localeCompare(b.startDate):a.kind==='trip'?-1:b.kind==='trip'?1:a.kind==='event'?-1:1);
+      // Colocamos el nombre al final del tramo visible de esta semana.
+      // No se crea ninguna capa superpuesta que pueda alterar el tamaño de los días.
+      const tagByDay=new Map<string,Memory>();
+      if(!compact){
+        const lastVisible=week.filter(day=>Number(day.slice(5,7))===month+1).at(-1);
+        if(lastVisible){
+          for(const m of spans){
+            const finalDay=m.endDate<lastVisible?m.endDate:lastVisible;
+            if(!tagByDay.has(finalDay))tagByDay.set(finalDay,m);
+          }
+        }
+      }
       return <div className="calendar-week" key={index}>
         {week.map(day=>{
           const current=Number(day.slice(5,7))===month+1;
@@ -50,23 +60,10 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
             {anniversary&&<span className="calendar-anniversary" aria-hidden="true"><span className="anniversary-heart">♥</span><span className="anniversary-count">{anniversary.years===0?'Inicio':`${anniversary.years}º`}</span></span>}
             {birthday&&<span className="calendar-birthday" aria-hidden="true">🎂</span>}
             {holiday&&<span className={'holiday-symbol holiday-symbol-'+holiday.theme} aria-hidden="true">{holiday.theme==='christmas'?'✶':holiday.theme==='carnival'?'🎭':holiday.theme==='pranks'?'🤭':holiday.theme==='autumn'?'🍂':holiday.theme==='spring'?'✿':holiday.theme==='bridge'?'↔':holiday.theme==='summer'?'☀':'★'}</span>}
+            {tagByDay.has(day)&&<span className="memrly-day-event-tag" aria-hidden="true">{category(tagByDay.get(day)!)}: {tagByDay.get(day)!.title}</span>}
           </button>;
         })}
-        {/* Las franjas están fuera del flujo de las 7 celdas: no generan filas implícitas. */}
-        {spans.length>0&&<div className="memrly-week-ranges" aria-hidden="true">
-          {spans.map((m,i)=>{
-            const segment=calendarSegments(m.startDate,m.endDate,year,month).find(s=>s.week===index);
-            if(!segment)return null;
-            const begin=segment.startColumn;
-            const finish=segment.endColumn;
-            return <div key={m.id} className={'memrly-range memrly-range-'+m.kind} style={{
-              gridColumn:`${begin+1} / span ${finish-begin+1}`,
-              gridRow:1,
-              margin:`${2+i*4}px`,
-              zIndex:3+i
-            }} title={category(m)+': '+m.title}>
-              <span className="memrly-range-label">{category(m)}: {m.title}</span>
-            </div>;
+      </div>;
           })}
         </div>}
       </div>;
