@@ -215,6 +215,7 @@ def upload_photo(
     key = object_key(original_id,extension)
     final_path = object_path(cfg["storage"],key)
     moved = False
+    committed = False
     try:
         with conn.cursor() as cur:
             cur.execute(
@@ -241,6 +242,7 @@ def upload_photo(
             moved = True
             row = get_photo_row(cur,uid,photo_id)
         conn.commit()
+        committed = True
         return row
     except psycopg.errors.UniqueViolation:
         conn.rollback()
@@ -252,6 +254,5 @@ def upload_photo(
         temp.unlink(missing_ok=True)
         # The file is removed only if this request failed to commit.
         # An already committed upload never loses its original.
-        if moved and conn.info.transaction_status.name != "IDLE":
-            # Defensive fallback for an unexpected failed transaction.
+        if moved and not committed:
             final_path.unlink(missing_ok=True)
