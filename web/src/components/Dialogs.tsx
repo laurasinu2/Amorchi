@@ -127,7 +127,7 @@ export function MemoryDialog({onClose,onSave,initial,defaultKind,initialDate}:{
       await onSave({id:initial?.id||createId(),kind,title:title.trim(),description,
         startDate,endDate:actualEnd,place:place.trim(),
         latitude:lat?Number(lat):undefined,longitude:lon?Number(lon):undefined,
-        favorite:initial?.favorite||false,coverPhotoId:initial?.coverPhotoId,createdAt:initial?.createdAt||new Date().toISOString()});
+        favorite:initial?.favorite||false,coverPhotoId:initial?.coverPhotoId,coverPosition:initial?.coverPosition,createdAt:initial?.createdAt||new Date().toISOString()});
       onClose();
     }catch(err){setError(String(err));}
     finally{setBusy(false);}

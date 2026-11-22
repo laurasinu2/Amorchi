@@ -29,8 +29,8 @@ export function CoverMenu({onChange}:{onChange:()=>void}){
 }
 
 const centered:CoverPosition={x:50,y:50};
-export function CoverPicker({photos,selectedId,selectedPosition,onClose,onSelect,title}:{
-  photos:Photo[];selectedId?:string;selectedPosition?:CoverPosition;title:string;
+export function CoverPicker({photos,selectedId,selectedPosition,previewKind='memory',onClose,onSelect,title}:{
+  photos:Photo[];selectedId?:string;selectedPosition?:CoverPosition;previewKind?:'home'|'year'|'memory';title:string;
   onClose:()=>void;onSelect:(id?:string,position?:CoverPosition)=>Promise<void>;
 }){
   const [chosen,setChosen]=useState(selectedId||'');
@@ -59,7 +59,7 @@ export function CoverPicker({photos,selectedId,selectedPosition,onClose,onSelect
       <div className="dialog-body">
         <p className="helper-text">Elige una foto y ajusta qué parte se ve en la portada. El original no se modifica ni se duplica.</p>
         {chosen&&<div className="cover-framing">
-          <div className="cover-frame-preview"><PhotoView id={chosen} quality="preview" focalPoint={point} className="cover-frame-photo"/></div>
+          <div className={'cover-frame-preview preview-'+previewKind}><PhotoView id={chosen} quality="preview" focalPoint={point} className="cover-frame-photo"/></div>
           <div className="cover-frame-controls"><strong><Move size={17}/> Ajustar encuadre</strong>
             <label>Horizontal <input type="range" min="0" max="100" step="1" value={point.x} onChange={e=>setPoint(p=>({...p,x:Number(e.target.value)}))}/></label>
             <label>Vertical <input type="range" min="0" max="100" step="1" value={point.y} onChange={e=>setPoint(p=>({...p,y:Number(e.target.value)}))}/></label>

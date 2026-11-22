@@ -111,7 +111,9 @@ function YearCard({year,photos,memories,settings,onYear,onChangeCover}:{
   onYear:(year:number)=>void;onChangeCover:(year:number)=>void;
 }){
   const stats=yearCounts(year,photos,memories);
-  const cover=photos.find(p=>p.id===settings.yearCoverPhotoIds?.[String(year)])||datedPhotos(stats.photos)[0];
+  const candidates=datedPhotos(stats.photos);
+  const cover=photos.find(p=>p.id===settings.yearCoverPhotoIds?.[String(year)])
+    ||(candidates.length?candidates[(Math.imul(year,2654435761)>>>0)%candidates.length]:undefined);
   const position:CoverPosition|undefined=cover?.id===settings.yearCoverPhotoIds?.[String(year)]?settings.yearCoverPositions?.[String(year)]:undefined;
   return <article className="memrly-year-card">
     <div className="memrly-year-photo-wrap">

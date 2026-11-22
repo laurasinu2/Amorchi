@@ -363,3 +363,15 @@ h1,h2,h3,h4,p,small{color:inherit}
 @media(prefers-reduced-motion:reduce){
  .memrly-screen *{scroll-behavior:auto!important;animation:none!important}
 }
+
+/* El encuadre del selector replica la forma aproximada de cada portada. */
+.cover-frame-preview{min-height:0;max-height:none;height:auto;aspect-ratio:3/1;position:relative}
+.cover-frame-preview.preview-home{aspect-ratio:7/1;min-height:95px}
+.cover-frame-preview.preview-year{aspect-ratio:1.8/1;max-height:240px}
+.cover-frame-preview.preview-memory{aspect-ratio:3.4/1;min-height:120px}
+.cover-frame-preview .cover-frame-photo{width:100%;height:100%;position:absolute;inset:0}
+@media(max-width:760px){
+  .cover-frame-preview.preview-home{aspect-ratio:3.4/1}
+  .memrly-year-metrics .memrly-stat{flex-direction:row;text-align:left;gap:3px}
+  .memrly-year-metrics .memrly-stat-icon{width:14px;height:14px}
+}

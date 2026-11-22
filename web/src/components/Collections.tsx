@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { ArrowRight, FolderPlus, Images, Plus, X } from 'lucide-react';
 import type { Photo, PhotoCollection } from '../types';
 import { createId } from '../id';
-import { dateLabel } from '../dates';
+import { dateLabel, localISO } from '../dates';
 import { PhotoView } from './PhotoView';
 
 export function AddToCollectionDialog({date,photos,collections,onSave,onClose}:{
@@ -67,6 +67,6 @@ export function CollectionsPage({collections,photos,onView,onCreate}:{
       {!collectionPhotos.length&&<p className="muted-text">Esta colección no contiene fotografías disponibles.</p>}
     </div>}
     <p className="helper-text">Para añadir fotografías a una colección existente, selecciona una fecha en el calendario y utiliza «Añadir a colección».</p>
-    <button type="button" className="btn subtle collection-from-today" onClick={()=>onCreate(new Date().toLocaleDateString('sv-SE'))}><Plus size={16}/> Añadir fotos de hoy a una colección</button>
+    <button type="button" className="btn subtle collection-from-today" onClick={()=>onCreate(localISO(new Date()))}><Plus size={16}/> Añadir fotos de hoy a una colección</button>
   </div>;
 }

@@ -142,7 +142,7 @@ export async function deletePhoto(photoId:string):Promise<void>{
   const memories=await memoryStore.getAll();
   for(const m of memories){
     if(m.coverPhotoId===photoId){
-      await memoryStore.put({...m,coverPhotoId:undefined});
+      await memoryStore.put({...m,coverPhotoId:undefined,coverPosition:undefined});
       await operations.put(op('memory',m.id));
     }
   }
@@ -157,8 +157,13 @@ export async function deletePhoto(photoId:string):Promise<void>{
   if(settings){
     const yearCovers=Object.fromEntries(Object.entries(settings.yearCoverPhotoIds||{}).filter(([,id])=>id!==photoId));
     if(settings.homeCoverPhotoId===photoId||Object.keys(yearCovers).length!==Object.keys(settings.yearCoverPhotoIds||{}).length){
-      await settingsStore.put({...settings,yearCoverPhotoIds:yearCovers,
-        homeCoverPhotoId:settings.homeCoverPhotoId===photoId?undefined:settings.homeCoverPhotoId});
+      const yearPositions={...(settings.yearCoverPositions||{})};
+      for(const key of Object.keys(settings.yearCoverPhotoIds||{})){
+        if(settings.yearCoverPhotoIds?.[key]===photoId)delete yearPositions[key];
+      }
+      await settingsStore.put({...settings,yearCoverPhotoIds:yearCovers,yearCoverPositions:yearPositions,
+        homeCoverPhotoId:settings.homeCoverPhotoId===photoId?undefined:settings.homeCoverPhotoId,
+        homeCoverPosition:settings.homeCoverPhotoId===photoId?undefined:settings.homeCoverPosition});
       await operations.put(op('settings','main'));
     }
   }
