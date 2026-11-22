@@ -152,3 +152,12 @@
 .memrly-avatar-pick>small{color:var(--muted);font-size:.66rem}
 .subject-avatar .memrly-subject-avatar-photo{border-radius:50%}
 @media(max-width:540px){.memrly-avatar-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+.memrly-profile-settings{display:grid;gap:12px}
+.memrly-profile-settings>h3{margin:0}
+.memrly-profile-settings>p{margin:0;color:var(--muted);font-size:.82rem}
+.memrly-profile-settings-row{display:flex;align-items:center;gap:14px}
+.memrly-local-profile-avatar{width:74px;height:74px;border-radius:50%;background:var(--memrly-soft);border:1px solid var(--border);overflow:hidden;display:grid;place-items:center;flex:0 0 74px}
+.memrly-local-profile-photo{width:100%;height:100%;border-radius:50%}
+.memrly-local-profile-actions{display:flex;gap:8px;flex-wrap:wrap}
+.memrly-profile-settings .field{max-width:340px}

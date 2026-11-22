@@ -193,7 +193,7 @@ export default function App(){
           {page==='album'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={openPhoto}/>}
           {page==='favoritos'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={openPhoto} filterFavorites/>}
           {page==='buscar'&&<SearchPage photos={photos} memories={memories} onView={openPhoto} onOpen={openMemory}/>}
-          {page==='ajustes'&&<SettingsPage pending={pending} settings={settings} onSaveSettings={commitSettings}/>}
+          {page==='ajustes'&&<SettingsPage pending={pending} settings={settings} photos={photos} subjects={subjects} onSaveSettings={commitSettings}/>}
           {page==='colecciones'&&<CollectionsPage collections={collections} photos={photos} onView={openPhoto} onCreate={day=>setCollectionDate(day)}/>}
           {page==='papelera'&&<EmptyState title="Papelera" description="El borrado seguro y la recuperación de fotos se añadirán con el servidor. Esta versión no borra originales desde la interfaz."/>}
         </>}

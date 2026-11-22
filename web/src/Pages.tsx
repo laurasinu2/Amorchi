@@ -118,15 +118,37 @@ export function SearchPage({photos,memories,onView,onOpen}:{photos:Photo[];memor
   </div>;
 }
 
-export function SettingsPage({pending,settings,onSaveSettings}:{pending:number;settings:AppSettings;onSaveSettings:(settings:AppSettings)=>Promise<void>}){
+export function SettingsPage({pending,settings,photos,subjects,onSaveSettings}:{pending:number;settings:AppSettings;photos:Photo[];subjects:Subject[];onSaveSettings:(settings:AppSettings)=>Promise<void>}){
   const [bytes,setBytes]=useState(0);
   const [quota,setQuota]=useState<number|undefined>();
   const [persistent,setPersistent]=useState<boolean|undefined>();
   const [error,setError]=useState('');
+  const [profilePicker,setProfilePicker]=useState(false);
   useEffect(()=>{getLocalUsage().then(v=>{setBytes(v.bytes);setQuota(v.quota);}).catch(e=>setError(String(e)));navigator.storage?.persisted?.()?.then(setPersistent).catch(()=>undefined);},[]);
   const format=(n:number)=>n>1024**3?(n/1024**3).toFixed(2)+' GB':(n/1024**2).toFixed(1)+' MB';
   return <div className="page-stack"><div className="page-intro"><span className="eyebrow">ALMACENAMIENTO Y SEGURIDAD</span><h1>Ajustes</h1><p>Estado de tu biblioteca en este dispositivo.</p></div>
     <SpecialDatesSettings settings={settings} onSave={onSaveSettings}/>
+    <section className="panel memrly-profile-settings">
+      <h3>Perfil en este dispositivo</h3>
+      <p>Elige una foto que te represente. Cuando conectemos las cuentas, se podrá vincular al usuario.</p>
+      <div className="memrly-profile-settings-row">
+        <div className="memrly-local-profile-avatar">
+          {settings.profilePhotoId?<PhotoView id={settings.profilePhotoId} className="memrly-local-profile-photo"/>:<Users size={29}/>}
+        </div>
+        <div className="memrly-local-profile-actions">
+          <button type="button" className="btn subtle" onClick={()=>setProfilePicker(true)}>Cambiar foto de perfil</button>
+          {settings.profilePhotoId&&<button type="button" className="memrly-avatar-clear" onClick={()=>onSaveSettings({...settings,profilePhotoId:undefined}).catch(e=>setError(String(e)))}>Quitar foto</button>}
+        </div>
+      </div>
+      <label className="field"><span>Relacionar tu perfil local con una persona</span>
+        <select value={settings.profileSubjectId||''} onChange={e=>onSaveSettings({...settings,profileSubjectId:e.target.value||undefined}).catch(err=>setError(String(err)))}>
+          <option value="">Ninguna (sin vincular)</option>
+          {subjects.filter(s=>s.kind==='person').map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+      </label>
+      {profilePicker&&<CoverPicker photos={photos} title="Elegir foto de perfil" selectedId={settings.profilePhotoId} previewKind="memory"
+        onClose={()=>setProfilePicker(false)} onSelect={async id=>{await onSaveSettings({...settings,profilePhotoId:id});}}/>}
+    </section>
     <div className="settings-cards"><section className="panel"><h3><HardDrive size={20}/> Biblioteca offline</h3><p className="large-stat">{format(bytes)}</p><p>Fotografías originales y variantes guardadas localmente.</p>{quota!==undefined&&<small>Cuota estimada del navegador: {format(quota)}</small>}
       <button className="btn subtle" onClick={async()=>{const ok=await requestPersistence();setPersistent(ok);}}><ShieldCheck size={16}/>{persistent?'Almacenamiento persistente concedido':'Solicitar almacenamiento persistente'}</button>
     </section><section className="panel"><h3><CloudUpload size={20}/> Cola de sincronización</h3><p className="large-stat">{pending}</p><p>Operaciones pendientes en este dispositivo.</p><div className="warning-note">El servidor todavía no está conectado. Estas operaciones NO se han subido y podrían perderse si el navegador elimina sus datos.</div></section></div>
