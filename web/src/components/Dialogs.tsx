@@ -22,12 +22,12 @@ export function Dialog({title,children,onClose,wide=false}:{
   </div>;
 }
 
-export function ImportDialog({memories,subjects,onClose,onCommit}:{
-  memories:Memory[];subjects:Subject[];onClose:()=>void;
+export function ImportDialog({memories,subjects,onClose,onCommit,initialDate}:{
+  memories:Memory[];subjects:Subject[];onClose:()=>void;initialDate?:string;
   onCommit:(files:File[],options:ImportOptions)=>Promise<{imported:number;errors:string[]}>;
 }){
   const [files,setFiles]=useState<File[]>([]);
-  const [overrideDate,setOverrideDate]=useState('');
+  const [overrideDate,setOverrideDate]=useState(initialDate||'');
   const [place,setPlace]=useState('');
   const [memoryId,setMemoryId]=useState('');
   const [selectedSubjects,setSelectedSubjects]=useState<string[]>([]);
@@ -103,14 +103,14 @@ export function ImportDialog({memories,subjects,onClose,onCommit}:{
   </Dialog>;
 }
 
-export function MemoryDialog({onClose,onSave,initial,defaultKind}:{
-  onClose:()=>void;onSave:(memory:Memory)=>Promise<void>;initial?:Memory;defaultKind?:MemoryKind;
+export function MemoryDialog({onClose,onSave,initial,defaultKind,initialDate}:{
+  onClose:()=>void;onSave:(memory:Memory)=>Promise<void>;initial?:Memory;defaultKind?:MemoryKind;initialDate?:string;
 }){
   const [kind,setKind]=useState<MemoryKind>(initial?.kind||defaultKind||'moment');
   const [title,setTitle]=useState(initial?.title||'');
   const [description,setDescription]=useState(initial?.description||'');
-  const [startDate,setStartDate]=useState(initial?.startDate||localISO(new Date()));
-  const [endDate,setEndDate]=useState(initial?.endDate||localISO(new Date()));
+  const [startDate,setStartDate]=useState(initial?.startDate||initialDate||localISO(new Date()));
+  const [endDate,setEndDate]=useState(initial?.endDate||initialDate||localISO(new Date()));
   const [place,setPlace]=useState(initial?.place||'');
   const [lat,setLat]=useState(initial?.latitude?.toString()||'');
   const [lon,setLon]=useState(initial?.longitude?.toString()||'');

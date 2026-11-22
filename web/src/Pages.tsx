@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, CalendarDays, Camera, ChevronLeft, ChevronRight, CloudUpload, Globe2, HardDrive, Heart, ImagePlus, MapPin, PawPrint, Plane, Plus, Search, ShieldCheck, Star, Trash2, Users } from 'lucide-react';
+import { ArrowRight, CalendarDays, Camera, CloudUpload, HardDrive, Heart, MapPin, PawPrint, Plus, Search, ShieldCheck, Star, Trash2, Users } from 'lucide-react';
 import type { AppSettings, Memory, Page, Photo, Subject } from './types';
-import { addDays, dateLabel, kindName, monthLabel } from './dates';
+import { dateLabel, kindName } from './dates';
 import { getLocalUsage, requestPersistence } from './db';
 import { CalendarGrid } from './components/CalendarGrid';
 import { PhotoView } from './components/PhotoView';
 import { WorldMap } from './components/WorldMap';
 import { CoverMenu } from './components/CoverPicker';
 import { SpecialDatesSettings } from './components/SpecialDatesSettings';
-import { occasionsOn } from './specialDates';
-import { holidaysOn } from './traditionalDates';
+export { Dashboard, YearsPage } from './OverviewPages';
+export { CalendarPage } from './CalendarRedesign';
+export type { CalendarMode } from './CalendarRedesign';
 
 export function SectionTitle({title,action,onAction}:{title:string;action?:string;onAction?:()=>void}){
   return <div className="section-title"><h2>{title}</h2>{action&&<button className="text-link" onClick={onAction}>{action}<ArrowRight size={16}/></button>}</div>;
@@ -26,84 +27,12 @@ export function PhotoGrid({photos,onView,limit}:{photos:Photo[];onView:(id:strin
 }
 const orderPhotos=(photos:Photo[])=>[...photos].sort((a,b)=>b.takenOn.localeCompare(a.takenOn)||b.createdAt.localeCompare(a.createdAt));
 const coverOf=(m:Memory,photos:Photo[])=>m.coverPhotoId||photos.find(p=>p.memoryIds.includes(m.id))?.id;
-const yearsOf=(photos:Photo[],memories:Memory[])=>[...new Set([...photos.map(p=>Number(p.takenOn.slice(0,4))),...memories.map(m=>Number(m.startDate.slice(0,4))),new Date().getFullYear()])].sort((a,b)=>b-a);
 function MemoryCard({memory,photos,onOpen}:{memory:Memory;photos:Photo[];onOpen:(id:string)=>void}){
   const cover=coverOf(memory,photos);
   return <button className="memory-card" onClick={()=>onOpen(memory.id)}>
-    {cover?<PhotoView id={cover} className="memory-cover"/>:<span className={'memory-cover placeholder '+memory.kind}>{memory.kind==='trip'?'✈':memory.kind==='event'?'✦':'♡'}</span>}
+    {cover?<PhotoView id={cover} focalPoint={memory.coverPhotoId===cover?memory.coverPosition:undefined} className="memory-cover"/>:<span className={'memory-cover placeholder '+memory.kind}>{memory.kind==='trip'?'✈':memory.kind==='event'?'✦':'♡'}</span>}
     <span className="memory-card-content"><span className="pill kind">{kindName(memory.kind)}</span><strong>{memory.title}</strong><small><CalendarDays size={13}/>{dateLabel(memory.startDate,'short')}{memory.endDate!==memory.startDate?' · '+dateLabel(memory.endDate,'short'):''}</small>{memory.place&&<small><MapPin size={13}/>{memory.place}</small>}</span>
   </button>;
-}
-
-export function Dashboard({photos,memories,settings,onNavigate,onOpenMemory,onViewPhoto,onImport,onCreateMemory,onChangeCover}:{
-  photos:Photo[];memories:Memory[];settings:AppSettings;onNavigate:(page:Page)=>void;onOpenMemory:(id:string)=>void;onViewPhoto:(id:string)=>void;onImport:()=>void;onCreateMemory:()=>void;onChangeCover:()=>void;
-}){
-  const newest=orderPhotos(photos);
-  const homeCover=photos.find(p=>p.id===settings.homeCoverPhotoId)||newest[0];
-  const trips=[...memories].filter(m=>m.kind==='trip').sort((a,b)=>b.startDate.localeCompare(a.startDate));
-  const years=yearsOf(photos,memories);
-  return <div className="page-stack">
-    <section className="dashboard-hero">
-      {homeCover&&<PhotoView id={homeCover.id} quality="preview" className="dashboard-hero-image"/>}
-      <div className="hero-content"><div className="hero-copy"><h1>Nuestra historia <em>♡</em></h1><p>Fotos, viajes y momentos.</p></div><button className="btn light hero-years" onClick={()=>onNavigate('anios')}>Ver años <ArrowRight size={17}/></button></div>
-      <CoverMenu onChange={onChangeCover}/>
-    </section>
-    <div className="stat-grid"><div className="stat"><CalendarDays/><strong>{years.length}</strong><span>Años</span></div><div className="stat"><Camera/><strong>{photos.length}</strong><span>Fotografías</span></div><div className="stat"><Plane/><strong>{trips.length}</strong><span>Viajes</span></div><div className="stat"><Heart/><strong>{memories.filter(m=>m.kind!=='trip').length}</strong><span>Recuerdos</span></div></div>
-    <div className="quick-actions"><button onClick={()=>onNavigate('calendario')}><CalendarDays size={24}/><span><strong>Calendario fotográfico</strong><small>Revive vuestra historia día a día</small></span><ArrowRight size={16}/></button><button onClick={onImport}><ImagePlus size={24}/><span><strong>Subir fotografías</strong><small>Añade recuerdos incluso sin conexión</small></span><ArrowRight size={16}/></button></div>
-    <SectionTitle title="Fotografías recientes" action="Ver álbum" onAction={()=>onNavigate('album')}/>
-    {photos.length?<div className="recent-row">{newest.slice(0,9).map(p=><PhotoView key={p.id} id={p.id} onClick={()=>onViewPhoto(p.id)} className="recent-photo"/>)}</div>:<EmptyState title="Vuestra historia empieza aquí" description="Importa las primeras fotografías. Se guardarán en el dispositivo incluso si el servidor está apagado." onAction={onImport} action="Subir primeras fotos"/>}
-    <SectionTitle title="Viajes y escapadas" action="Ver viajes" onAction={()=>onNavigate('viajes')}/>
-    {trips.length?<div className="memory-cards">{trips.slice(0,3).map(m=><MemoryCard key={m.id} memory={m} photos={photos} onOpen={onOpenMemory}/>)}</div>:<EmptyState title="Todavía no hay viajes" description="Crea un viaje con sus fechas y después asocia las fotos." onAction={onCreateMemory} action="Crear un recuerdo"/>}
-    <SectionTitle title="Un mundo de recuerdos" action="Abrir mapa" onAction={()=>onNavigate('lugares')}/>
-    <div className="world-teaser"><Globe2 size={32}/><div><h3>Los lugares de nuestra historia</h3><p>Viajes, eventos y momentos agrupados en un mapa mundial.</p></div><button className="btn subtle" onClick={()=>onNavigate('lugares')}>Explorar mapa <ArrowRight size={15}/></button></div>
-  </div>;
-}
-
-export function YearsPage({photos,memories,settings,onYear,onChangeCover}:{photos:Photo[];memories:Memory[];settings:AppSettings;onYear:(year:number)=>void;onChangeCover:(year:number)=>void}){
-  const years=yearsOf(photos,memories);
-  return <div className="page-stack">
-    <div className="page-intro"><span className="eyebrow">ARCHIVO CRONOLÓGICO</span><h1>Nuestros años ♡</h1><p>Cada año guarda sus propios viajes, lugares y fotografías.</p></div>
-    <div className="year-cards">{years.map(y=>{
-      const photo=photos.find(p=>p.id===settings.yearCoverPhotoIds?.[String(y)])||photos.find(p=>p.takenOn.startsWith(String(y)));
-      const count=photos.filter(p=>p.takenOn.startsWith(String(y))).length;
-      const yearMem=memories.filter(m=>m.startDate.slice(0,4)===String(y));
-      return <article key={y} className="year-card">
-        <button type="button" className="year-card-main" onClick={()=>onYear(y)}>
-          {photo?<PhotoView id={photo.id} className="year-cover"/>:<span className="year-cover placeholder">♡</span>}
-          <span><strong>{y}</strong><small>{count} fotos · {yearMem.length} recuerdos</small><span className="year-tags">{yearMem.slice(0,2).map(m=><span className={'pill '+m.kind} key={m.id}>{m.kind==='trip'?'✈ ': '♡ '}{m.title}</span>)}</span></span><ArrowRight size={22}/>
-        </button>
-        <CoverMenu onChange={()=>onChangeCover(y)}/>
-      </article>;
-    })}</div>
-  </div>;
-}
-
-export type CalendarMode='year'|'month'|'day';
-export function CalendarPage({year,month,mode,selectedDay,photos,memories,settings,onMode,onYear,onMonth,onDay,onViewPhoto}:{
-  year:number;month:number;mode:CalendarMode;selectedDay:string;photos:Photo[];memories:Memory[];settings:AppSettings;
-  onMode:(m:CalendarMode)=>void;onYear:(y:number)=>void;onMonth:(year:number,month:number)=>void;onDay:(iso:string)=>void;onViewPhoto:(id:string)=>void;
-}){
-  const dayPhotos=orderPhotos(photos.filter(p=>p.takenOn===selectedDay));
-  const dayMemories=memories.filter(m=>m.startDate<=selectedDay&&m.endDate>=selectedDay);
-  const daySpecials=occasionsOn(selectedDay,settings);
-  const dayHolidays=settings.showTraditions===false?[]:holidaysOn(selectedDay);
-  function shift(delta:number){
-    if(mode==='year')onYear(year+delta);
-    else if(mode==='month'){const date=new Date(year,month+delta,1,12);onMonth(date.getFullYear(),date.getMonth());}
-    else onDay(addDays(selectedDay,delta));
-  }
-  return <div className="page-stack">
-    <div className="segmented calendar-tabs"><button className={mode==='year'?'active':''} onClick={()=>onMode('year')}>Año</button><button className={mode==='month'?'active':''} onClick={()=>onMode('month')}>Mes</button><button className={mode==='day'?'active':''} onClick={()=>onMode('day')}>Día</button></div>
-    <div className="calendar-title"><button className="icon-button" onClick={()=>shift(-1)} aria-label="Anterior"><ChevronLeft/></button><h1><CalendarDays/>{mode==='year'?year:mode==='month'?monthLabel(year,month):dateLabel(selectedDay)}</h1><button className="icon-button" onClick={()=>shift(1)} aria-label="Siguiente"><ChevronRight/></button></div>
-    {mode==='year'&&<div className="months-grid">{Array.from({length:12},(_,m)=><section className="month-card" key={m}>
-      <button className="month-heading" onClick={()=>onMonth(year,m)}><strong>{new Intl.DateTimeFormat('es-ES',{month:'long'}).format(new Date(year,m,1))}</strong><small><Camera size={12}/>{photos.filter(p=>p.takenOn.startsWith(`${year}-${String(m+1).padStart(2,'0')}`)).length}</small></button>
-      <CalendarGrid year={year} month={m} compact photos={photos} memories={memories} settings={settings} onDay={onDay}/>
-    </section>)}</div>}
-    {mode==='month'&&<div className="month-wide"><CalendarGrid year={year} month={month} selectedDay={selectedDay} photos={photos} memories={memories} settings={settings} onDay={onDay}/><div className="calendar-legend"><span><i className="legend-photo"/>Día con foto</span><span><i className="legend-trip"/>Viaje</span><span><i className="legend-event"/>Evento / momento</span><span><i className="legend-anniversary"/>Aniversario de pareja</span><span>🎂 Cumpleaños</span><span className="legend-themed">✶ Navidad · <b>naranja</b></span><span className="legend-themed">✿ Semana Santa · <b>verde</b></span><span className="legend-themed">🎭 Carnaval · <b>morado</b></span><span className="legend-themed">🍂 Otoño · <b>cobre</b></span><span className="legend-themed">↔ Puente posible · <b>azul</b></span><span className="legend-themed">🤭 Santos Inocentes · <b>rosa</b></span></div></div>}
-    {mode==='day'&&<div className="day-layout">{dayHolidays.length>0&&<div className="panel day-special-panel">
-      <SectionTitle title="Celebraciones y tradiciones"/>{dayHolidays.map(h=><div key={h.id} className={'traditional-day-event holiday-'+h.theme}><span>{h.theme==='christmas'?'✶':h.theme==='carnival'?'🎭':h.theme==='pranks'?'🤭':h.theme==='autumn'?'🍂':h.theme==='spring'?'✿':h.theme==='bridge'?'↔':'★'}</span><strong>{h.title}</strong>{h.status==='optional-bridge'&&<small>No es festivo laboral automático</small>}</div>)}</div>}{daySpecials.length>0&&<div className="panel day-special-panel"><SectionTitle title="Fechas especiales"/>{daySpecials.map(item=><div key={item.id} className={'special-day-event '+item.type}><span className="special-day-icon">{item.type==='anniversary'?'♥':'🎂'}</span><strong>{item.label}</strong>{item.type==='anniversary'&&item.years!==undefined&&item.years>0&&<span className="special-day-count">{item.years}º</span>}</div>)}</div>}<div className="panel"><SectionTitle title="Fotos del día"/>{dayPhotos.length?<div className="day-preview">{dayPhotos.slice(0,6).map(p=><PhotoView key={p.id} id={p.id} className="day-photo" onClick={()=>onViewPhoto(p.id)}/>)}</div>:<p className="muted-text">Todavía no hay fotos de este día.</p>}</div><div className="panel"><SectionTitle title="Viajes y momentos"/>{dayMemories.length?dayMemories.map(m=><p className="event-row" key={m.id}><span className={'pill '+m.kind}>{kindName(m.kind)}</span><strong>{m.title}</strong></p>):<p className="muted-text">Ningún evento definido en esta fecha.</p>}</div></div>}
-    {mode!=='year'&&<p className="helper-text">Pulsa un día del calendario para consultar sus recuerdos. Las franjas muestran eventos y viajes que pueden durar varios días.</p>}
-  </div>;
 }
 
 export function MemoriesPage({memories,photos,onlyTrips,onOpen,onCreate}:{
@@ -127,7 +56,7 @@ export function MemoryDetail({memory,memories,photos,subjects,settings,onViewPho
   const relatedMemories=memories.filter(m=>m.id!==memory.id&&(m.startDate>=memory.startDate&&m.startDate<=memory.endDate));
   const [y,m]=memory.startDate.split('-').map(Number);
   return <div className="page-stack memory-detail">
-    <section className="memory-hero">{cover&&<PhotoView id={cover} quality="preview" className="memory-hero-image"/>}
+    <section className="memory-hero">{cover&&<PhotoView id={cover} quality="preview" focalPoint={memory.coverPhotoId===cover?memory.coverPosition:undefined} className="memory-hero-image"/>}
       <div className="memory-hero-content"><span className="pill hero-pill">{kindName(memory.kind)}</span><h1>{memory.kind==='trip'?'✈ ':''}{memory.title}</h1><p><CalendarDays size={17}/>{dateLabel(memory.startDate,'short')}{memory.endDate!==memory.startDate?' – '+dateLabel(memory.endDate,'short'):''}{memory.place&&<> · <MapPin size={17}/>{memory.place}</>}</p></div>
       <button className="btn light hero-edit" onClick={onEdit}>Editar recuerdo</button><CoverMenu onChange={onChangeCover}/>
     </section>
