@@ -17,7 +17,7 @@ def test_signup_requires_explicit_enable(monkeypatch):
     settings.cache_clear()
     with TestClient(app) as client:
         result = client.post("/api/v1/auth/register", json={
-            "email": "not-registered@example.test", "password": "strong-password-123",
+            "email": "not-registered@gmail.com", "password": "strong-password-123",
             "display_name": "Usuario",
         })
     assert result.status_code == 403
@@ -31,7 +31,7 @@ def test_private_upload_workflow(tmp_path, monkeypatch):
     suffix = uuid4().hex[:12]
     with TestClient(app) as client:
         def register(alias):
-            email = f"{alias}-{suffix}@example.test"
+            email = f"{alias}-{suffix}@gmail.com"
             response = client.post("/api/v1/auth/register", json={
                 "email": email, "password": "a-long-private-password-123",
                 "display_name": alias,
