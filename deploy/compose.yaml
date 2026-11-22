@@ -49,6 +49,8 @@ services:
       context: ..
       dockerfile: deploy/web.Dockerfile
     restart: unless-stopped
+    # Nginx runs rootless on 8080; avoids chown with dropped capabilities.
+    user: "101:101"
     depends_on: [api]
     networks:
       app_private:
@@ -56,9 +58,9 @@ services:
         aliases: [memrly-web]
     read_only: true
     tmpfs:
-      - /var/cache/nginx
-      - /var/run
-      - /tmp
+      - /var/cache/nginx:uid=101,gid=101,mode=0700
+      - /var/run:uid=101,gid=101,mode=0700
+      - /tmp:uid=101,gid=101,mode=1777
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     # No public port! GeoCauce's existing Caddy stays the only HTTPS endpoint.
