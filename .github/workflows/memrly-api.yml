@@ -53,3 +53,26 @@ jobs:
       - name: Ensure no public Memrly services bind 80/443
         run: |
           ! grep -E '(^|[[:space:]])(80:80|443:443)' deploy/compose.yaml
+  docker-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create a TEST-ONLY Docker edge network
+        run: docker network create memrly-edge
+      - name: Build and start Memrly only, on loopback
+        run: |
+          docker compose --env-file deploy/.env.example \
+            -f deploy/compose.yaml -f deploy/compose.local.yaml up -d --build --wait
+      - name: End-to-end HTTP smoke (local, no GeoCauce)
+        run: |
+          curl --fail --retry 12 --retry-delay 2 --retry-connrefused \
+            --silent --show-error http://127.0.0.1:18080/api/v1/health
+          curl --fail --silent --show-error -o /dev/null http://127.0.0.1:18080/
+      - name: Print Memrly logs only if a smoke check fails
+        if: failure()
+        run: |
+          docker compose --env-file deploy/.env.example \
+            -f deploy/compose.yaml -f deploy/compose.local.yaml ps
+          docker compose --env-file deploy/.env.example \
+            -f deploy/compose.yaml -f deploy/compose.local.yaml logs --tail=100
