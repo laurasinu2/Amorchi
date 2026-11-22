@@ -224,7 +224,10 @@ export function PhotoDetailPage({photo,photos,memories,subjects,settings,onBack,
             </div></div>
             <div className="memrly-photo-detail-row memrly-people-row"><Users size={19}/><div><strong>Personas y mascotas</strong>
               <div className="memrly-people-list">
-                {selectedSubjects.length?selectedSubjects.map(s=><span className="memrly-person-item" key={s.id}><Avatar subject={s} settings={settings}/><small>{s.name}</small></span>):<span className="memrly-empty-small">Sin personas asociadas</span>}
+                {selectedSubjects.length?<>
+                  {selectedSubjects.slice(0,4).map(s=><span className="memrly-person-item" key={s.id}><Avatar subject={s} settings={settings}/><small>{s.name}</small></span>)}
+                  {selectedSubjects.length>4&&<span className="memrly-person-more" title={selectedSubjects.slice(4).map(s=>s.name).join(', ')}>+{selectedSubjects.length-4}</span>}
+                </>:<span className="memrly-empty-small">Sin personas asociadas</span>}
                 <div className="memrly-person-add-wrap" ref={peopleRef}>
                   <button type="button" className="memrly-person-add" aria-label="Añadir persona o mascota" title="Añadir persona o mascota" onClick={()=>setPeoplePicker(v=>!v)}><Plus size={20}/></button>
                   {peoplePicker&&<div className="memrly-photo-popup memrly-people-popup">
