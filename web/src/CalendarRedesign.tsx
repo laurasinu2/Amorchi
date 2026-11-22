@@ -44,6 +44,16 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,settin
   const dayPlace=displayLocation(dayPhotos.find(p=>p.place)?.place||'',dayPhotos[0]?.latitude,dayPhotos[0]?.longitude)||
     (dayMemories.find(m=>m.place)?.place||'Sin ubicación');
   const monthTitle=monthLabel(year,month);
+  // Año elegible con desplegable, incluidos los que contienen datos antiguos.
+  const yearOptions=useMemo(()=>{
+    const relevant=[year,new Date().getFullYear()+10,
+      ...photos.map(p=>Number(p.takenOn.slice(0,4))),
+      ...memories.flatMap(m=>[Number(m.startDate.slice(0,4)),Number(m.endDate.slice(0,4))])
+    ].filter(y=>Number.isInteger(y)&&y>=1800&&y<=4100);
+    const from=Math.max(1800,Math.min(1900,...relevant));
+    const to=Math.min(4100,Math.max(...relevant));
+    return Array.from({length:to-from+1},(_,i)=>to-i);
+  },[year,photos,memories]);
   const list=useMemo(()=>{
     if(mode!=='list')return [];
     const entries=new Map<string,DayEntry>();
@@ -94,9 +104,10 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,settin
     onDay(day);
   }
   return <div className="memrly-screen memrly-calendar-screen">
-    <header className="memrly-screen-intro"><h1>Calendario fotográfico</h1><p>Descubre tus fotografías, viajes y recuerdos por fecha.</p></header>
     <div className="memrly-calendar-workspace">
-      <section className="memrly-calendar-main memrly-panel">
+      <div className="memrly-calendar-left">
+        <header className="memrly-screen-intro"><h1>Calendario fotográfico</h1><p>Descubre tus fotografías, viajes y recuerdos por fecha.</p></header>
+        <section className="memrly-calendar-main memrly-panel">
         <div className="memrly-calendar-toolbar">
           <div className="memrly-calendar-period">
             <button type="button" className="memrly-nav-round" aria-label="Periodo anterior" onClick={()=>shift(-1)}><ChevronLeft size={19}/></button>
@@ -105,7 +116,9 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,settin
                 {mode==='month'?monthTitle:year}<ChevronDown size={16}/>
               </button>
               {jumpOpen&&<div className="memrly-jump-popover" role="dialog" aria-label="Elegir mes y año">
-                <label>Año<input type="number" min="1800" max="4100" value={targetYear} onChange={e=>setTargetYear(Number(e.target.value))}/></label>
+                <label>Año<select aria-label="Seleccionar año" value={targetYear} onChange={e=>setTargetYear(Number(e.target.value))}>
+                  {yearOptions.map(y=><option value={y} key={y}>{y}</option>)}
+                </select></label>
                 {mode==='month'&&<label>Mes<select value={targetMonth} onChange={e=>setTargetMonth(Number(e.target.value))}>{monthNames.map((m,i)=><option value={i} key={i}>{m}</option>)}</select></label>}
                 <button type="button" className="btn primary" onClick={jump} disabled={targetYear<1800||targetYear>4100}>Ir a fecha</button>
               </div>}
@@ -147,7 +160,8 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,settin
             <ChevronRight size={15}/>
           </button>):<p className="muted-text">Todavía no hay elementos en este año.</p>}
         </div>}
-      </section>
+        </section>
+      </div>
 
       <aside className="memrly-calendar-side">
         <section className="memrly-panel memrly-calendar-overview">

@@ -3,6 +3,7 @@ import { covers, dateLabel, monthWeeks } from '../dates';
 import { PhotoView } from './PhotoView';
 import { occasionsOn } from '../specialDates';
 import { holidaysOn } from '../traditionalDates';
+import { calendarSegments } from '../calendarSegments';
 
 const weekdays=['L','M','X','J','V','S','D'];
 const category=(m:Memory)=>m.kind==='trip'?'Viaje':m.kind==='event'?'Evento':'Recuerdo';
@@ -54,9 +55,10 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
         {/* Las franjas están fuera del flujo de las 7 celdas: no generan filas implícitas. */}
         {spans.length>0&&<div className="memrly-week-ranges" aria-hidden="true">
           {spans.map((m,i)=>{
-            const begin=m.startDate<=week[0]?0:week.indexOf(m.startDate);
-            const finish=m.endDate>=week[6]?6:week.indexOf(m.endDate);
-            if(begin<0||finish<begin)return null;
+            const segment=calendarSegments(m.startDate,m.endDate,year,month).find(s=>s.week===index);
+            if(!segment)return null;
+            const begin=segment.startColumn;
+            const finish=segment.endColumn;
             return <div key={m.id} className={'memrly-range memrly-range-'+m.kind} style={{
               gridColumn:`${begin+1} / span ${finish-begin+1}`,
               gridRow:1,
