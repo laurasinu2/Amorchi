@@ -1,0 +1,17 @@
+[Unit]
+Description=Memrly: recuperar enrutamiento Caddy del dominio adicional sin editar GeoCauce
+Documentation=file:/opt/memrly/deploy/README.md
+Wants=docker.service network-online.target
+After=docker.service network-online.target
+ConditionPathExists=/opt/memrly/deploy/caddy/memrly.site
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/bin/bash /opt/memrly/deploy/scripts/ensure-caddy-routing.sh --apply
+TimeoutStartSec=55
+NoNewPrivileges=true
+PrivateDevices=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/tmp
