@@ -1,50 +1,68 @@
-import type { AppSettings,Memory,Photo } from '../types';
+import type { AppSettings, Memory, Photo } from '../types';
 import { covers, dateLabel, monthWeeks } from '../dates';
 import { PhotoView } from './PhotoView';
 import { occasionsOn } from '../specialDates';
 import { holidaysOn } from '../traditionalDates';
 
 const weekdays=['L','M','X','J','V','S','D'];
+const category=(m:Memory)=>m.kind==='trip'?'Viaje':m.kind==='event'?'Evento':'Recuerdo';
+
+/**
+ * Rangos de varios días dibujados como una sola caja continua por semana.
+ * Si cruzan al lunes siguiente, se conectan visualmente mediante otra caja.
+ * Los números de los días incluidos llevan su propio resaltado.
+ */
 export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=false,selectedDay}:{
-  year:number;month:number;photos:Photo[];memories:Memory[];settings:AppSettings;onDay:(iso:string)=>void;compact?:boolean;selectedDay?:string;
+  year:number;month:number;photos:Photo[];memories:Memory[];settings:AppSettings;
+  onDay:(iso:string)=>void;compact?:boolean;selectedDay?:string;
 }){
   const weeks=monthWeeks(year,month);
-  const byDate=new Map<string,Photo>();
-  for(const photo of photos){
-    if(!byDate.has(photo.takenOn))byDate.set(photo.takenOn,photo);
+  const coverByDate=new Map<string,Photo>();
+  for(const p of [...photos].sort((a,b)=>b.createdAt.localeCompare(a.createdAt))){
+    if(!coverByDate.has(p.takenOn))coverByDate.set(p.takenOn,p);
   }
-  return <div className={'calendar-grid '+(compact?'compact':'')}>
-    <div className="week-names">{weekdays.map((d,i)=><span key={i}>{d}</span>)}</div>
+  return <div className={'calendar-grid memrly-calendar-grid '+(compact?'compact':'')}>
+    <div className="week-names">{weekdays.map((name,i)=><span key={i}>{name}</span>)}</div>
     {weeks.map((week,index)=>{
-      const overlaps=memories.filter(m=>m.startDate<=week[6]&&m.endDate>=week[0]).slice(0,2);
+      const spans=memories.filter(m=>m.startDate<=week[6]&&m.endDate>=week[0])
+        .sort((a,b)=>a.kind===b.kind?a.startDate.localeCompare(b.startDate):a.kind==='trip'?-1:b.kind==='trip'?1:a.kind==='event'?-1:1)
+        .slice(0,compact?1:3);
       return <div className="calendar-week" key={index}>
         {week.map(day=>{
           const current=Number(day.slice(5,7))===month+1;
-          const photo=byDate.get(day);
+          const photo=coverByDate.get(day);
           const matches=memories.filter(m=>covers(m.startDate,m.endDate,day));
           const specials=occasionsOn(day,settings);
           const anniversary=specials.find(s=>s.type==='anniversary');
-          const birthdays=specials.filter(s=>s.type==='birthday');
-          const traditional=settings.showTraditions===false?[]:holidaysOn(day);
-          const mainHoliday=traditional.find(x=>x.status!=='optional-bridge')||traditional[0];
-          return <button key={day} type="button" title={[dateLabel(day),...specials.map(s=>s.label),...traditional.map(h=>h.title)].join(' · ')} aria-label={[dateLabel(day),...specials.map(s=>s.label),...traditional.map(h=>h.title)].join(' · ')} className={['calendar-day',current?'':'muted',photo?'with-photo':'',matches.length?'has-event':'',mainHoliday?'holiday-border holiday-'+mainHoliday.theme:'',anniversary?'has-anniversary':'',selectedDay===day?'selected':''].join(' ')} onClick={()=>onDay(day)}>
+          const birthday=specials.some(s=>s.type==='birthday');
+          const holidays=settings.showTraditions===false?[]:holidaysOn(day);
+          const holiday=holidays.find(h=>h.status!=='optional-bridge')||holidays[0];
+          const label=[dateLabel(day),...matches.map(m=>category(m)+': '+m.title),...specials.map(s=>s.label),...holidays.map(h=>h.title)].join(' · ');
+          return <button type="button" key={day} className={[
+              'calendar-day',current?'':'muted',photo?'with-photo':'',
+              matches.length?'has-event memrly-in-range':'',selectedDay===day?'selected':'',
+              holiday?'holiday-border holiday-'+holiday.theme:'',
+              anniversary?'has-anniversary':''
+            ].join(' ')} title={label} aria-label={label} onClick={()=>onDay(day)}>
             {photo&&<PhotoView id={photo.id} className="day-backdrop"/>}
-            <span className="day-number">{Number(day.slice(8,10))}</span>
+            <span className={'day-number '+(matches.length?'memrly-number-mark':'')}>{Number(day.slice(8,10))}</span>
             {anniversary&&<span className="calendar-anniversary" aria-hidden="true"><span className="anniversary-heart">♥</span><span className="anniversary-count">{anniversary.years===0?'Inicio':`${anniversary.years}º`}</span></span>}
-            {birthdays.length>0&&<span className="calendar-birthday" aria-hidden="true">🎂</span>}
-            {mainHoliday&&<span className={'holiday-symbol holiday-symbol-'+mainHoliday.theme} aria-hidden="true">{mainHoliday.theme==='christmas'?'✶':mainHoliday.theme==='carnival'?'🎭':mainHoliday.theme==='pranks'?'🤭':mainHoliday.theme==='autumn'?'🍂':mainHoliday.theme==='spring'?'✿':mainHoliday.theme==='bridge'?'↔':mainHoliday.theme==='summer'?'☀':'★'}</span>}
-            {!photo&&matches.length>0&&<span className="calendar-dot"/>}
+            {birthday&&<span className="calendar-birthday" aria-hidden="true">🎂</span>}
+            {holiday&&<span className={'holiday-symbol holiday-symbol-'+holiday.theme} aria-hidden="true">{holiday.theme==='christmas'?'✶':holiday.theme==='carnival'?'🎭':holiday.theme==='pranks'?'🤭':holiday.theme==='autumn'?'🍂':holiday.theme==='spring'?'✿':holiday.theme==='bridge'?'↔':holiday.theme==='summer'?'☀':'★'}</span>}
           </button>;
         })}
-        <div className="calendar-strips">
-          {overlaps.map((m,i)=>{
-            const begin=m.startDate<week[0]?0:week.indexOf(m.startDate);
-            const finish=m.endDate>week[6]?6:week.indexOf(m.endDate);
-            return <div key={m.id} className={'calendar-strip '+m.kind} style={{gridColumn:`${begin+1} / span ${finish-begin+1}`,gridRow:i+1}} title={m.title}>
-              <span>{m.kind==='trip'?'✈ ':m.kind==='event'?'◷ ':'♡ '}{m.title}</span>
-            </div>;
-          })}
-        </div>
+        {spans.map((m,i)=>{
+          const begin=m.startDate<=week[0]?0:week.indexOf(m.startDate);
+          const finish=m.endDate>=week[6]?6:week.indexOf(m.endDate);
+          if(begin<0||finish<begin)return null;
+          return <div key={m.id} className={'memrly-range memrly-range-'+m.kind} style={{
+            gridColumn:`${begin+1} / span ${finish-begin+1}`,
+            gridRow:1,margin:`${2+i*4}px`,
+            zIndex:3+i
+          }} title={category(m)+': '+m.title}>
+            <span className="memrly-range-label">{category(m)}: {m.title}</span>
+          </div>;
+        })}
       </div>;
     })}
   </div>;
