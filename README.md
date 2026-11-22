@@ -87,3 +87,11 @@ Los cambios se guardan atómicamente en IndexedDB junto con un marcador de borra
 - La nueva identidad cromática solo usa blanco, azul oscuro y transparencias derivadas para los componentes; las propias imágenes y los símbolos de las festividades pueden tener su color natural.
 
 Los iconos/logo actuales siguen como provisionales hasta recibir los nuevos archivos del diseño.
+
+## Ajustes del calendario y altura de Inicio/Años (noviembre de 2026)
+
+- El bug por el que los rangos de viajes desplazaban celdas a otras filas se corrige en `CalendarGrid` mediante una capa `memrly-week-ranges` de posición absoluta. Los siete botones de cada semana permanecen siempre en la única fila de la cuadrícula; los segmentos abarcan días en una capa que no interviene en el flujo. Pruebas de intervalos semanales: `web/tests/calendarSegments.test.mjs`.
+- En escritorio, Inicio y Años usan toda la altura disponible debajo de la cabecera, con filas de cuadrícula ajustables, sin desplazamiento de la página. En móvil el desplazamiento vertical sigue activo para evitar ocultar contenido.
+- Cuando el ancho del escritorio es de 1350 px o menos, se oculta `Tu historia en Memrly` en Años y se da todo el ancho a las dos tarjetas.
+- En Calendario el título forma parte de la columna izquierda y la columna de resumen se alinea desde arriba. El selector del periodo permite escoger **año en una lista desplegable** y mes en otra lista en vista mensual; el rango de años incluye los años presentes en los recuerdos y fotografías.
+- Los ajustes CSS de esta iteración están al final de `web/src/memrly-redesign.css`. Esta modificación no migra ni elimina datos locales.

@@ -46,12 +46,21 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,settin
   const monthTitle=monthLabel(year,month);
   // Año elegible con desplegable, incluidos los que contienen datos antiguos.
   const yearOptions=useMemo(()=>{
-    const relevant=[year,new Date().getFullYear()+10,
-      ...photos.map(p=>Number(p.takenOn.slice(0,4))),
-      ...memories.flatMap(m=>[Number(m.startDate.slice(0,4)),Number(m.endDate.slice(0,4))])
-    ].filter(y=>Number.isInteger(y)&&y>=1800&&y<=4100);
-    const from=Math.max(1800,Math.min(1900,...relevant));
-    const to=Math.min(4100,Math.max(...relevant));
+    let from=Math.max(1800,Math.min(1900,year));
+    let to=Math.min(4100,Math.max(new Date().getFullYear()+10,year));
+    const consider=(value:string)=>{
+      const candidate=Number(value.slice(0,4));
+      if(Number.isInteger(candidate)&&candidate>=1800&&candidate<=4100){
+        from=Math.min(from,candidate);
+        to=Math.max(to,candidate);
+      }
+    };
+    // No usar arrays masivos ni spread: las bibliotecas pueden tener miles de fotos.
+    for(const photo of photos)consider(photo.takenOn);
+    for(const memory of memories){
+      consider(memory.startDate);
+      consider(memory.endDate);
+    }
     return Array.from({length:to-from+1},(_,i)=>to-i);
   },[year,photos,memories]);
   const list=useMemo(()=>{
