@@ -150,7 +150,7 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,settin
 
         {mode==='month'&&<div className="memrly-month-calendar">
           <CalendarGrid year={year} month={month} selectedDay={selectedDay} photos={photos} memories={memories} settings={settings} onDay={selectDate}/>
-          <div className="memrly-calendar-key"><span><i/>Foto</span><span><i/>Viaje o evento</span><span><i/>Día seleccionado</span></div>
+          <div className="memrly-calendar-key"><span><i/>Foto</span><span><i/>Viaje o evento</span><span><i/>Día seleccionado</span><span className="memrly-key-holiday"><i/>Festivo</span><span className="memrly-key-anniversary"><i/>Aniversario</span></div>
         </div>}
 
         {mode==='year'&&<div className="memrly-mini-months">

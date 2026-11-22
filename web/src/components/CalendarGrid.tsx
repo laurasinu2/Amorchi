@@ -50,7 +50,8 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
               inRange?'memrly-in-range':'',
               selectedDay===day?'selected':'',
               holiday?'holiday-border holiday-'+holiday.theme:'',
-              anniversary?'has-anniversary':''
+              birthday?'memrly-special-birthday':'',
+              anniversary?'has-anniversary memrly-special-anniversary':''
             ].join(' ')} title={label} aria-label={label} onClick={()=>onDay(day)}>
             {photo&&<PhotoView id={photo.id} className="day-backdrop"/>}
             <span className={'day-number '+(matches.length?'memrly-number-mark':'')}>{Number(day.slice(8,10))}</span>

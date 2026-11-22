@@ -118,3 +118,10 @@ La interfaz prioriza esos PNG y recurre a los anteriores si aún no están prese
 - Las nuevas relaciones viven en el navegador, todavía **no se sincronizan con servidor**. No elimines los datos del navegador ni presupongas que existe copia de seguridad remota.
 - El calendario muestra las celebraciones del día seleccionado y los contornos de viaje/evento y día seleccionado usan ahora **3 px** en la vista mensual (2 px en minimapas).
 
+
+## Colores de los días especiales y bordes (22/11/2026)
+
+- El intervalo semanal de viajes, momentos y eventos **mantiene su borde azul marino original de 2 px** (1 px en calendarios pequeños). No se alteran sus segmentos ni la etiqueta del nombre.
+- Los días de festivos y tradiciones ahora tienen un **contorno individual de color** según su categoría: rojo para Navidad, verde para primavera/Semana Santa, violeta para Carnaval, naranja para otoño, amarillo para verano, etc. Los cumpleaños se distinguen en violeta.
+- El **aniversario de pareja** tiene prioridad y utiliza un **rosa fuerte (#ee1783)**, independientemente de otros festivos o viajes que coincidan ese día.
+- El día seleccionado se resalta con 3 px azul marino (2 px en calendarios pequeños). Si también es festivo o aniversario, conserva su marco azul y añade un **segundo aro exterior** del color correspondiente, sin ocultar el estado de selección.
