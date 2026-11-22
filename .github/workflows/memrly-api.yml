@@ -1,0 +1,88 @@
+name: Memrly REST API and Caddy checks
+on:
+  push:
+    branches: ["feat/memrly-backend-rest-*"]
+  pull_request:
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: memrly
+          POSTGRES_USER: memrly
+          POSTGRES_PASSWORD: ci_password_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U memrly -d memrly"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install REST dependencies
+        run: python -m pip install -r server/api/requirements-test.txt
+      - name: Initialize Memrly-only PostgreSQL schema
+        run: |
+          docker exec -i ${{ job.services.postgres.id }} psql -U memrly -d memrly -v ON_ERROR_STOP=1 < server/db/001_initial.sql
+          docker exec -i ${{ job.services.postgres.id }} psql -U memrly -d memrly -v ON_ERROR_STOP=1 < server/db/002_preferences.sql
+      - name: Compile REST modules
+        run: python -m compileall -q server/api/memrly_api
+      - name: Unit and real database tests
+        working-directory: server/api
+        env:
+          MEMRLY_DB_HOST: 127.0.0.1
+          MEMRLY_DB_NAME: memrly
+          MEMRLY_DB_USER: memrly
+          MEMRLY_DB_PASSWORD: ci_password_only
+          MEMRLY_JWT_SECRET: 1234567890abcdef1234567890abcdef1234567890abcdef
+          MEMRLY_ALLOW_SIGNUP: "true"
+        run: python -m pytest -q tests
+  compose-and-caddy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate isolated Memrly Compose
+        run: docker compose --env-file deploy/.env.example -f deploy/compose.yaml config --quiet
+      - name: Validate standalone Memrly Caddy block
+        run: |
+          docker run --rm -v "$PWD/deploy/caddy/memrly.site:/etc/caddy/Caddyfile:ro" caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+      - name: Ensure no public Memrly services bind 80/443
+        run: |
+          ! grep -E '(^|[[:space:]])(80:80|443:443)' deploy/compose.yaml
+  docker-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create a TEST-ONLY Docker edge network
+        run: docker network create memrly-edge
+      - name: Build and start Memrly only, on loopback
+        run: |
+          docker compose --env-file deploy/.env.example \
+            -f deploy/compose.yaml -f deploy/compose.local.yaml up -d --build --wait
+      - name: End-to-end HTTP smoke (local, no GeoCauce)
+        run: |
+          curl --fail --retry 12 --retry-delay 2 --retry-connrefused \
+            --silent --show-error http://127.0.0.1:18080/api/v1/health
+          curl --fail --silent --show-error -o /dev/null http://127.0.0.1:18080/
+      - name: Print Memrly logs only if a smoke check fails
+        if: failure()
+        run: |
+          docker compose --env-file deploy/.env.example \
+            -f deploy/compose.yaml -f deploy/compose.local.yaml ps
+          docker compose --env-file deploy/.env.example \
+            -f deploy/compose.yaml -f deploy/compose.local.yaml logs --tail=100
+
+  caddy-bridge-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate safe Caddy recovery script syntax
+        run: bash -n deploy/scripts/ensure-caddy-routing.sh
+      - name: Validate service and timer format
+        run: |
+          systemd-analyze verify deploy/systemd/memrly-caddy-bridge.service deploy/systemd/memrly-caddy-bridge.timer

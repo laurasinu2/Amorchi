@@ -10,3 +10,8 @@ coverage/
 .idea/
 .vscode/
 web/tsconfig.tsbuildinfo
+
+# Credenciales del despliegue Memrly, nunca subir a Git
+/deploy/.env
+/deploy/.env.*
+!/deploy/.env.example

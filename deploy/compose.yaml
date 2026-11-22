@@ -1,0 +1,77 @@
+# Independent Memrly stack. Never pass GeoCauce's Compose file to this project.
+name: memrly
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${MEMRLY_DB_NAME:?Set MEMRLY_DB_NAME}
+      POSTGRES_USER: ${MEMRLY_DB_USER:?Set MEMRLY_DB_USER}
+      POSTGRES_PASSWORD: ${MEMRLY_DB_PASSWORD:?Set MEMRLY_DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../server/db/001_initial.sql:/docker-entrypoint-initdb.d/001_initial.sql:ro
+      - ../server/db/002_preferences.sql:/docker-entrypoint-initdb.d/002_preferences.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [database]
+    security_opt: [no-new-privileges:true]
+  api:
+    build:
+      context: ..
+      dockerfile: server/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      MEMRLY_DB_HOST: db
+      MEMRLY_DB_NAME: ${MEMRLY_DB_NAME:?Set MEMRLY_DB_NAME}
+      MEMRLY_DB_USER: ${MEMRLY_DB_USER:?Set MEMRLY_DB_USER}
+      MEMRLY_DB_PASSWORD: ${MEMRLY_DB_PASSWORD:?Set MEMRLY_DB_PASSWORD}
+      MEMRLY_JWT_SECRET: ${MEMRLY_JWT_SECRET:?Set MEMRLY_JWT_SECRET}
+      MEMRLY_ALLOW_SIGNUP: ${MEMRLY_ALLOW_SIGNUP:-false}
+      MEMRLY_MAX_UPLOAD_BYTES: ${MEMRLY_MAX_UPLOAD_BYTES:-26214400}
+      MEMRLY_STORAGE_ROOT: /data/files
+    volumes:
+      - photo_files:/data/files
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [database, app_private]
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    restart: unless-stopped
+    # Nginx runs rootless on 8080; avoids chown with dropped capabilities.
+    user: "101:101"
+    depends_on: [api]
+    networks:
+      app_private:
+      edge:
+        aliases: [memrly-web]
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:uid=101,gid=101,mode=0700
+      - /var/run:uid=101,gid=101,mode=0700
+      - /tmp:uid=101,gid=101,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    # No public port! GeoCauce's existing Caddy stays the only HTTPS endpoint.
+networks:
+  database:
+    internal: true
+  app_private:
+    internal: true
+  edge:
+    external: true
+    name: memrly-edge
+volumes:
+  postgres_data:
+  photo_files:

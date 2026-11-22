@@ -1,0 +1,12 @@
+[Unit]
+Description=Memrly: comprobar y recuperar el enlace al Caddy compartido
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=1min
+AccuracySec=15s
+Unit=memrly-caddy-bridge.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target
