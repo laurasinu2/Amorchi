@@ -144,18 +144,16 @@ La acción Compartir usa la API nativa del dispositivo cuando admite archivos; c
 
 Los datos siguen residiendo en IndexedDB. El código de selección de relacionadas se prueba en `web/tests/photoRelations.test.mjs`, y las referencias de avatar se limpian cuando se elimina la foto correspondiente, conservando las fichas.
 
-## Logotipo e iconos de Memrly (22/11/2026)
+## Logos originales Memrly (22/11/2026)
 
-Se ha retirado la identidad de «Recuerdos» de la cabecera, barra lateral, favicon y manifiesto de la PWA. Los recursos vectoriales `web/public/brand/memrly-app.svg` y `web/public/brand/memrly-horizontal.svg` son **recreaciones provisionales** del logo cuadrado azul marino con fotógrafo y del logo largo «Memrly» aportados en el chat. No sustituyen los archivos PNG originales del usuario, que deberán añadirse como recursos cuando se disponga de transferencia binaria al repositorio. Se mantiene la identidad en azul marino y blanco; no se alteran fotografías ni datos de IndexedDB.
+Los PNG originales suministrados por la persona usuaria están incorporados a **GitHub sin modificar ningún byte**, reutilizando exactamente los blobs subidos a `web/src`:
 
-## Logos originales PNG (pendiente de incorporar los archivos binarios)
+- **Icono cuadrado**: `web/public/brand/memrly-app.png`. SHA Git `d8ca7e94453264e17a22404f2ed888a6c1e6ab65`, 813839 bytes.
+- **Logo horizontal**: `web/public/brand/memrly-horizontal.png`. SHA Git `916a5c9c6a1b13e3562e379cd7c1f743d947c8b9`, 435511 bytes.
 
-La aplicación ahora **prioriza los archivos originales sin redibujar ni modificar sus píxeles** en estas rutas:
+`App.tsx` usa los PNG originales en la barra lateral y la cabecera; `web/index.html` y `web/vite.config.ts` los priorizan para el favicon, el acceso directo y el manifiesto de la PWA. Los SVG recreados siguen presentes únicamente como alternativa de emergencia si faltara algún archivo. Los archivos originales subidos a `web/src` se han conservado para no eliminar contenido del usuario.
 
-- `web/public/brand/memrly-app.png`: original cuadrado del fotógrafo, PNG **1254 × 1254**.
-- `web/public/brand/memrly-horizontal.png`: original horizontal con «Memrly», PNG **2048 × 682**.
-
-Estas rutas corresponden a las dos imágenes entregadas por el usuario el 22/11/2026. Una vez añadidos los binarios al repositorio y reiniciado Vite, la barra lateral, la cabecera, el favicon y el manifiesto PWA utilizarán **sus PNG exactos**. Si faltan, se mostrarán los SVG recreados únicamente como alternativa de seguridad, para no romper la instalación ni la página. Los PNG **todavía no están dentro del árbol Git**: no confundir «rutas preparadas» con «archivos subidos». El cambio de icono de una PWA ya instalada puede requerir reinstalación o actualización del navegador. No afecta a datos locales ni fotografías.
+Si el dispositivo mantiene el icono antiguo después de actualizar la PWA, puede necesitar recargar y reinstalar el acceso directo. No se han modificado las fotografías ni el almacenamiento IndexedDB.
 
 ## Recuerdos de una sola fecha en el calendario
 
