@@ -6,7 +6,7 @@ export function relatedPhotos(photo:Photo,photos:Photo[]):Photo[]{
   const memoryIds=new Set(photo.memoryIds);
   const included=photos.filter(p=>p.id===photo.id||p.takenOn===photo.takenOn||p.memoryIds.some(id=>memoryIds.has(id)));
   return included.sort((a,b)=>a.takenOn.localeCompare(b.takenOn)||
-    (a.takenTime||'').localeCompare(b.takenTime||'')||a.createdAt.localeCompare(b.createdAt));
+    (a.takenTime||'').localeCompare(b.takenTime||'')||a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));
 }
 
 /** Una asociación directa se muestra antes que los viajes que coinciden por fecha. */
