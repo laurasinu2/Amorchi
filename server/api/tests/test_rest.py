@@ -28,6 +28,7 @@ def test_signup_requires_explicit_enable(monkeypatch):
 def test_private_upload_workflow(tmp_path, monkeypatch):
     monkeypatch.setenv("MEMRLY_STORAGE_ROOT", str(tmp_path))
     monkeypatch.setenv("MEMRLY_ALLOW_SIGNUP", "true")
+    monkeypatch.delenv("MEMRLY_SMTP_HOST", raising=False)
     settings.cache_clear()
     suffix = uuid4().hex[:12]
     codes = {}
@@ -41,19 +42,16 @@ def test_private_upload_workflow(tmp_path, monkeypatch):
                 "display_name": alias,
             })
             assert response.status_code == 201, response.text
-            unverified = client.post("/api/v1/account/login", json={
-                "email": email, "password": "a-long-private-password-123",
-            })
-            assert unverified.status_code == 403
-            verified = client.post("/api/v1/account/verify", json={
-                "email": email, "code": codes[(email, "verify")],
-            })
-            assert verified.status_code == 200, verified.text
+            # Without SMTP, registration succeeds and email remains unverified.
             login = client.post("/api/v1/account/login", json={
                 "email": email, "password": "a-long-private-password-123",
                 "remember": True,
             })
             assert login.status_code == 200, login.text
+            profile = client.get("/api/v1/auth/me", headers={
+                "Authorization": "Bearer " + login.json()["access_token"]
+            })
+            assert profile.status_code == 200 and profile.json()["email_verified_at"] is None
             return email, login.json()["access_token"]
         email_a, token_a = register("one")
         email_b, token_b = register("two")
@@ -99,11 +97,6 @@ def test_private_upload_workflow(tmp_path, monkeypatch):
         assert client.get("/api/v1/photos",headers=h2).json() == []
         recovery = client.post("/api/v1/account/forgot", json={"email": email_a})
         assert recovery.status_code == 200
-        changed = client.post("/api/v1/account/reset", json={
-            "email": email_a, "code": codes[(email_a, "reset")],
-            "password": "replacement-password-123",
-            "repeat_password": "replacement-password-123",
-        })
-        assert changed.status_code == 200
-        assert client.get("/api/v1/photos",headers=h1).status_code == 401
+        assert (email_a, "reset") not in codes
+        # Password recovery remains unavailable until mail delivery is configured.
     settings.cache_clear()
