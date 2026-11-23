@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { Account } from './account';
 import { ArrowRight, CalendarDays, Camera, CloudUpload, HardDrive, Heart, MapPin, PawPrint, Plus, Search, ShieldCheck, Star, Trash2, Users } from 'lucide-react';
 import type { AppSettings, Memory, Photo, Subject } from './types';
 import { dateLabel, kindName } from './dates';
@@ -118,7 +119,7 @@ export function SearchPage({photos,memories,onView,onOpen}:{photos:Photo[];memor
   </div>;
 }
 
-export function SettingsPage({pending,settings,photos,subjects,onSaveSettings}:{pending:number;settings:AppSettings;photos:Photo[];subjects:Subject[];onSaveSettings:(settings:AppSettings)=>Promise<void>}){
+export function SettingsPage({pending,settings,photos,subjects,onSaveSettings,account,accountChecking,onLogin,onLogout}:{pending:number;settings:AppSettings;photos:Photo[];subjects:Subject[];onSaveSettings:(settings:AppSettings)=>Promise<void>;account:Account|null;accountChecking:boolean;onLogin:()=>void;onLogout:()=>void}){
   const [bytes,setBytes]=useState(0);
   const [quota,setQuota]=useState<number|undefined>();
   const [persistent,setPersistent]=useState<boolean|undefined>();
@@ -127,6 +128,14 @@ export function SettingsPage({pending,settings,photos,subjects,onSaveSettings}:{
   useEffect(()=>{getLocalUsage().then(v=>{setBytes(v.bytes);setQuota(v.quota);}).catch(e=>setError(String(e)));navigator.storage?.persisted?.()?.then(setPersistent).catch(()=>undefined);},[]);
   const format=(n:number)=>n>1024**3?(n/1024**3).toFixed(2)+' GB':(n/1024**2).toFixed(1)+' MB';
   return <div className="page-stack"><div className="page-intro"><span className="eyebrow">ALMACENAMIENTO Y SEGURIDAD</span><h1>Ajustes</h1><p>Estado de tu biblioteca en este dispositivo.</p></div>
+    <section className="account-panel">
+      <h3><ShieldCheck size={20}/> Cuenta de Memrly</h3>
+      {accountChecking?<p>Comprobando sesión…</p>:account?<><p className="account-email">{account.display_name}</p>
+        <p>{account.email}</p><small>Cuenta iniciada en este dispositivo.</small>
+      </>:<><p>Inicia sesión para acceder a tu cuenta y preparar la sincronización de tus recuerdos.</p>
+        <div className="account-actions"><button type="button" className="btn primary" onClick={onLogin}>Iniciar sesión</button></div>
+      </>}
+    </section>
     <SpecialDatesSettings settings={settings} onSave={onSaveSettings}/>
     <section className="panel memrly-profile-settings">
       <h3>Perfil en este dispositivo</h3>
@@ -152,7 +161,8 @@ export function SettingsPage({pending,settings,photos,subjects,onSaveSettings}:{
     <div className="settings-cards"><section className="panel"><h3><HardDrive size={20}/> Biblioteca offline</h3><p className="large-stat">{format(bytes)}</p><p>Fotografías originales y variantes guardadas localmente.</p>{quota!==undefined&&<small>Cuota estimada del navegador: {format(quota)}</small>}
       <button className="btn subtle" onClick={async()=>{const ok=await requestPersistence();setPersistent(ok);}}><ShieldCheck size={16}/>{persistent?'Almacenamiento persistente concedido':'Solicitar almacenamiento persistente'}</button>
     </section><section className="panel"><h3><CloudUpload size={20}/> Cola de sincronización</h3><p className="large-stat">{pending}</p><p>Operaciones pendientes en este dispositivo.</p><div className="warning-note">El servidor todavía no está conectado. Estas operaciones NO se han subido y podrían perderse si el navegador elimina sus datos.</div></section></div>
-    <section className="panel"><h3>Estado del proyecto</h3><p>La sesión por correo electrónico y la sincronización con PostgreSQL estarán disponibles cuando se implemente la API doméstica. No hay autenticación ni copias de seguridad automáticas en esta versión.</p><p>Para una instalación segura en móviles de la misma Wi-Fi será necesario HTTPS fiable y un servidor accesible por dirección local.</p></section>
+    <section className="panel"><h3>Estado del proyecto</h3><p>La autenticación de Memrly está disponible. La biblioteca de este dispositivo todavía es local: iniciar sesión no sube fotografías automáticamente. Comprueba las copias de seguridad del servidor antes de confiarle los originales.</p><p>Para una instalación segura en móviles de la misma Wi-Fi será necesario HTTPS fiable y un servidor accesible por dirección local.</p></section>
+    {account&&<div className="account-signout"><button type="button" onClick={onLogout}>Cerrar sesión</button></div>}
     {error&&<p role="alert" className="form-errors">{error}</p>}
   </div>;
 }
