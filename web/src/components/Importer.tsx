@@ -5,6 +5,7 @@ import { inspectPhoto, type PhotoInspection } from '../db';
 import type { AppSettings, ImportOptions, Memory, Subject } from '../types';
 import { createId } from '../id';
 import { automaticCelebrationIds, celebrationCatalog } from '../celebrations';
+import { LocationSearch } from './LocationSearch';
 import './importer-cards.css';
 
 type Draft = {
@@ -14,6 +15,8 @@ type Draft = {
   inspection?: PhotoInspection;
   date: string;
   place: string;
+  latitude?: number;
+  longitude?: number;
   memoryId: string;
   editedDate: boolean;
 };
@@ -109,6 +112,8 @@ export function ImportDialog({ memories, subjects, settings, onClose, onCommit, 
         perFile: items.map(item => ({
           overrideDate: item.editedDate ? item.date || undefined : undefined,
           place: item.place,
+          latitude: item.latitude,
+          longitude: item.longitude,
           memoryId: item.memoryId || undefined,
         }))
       });
@@ -200,8 +205,13 @@ export function ImportDialog({ memories, subjects, settings, onClose, onCommit, 
         <p className="memrly-import-editor-filename">{current.file.name}</p>
         {editor.field === 'date' && <label className="field"><span>Fecha de la fotografía</span>
           <input type="date" value={current.date} onChange={e => update(current.id, {date: e.target.value, editedDate: true})}/></label>}
-        {editor.field === 'place' && <label className="field"><span>Lugar</span>
-          <input autoFocus value={current.place} maxLength={180} placeholder="Barcelona, Roma…" onChange={e => update(current.id, {place:e.target.value})}/></label>}
+        {editor.field === 'place' && <div className="memrly-import-match-editor">
+          <label className="field"><span>Buscar lugar online</span></label>
+          <LocationSearch value={current.place} onSelect={location=>update(current.id,{
+            place:location.label,latitude:location.latitude,longitude:location.longitude
+          })}/>
+          {current.place&&<small>Lugar seleccionado: {current.place}</small>}
+        </div>}
         {editor.field === 'memory' && <div className="memrly-import-match-editor">
           <label className="field"><span>Recuerdos que coinciden con la fecha</span>
             <select value={current.memoryId} onChange={e => update(current.id, {memoryId:e.target.value})}>
@@ -223,7 +233,7 @@ export function ImportDialog({ memories, subjects, settings, onClose, onCommit, 
           })()}
         </div>}
         {editor.field === 'place' && current.inspection?.latitude !== undefined &&
-          <small>GPS EXIF: {current.inspection.latitude.toFixed(5)}, {current.inspection.longitude?.toFixed(5)}. Las coordenadas originales se conservan.</small>}
+          <small>GPS EXIF original: {current.inspection.latitude.toFixed(5)}, {current.inspection.longitude?.toFixed(5)}. Si seleccionas otro lugar, se utilizarán sus coordenadas.</small>}
         <button type="button" className="memrly-import-submit" onClick={() => setEditor(null)}>Guardar cambios</button>
       </section></div>}
     </section>
