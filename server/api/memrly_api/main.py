@@ -15,10 +15,12 @@ from .config import settings
 from .database import get_conn
 from .security import create_token, decode_token, hash_password, verify_password
 from .storage import object_key, object_path, receive_file, safe_name
+from .accounts import router as account_router
 
 app = FastAPI(title="Memrly REST API", version="0.1.0",
               docs_url=None, redoc_url=None, openapi_url=None)
 bearer = HTTPBearer(auto_error=False)
+app.include_router(account_router)
 
 
 class RegisterIn(BaseModel):
@@ -105,41 +107,14 @@ def health():
     return {"service": "memrly", "status": "ok"}
 
 
-@app.post("/api/v1/auth/register", response_model=TokenOut, status_code=201)
-def register(data: RegisterIn, conn=Depends(get_conn)):
-    if not settings()["allow_signup"]:
-        raise HTTPException(403, "El registro todavía está cerrado. Actívalo tras comprobar HTTPS.")
-    email = str(data.email).lower()
-    uid, aid = uuid4(), uuid4()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO app_users(id,email,password_hash,display_name) VALUES (%s,%s,%s,%s)",
-                (uid,email,hash_password(data.password),data.display_name),
-            )
-            cur.execute("INSERT INTO albums(id,name,created_by) VALUES (%s,%s,%s)",
-                        (aid,"Mi álbum",uid))
-            cur.execute("""INSERT INTO album_members(album_id,user_id,role)
-                           VALUES (%s,%s,'owner')""", (aid,uid))
-        conn.commit()
-    except psycopg.errors.UniqueViolation:
-        conn.rollback()
-        raise HTTPException(409, "Ya existe una cuenta con este correo.")
-    return TokenOut(access_token=create_token(uid))
+# Legacy endpoints deliberately disabled: they bypassed email verification and revocable sessions.
+@app.post("/api/v1/auth/register", status_code=410)
+def legacy_register():
+    raise HTTPException(410, "Utiliza /api/v1/account/register.")
 
-
-@app.post("/api/v1/auth/login", response_model=TokenOut)
-def login(data: LoginIn, conn=Depends(get_conn)):
-    with conn.cursor() as cur:
-        cur.execute(
-            "SELECT id,password_hash FROM app_users WHERE email=%s AND disabled_at IS NULL",
-            (str(data.email).lower(),),
-        )
-        row = cur.fetchone()
-    valid = verify_password(data.password, row["password_hash"] if row else None)
-    if not valid or row is None:
-        raise HTTPException(401, "Correo o contraseña incorrectos.")
-    return TokenOut(access_token=create_token(row["id"]))
+@app.post("/api/v1/auth/login", status_code=410)
+def legacy_login():
+    raise HTTPException(410, "Utiliza /api/v1/account/login.")
 
 
 @app.get("/api/v1/auth/me")
