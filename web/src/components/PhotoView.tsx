@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { ImageOff } from 'lucide-react';
-import { getPhotoAsset } from '../db';
+import { getOnlinePhotoBlob } from '../onlineLibrary';
 import type { CoverPosition } from '../types';
 
 export function PhotoView({id,quality='thumb',className='',children,onClick,focalPoint}:{
@@ -11,7 +11,7 @@ export function PhotoView({id,quality='thumb',className='',children,onClick,foca
   useEffect(()=>{
     let alive=true;let objectUrl='';
     setUrl('');setMissing(false);
-    getPhotoAsset(id,quality).then(blob=>{
+    getOnlinePhotoBlob(id,quality).then(blob=>{
       if(!alive)return;
       if(!blob){setMissing(true);return;}
       objectUrl=URL.createObjectURL(blob);setUrl(objectUrl);
