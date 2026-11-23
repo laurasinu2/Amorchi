@@ -243,3 +243,6 @@ def upload_photo(
 # Load only after current_user is defined; the sync router uses the same auth dependency.
 from .photo_sync import router as photo_sync_router
 app.include_router(photo_sync_router)
+
+from .library import router as library_router
+app.include_router(library_router)
