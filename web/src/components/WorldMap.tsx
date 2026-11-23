@@ -1,77 +1,64 @@
-import { useEffect, useState, type ChangeEvent } from 'react';
-import { ImageOverlay, MapContainer, CircleMarker, Tooltip, ZoomControl } from 'react-leaflet';
-import type { LatLngBoundsExpression } from 'leaflet';
-import { ImagePlus, Map as MapIcon } from 'lucide-react';
-import type { Memory } from '../types';
-import { getWorldMapImage, saveWorldMapImage } from '../db';
+import { useEffect, useState } from 'react';
+import { CircleMarker, MapContainer, TileLayer, Tooltip, ZoomControl, useMap } from 'react-leaflet';
+import { MapPin, WifiOff } from 'lucide-react';
+import type { Memory, Photo } from '../types';
+import type { LocationChoice } from './LocationSearch';
+import './online-places.css';
 
-/**
- * GeoTIFF original: EPSG:3857, 28740 x 27559 pixels.
- * Bounding box en metros:
- * xmin=-20075000, ymin=-19250000, xmax=20074860.299720608, ymax=19250000.
- *
- * La versión WebP deriva de dicho raster sin recortar, por lo que conserva
- * su georreferenciación mediante este bounding box externo.
- * Leaflet utiliza EPSG:3857, el mismo CRS que el GeoTIFF.
- */
-const R=6378137;
-const lng=(x:number)=>x/R*180/Math.PI;
-const lat=(y:number)=>Math.atan(Math.sinh(y/R))*180/Math.PI;
-export const WORLD_RASTER_BOUNDS:LatLngBoundsExpression=[
-  [lat(-19250000),lng(-20075000)],
-  [lat(19250000),lng(20074860.299720608)]
-];
-const markerColors={trip:'#b96848',event:'#70906b',moment:'#956788'} as const;
+const markerColors={trip:'#a65c46',event:'#527b65',moment:'#805b8e'} as const;
 
-export function WorldMap({memories,onSelect}:{
-  memories:Memory[];onSelect:(id:string)=>void;
+function FlyToLocation({location}:{location?:LocationChoice}){
+  const map=useMap();
+  useEffect(()=>{if(location)map.flyTo([location.latitude,location.longitude],11,{duration:.6});},
+    [location?.latitude,location?.longitude,map]);
+  return null;
+}
+
+export function WorldMap({memories,photos=[],onSelect,onSelectPhoto,focus}:{
+  memories:Memory[];photos?:Photo[];onSelect:(id:string)=>void;onSelectPhoto?:(id:string)=>void;focus?:LocationChoice;
 }){
-  const [url,setUrl]=useState('');
-  const [loading,setLoading]=useState(true);
-  const [error,setError]=useState('');
-  const [importing,setImporting]=useState(false);
-  const [version,setVersion]=useState(0);
+  const [online,setOnline]=useState(navigator.onLine);
   useEffect(()=>{
-    let alive=true;
-    let imageUrl='';
-    setLoading(true);
-    getWorldMapImage().then(blob=>{
-      if(!alive)return;
-      if(blob){imageUrl=URL.createObjectURL(blob);setUrl(imageUrl);}
-      else setUrl('');
-    }).catch(e=>{if(alive)setError(String(e));}).finally(()=>{if(alive)setLoading(false);});
-    return ()=>{alive=false;if(imageUrl)URL.revokeObjectURL(imageUrl);};
-  },[version]);
-  async function onImport(e:ChangeEvent<HTMLInputElement>){
-    const file=e.target.files?.[0];
-    e.target.value='';
-    if(!file)return;
-    setError('');setImporting(true);
-    try{await saveWorldMapImage(file);setVersion(x=>x+1);}
-    catch(err){setError(err instanceof Error?err.message:String(err));}
-    finally{setImporting(false);}
-  }
-  const pinned=memories.filter(m=>m.latitude!==undefined&&m.longitude!==undefined&&Number.isFinite(m.latitude)&&Number.isFinite(m.longitude));
-  return <div className="world-map">
-    <div className="world-map-tools">
-      <div><strong>Mapa de nuestros recuerdos</strong><small>Mapa físico y político mundial georreferenciado · EPSG:3857</small></div>
-      <label className="btn subtle world-upload">
-        <ImagePlus size={16}/>{importing?'Importando…':url?'Sustituir mapa':'Cargar mapa optimizado'}
-        <input type="file" accept="image/webp,image/png,image/jpeg,.webp" disabled={importing} onChange={onImport}/>
-      </label>
+    const changed=()=>setOnline(navigator.onLine);
+    window.addEventListener('online',changed);window.addEventListener('offline',changed);
+    return ()=>{window.removeEventListener('online',changed);window.removeEventListener('offline',changed);};
+  },[]);
+  const locatedMemories=memories.filter(m=>m.latitude!==undefined&&m.longitude!==undefined&&
+    Number.isFinite(m.latitude)&&Number.isFinite(m.longitude));
+  const locatedPhotos=photos.filter(p=>p.latitude!==undefined&&p.longitude!==undefined&&
+    Number.isFinite(p.latitude)&&Number.isFinite(p.longitude));
+  return <section className="world-map">
+    <div className="world-map-tools"><div><strong>Mapa de nuestros recuerdos</strong>
+      <small>Cartografía online · OpenStreetMap · no se descargan mapas</small></div></div>
+    <div className="world-map-frame memrly-online-map-frame">
+      {online
+        ? <MapContainer center={[22,0]} zoom={2} minZoom={2} maxZoom={18} scrollWheelZoom
+            zoomControl={false} className="leaflet-world-map">
+            <TileLayer
+              url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              maxZoom={19}
+              crossOrigin={false}
+            />
+            {locatedMemories.map(m=><CircleMarker key={'m:'+m.id}
+              center={[m.latitude!,m.longitude!]} radius={10}
+              pathOptions={{color:'#ffffff',weight:2,fillColor:markerColors[m.kind],fillOpacity:.94}}
+              eventHandlers={{click:()=>onSelect(m.id)}}>
+              <Tooltip direction="top">{m.title} · {m.place}</Tooltip>
+            </CircleMarker>)}
+            {locatedPhotos.map(p=><CircleMarker key={'p:'+p.id} center={[p.latitude!,p.longitude!]}
+              radius={5} pathOptions={{color:'#ffffff',weight:1,fillColor:'#366cb5',fillOpacity:.8}}
+              eventHandlers={{click:()=>onSelectPhoto?.(p.id)}}>
+              <Tooltip direction="top">{p.place||p.filename}</Tooltip>
+            </CircleMarker>)}
+            <FlyToLocation location={focus}/>
+            <ZoomControl position="bottomright"/>
+          </MapContainer>
+        : <div className="memrly-world-offline"><WifiOff size={26}/><strong>El mapa necesita Internet</strong>
+            <p>Los nombres y coordenadas ya guardados siguen disponibles en la lista.</p></div>}
     </div>
-    <div className="world-map-frame">
-      <MapContainer center={[18,0]} zoom={2} minZoom={1} maxZoom={7} worldCopyJump={false} scrollWheelZoom zoomControl={false} attributionControl={false} className="leaflet-world-map">
-        {url&&<ImageOverlay url={url} bounds={WORLD_RASTER_BOUNDS} opacity={1}/>}
-        {pinned.map(m=><CircleMarker key={m.id} center={[m.latitude!,m.longitude!]} radius={11} pathOptions={{color:'#fff7ef',weight:3,fillColor:markerColors[m.kind],fillOpacity:.95}} eventHandlers={{click:()=>onSelect(m.id)}}>
-          <Tooltip direction="top">{m.kind==='trip'?'✈ ':m.kind==='event'?'✦ ':'♥ '}{m.title}</Tooltip>
-        </CircleMarker>)}
-        <ZoomControl position="bottomright"/>
-      </MapContainer>
-      {!url&&!loading&&<div className="world-map-empty"><MapIcon size={27}/><strong>Importa el mapa optimizado</strong><p>El GeoTIFF original pesa unos 480 MB. Utiliza el WebP optimizado generado a partir del mapa que has compartido. Se guardará en este dispositivo y funcionará sin conexión.</p></div>}
-    </div>
-    <div className="map-legend"><span>🧳 Viajes</span><span>✦ Eventos</span><span>♥ Momentos</span><span>{pinned.length} recuerdos localizados</span></div>
-    {error&&<p className="form-errors" role="alert">{error}</p>}
-    <small>Los marcadores representan recuerdos y viajes, no fotos individuales. La cartografía se almacena localmente y no necesita peticiones a mapas externos.</small>
-  </div>;
+    <div className="map-legend"><span>🧳 Viajes</span><span>✦ Eventos</span><span>♥ Momentos</span><span>● Fotografías</span>
+      <span><MapPin size={13}/>{locatedMemories.length} recuerdos · {locatedPhotos.length} fotos</span></div>
+    <small>El mapa se carga desde OpenStreetMap al estar conectado. No guardamos cartografía en Memrly ni en Contabo. Los proveedores externos reciben las peticiones necesarias para mostrar el mapa.</small>
+  </section>;
 }
