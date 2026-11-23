@@ -1,4 +1,6 @@
 import { useEffect, useState, type ComponentType } from 'react';
+import { AuthDialog } from './AuthDialog';
+import { useAccount } from './account';
 import { CalendarDays, CloudUpload, Compass, Heart, Home, Images, Layers, MapPin, Menu, Plane, Plus, Search, Settings, Star, Trash2, Users, WifiOff } from 'lucide-react';
 import { defaultSettings, type AppSettings, type CoverPosition, type ImportOptions, type Memory, type MemoryKind, type Page, type Photo, type PhotoCollection, type Subject } from './types';
 import { localISO } from './dates';
@@ -30,6 +32,10 @@ const bottomItems:{page:Page;label:string;icon:Icon}[]=[
   {page:'album',label:'Álbum',icon:Images}
 ];
 export default function App(){
+  const account=useAccount();
+  const [authOpen,setAuthOpen]=useState(false);
+  const [logoutConfirm,setLogoutConfirm]=useState(false);
+  const [logoutError,setLogoutError]=useState('');
   const [page,setPage]=useState<Page>('inicio');
   const [photos,setPhotos]=useState<Photo[]>([]);
   const [memories,setMemories]=useState<Memory[]>([]);
@@ -193,7 +199,7 @@ export default function App(){
           {page==='album'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={openPhoto}/>}
           {page==='favoritos'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={openPhoto} filterFavorites/>}
           {page==='buscar'&&<SearchPage photos={photos} memories={memories} onView={openPhoto} onOpen={openMemory}/>}
-          {page==='ajustes'&&<SettingsPage pending={pending} settings={settings} photos={photos} subjects={subjects} onSaveSettings={commitSettings}/>}
+          {page==='ajustes'&&<SettingsPage pending={pending} settings={settings} photos={photos} subjects={subjects} onSaveSettings={commitSettings} account={account.user} accountChecking={account.checking} onLogin={()=>setAuthOpen(true)} onLogout={()=>{setLogoutError('');setLogoutConfirm(true);}}/>}
           {page==='colecciones'&&<CollectionsPage collections={collections} photos={photos} onView={openPhoto} onCreate={day=>setCollectionDate(day)}/>}
           {page==='papelera'&&<EmptyState title="Papelera" description="El borrado seguro y la recuperación de fotos se añadirán con el servidor. Esta versión no borra originales desde la interfaz."/>}
         </>}
@@ -204,6 +210,14 @@ export default function App(){
       <button className="add-tab" onClick={()=>setImportOpen(true)} aria-label="Subir fotografías"><Plus size={31}/><span>Subir</span></button>
       {bottomItems.slice(2).map(item=><button key={item.page} className={page===item.page?'active':''} onClick={()=>navigate(item.page)}><item.icon size={23}/><span>{item.label}</span></button>)}
     </nav>
+    {authOpen&&<AuthDialog onClose={()=>setAuthOpen(false)} onLogin={account.login}/>}
+    {logoutConfirm&&<div className="account-confirm-backdrop" role="presentation"><section className="account-confirm" role="alertdialog" aria-modal="true" aria-labelledby="logout-title">
+      <h2 id="logout-title">¿Seguro que quieres cerrar sesión?</h2>
+      <p>Tu cuenta seguirá conservando sus fotografías. Las fotos locales de este navegador no se borrarán.</p>
+      {logoutError&&<p role="alert" className="form-errors">{logoutError}</p>}
+      <div className="account-actions"><button className="btn subtle" onClick={()=>setLogoutConfirm(false)}>Cancelar</button>
+        <button className="btn primary" onClick={()=>account.logout().then(()=>setLogoutConfirm(false)).catch(e=>setLogoutError(String(e)))}>Cerrar sesión</button></div>
+    </section></div>}
     {coverTarget&&<CoverPicker photos={coverTarget&&coverTarget!=='home'&&'year' in coverTarget?photos.filter(p=>p.takenOn.startsWith(String(coverTarget.year))):photos} title={coverTarget==='home'?'Elegir foto de fondo de Inicio':'year' in coverTarget?`Portada del año ${coverTarget.year}`:'Elegir foto de fondo del recuerdo'} selectedId={coverTarget==='home'?settings.homeCoverPhotoId:'year' in coverTarget?settings.yearCoverPhotoIds?.[String(coverTarget.year)]:memories.find(m=>m.id===coverTarget.memoryId)?.coverPhotoId} selectedPosition={coverTarget==='home'?settings.homeCoverPosition:'year' in coverTarget?settings.yearCoverPositions?.[String(coverTarget.year)]:memories.find(m=>m.id===coverTarget.memoryId)?.coverPosition} previewKind={coverTarget==='home'?'home':'year' in coverTarget?'year':'memory'} onClose={()=>setCoverTarget(null)} onSelect={commitCover}/>}
     {memoryToDeleteId&&memories.find(m=>m.id===memoryToDeleteId)&&<MemoryDeleteDialog memory={memories.find(m=>m.id===memoryToDeleteId)!} photoCount={photos.filter(p=>p.memoryIds.includes(memoryToDeleteId)).length} onClose={()=>setMemoryToDeleteId(undefined)} onConfirm={commitDeleteMemory}/>}
     {importOpen&&<ImportDialog initialDate={importDate} memories={memories} subjects={subjects} onClose={()=>{setImportOpen(false);setImportDate(undefined);}} onCommit={commitImport}/>}
