@@ -55,7 +55,7 @@ export function MemoryDetail({memory,memories,photos,subjects,settings,onViewPho
   const related=orderPhotos(photos.filter(p=>p.memoryIds.includes(memory.id)));
   const cover=coverOf(memory,photos);
   const people=subjects.filter(s=>related.some(p=>p.subjectIds.includes(s.id)));
-  const relatedMemories=memories.filter(m=>m.id!==memory.id&&(m.startDate>=memory.startDate&&m.startDate<=memory.endDate));
+  const relatedMemories=memories.filter(m=>m.id!==memory.id&&((memory.relatedMemoryIds||[]).includes(m.id)||(m.relatedMemoryIds||[]).includes(memory.id)||(m.startDate<=memory.endDate&&m.endDate>=memory.startDate)));
   const [y,m]=memory.startDate.split('-').map(Number);
   return <div className="page-stack memory-detail">
     <section className="memory-hero">{cover&&<PhotoView id={cover} quality="preview" focalPoint={memory.coverPhotoId===cover?memory.coverPosition:undefined} className="memory-hero-image"/>}
