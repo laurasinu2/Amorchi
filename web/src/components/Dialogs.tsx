@@ -1,10 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Check, Heart, ImagePlus, MapPin, Trash2, X } from 'lucide-react';
-import type { AppSettings, ImportOptions, Memory, MemoryKind, Photo, Subject, SubjectKind } from '../types';
+import type { AppSettings, Memory, MemoryKind, Photo, Subject, SubjectKind } from '../types';
 import { celebrationCatalog, automaticCelebrationIds, overrideCelebration } from '../celebrations';
 import { dateLabel, localISO } from '../dates';
 import { PhotoView } from './PhotoView';
-import { inspectPhoto, type PhotoInspection } from '../db';
 import { createId } from '../id';
 
 export function Dialog({title,children,onClose,wide=false}:{
@@ -21,87 +20,6 @@ export function Dialog({title,children,onClose,wide=false}:{
       <div className="dialog-body">{children}</div>
     </section>
   </div>;
-}
-
-export function ImportDialog({memories,subjects,onClose,onCommit,initialDate}:{
-  memories:Memory[];subjects:Subject[];onClose:()=>void;initialDate?:string;
-  onCommit:(files:File[],options:ImportOptions)=>Promise<{imported:number;errors:string[]}>;
-}){
-  const [files,setFiles]=useState<File[]>([]);
-  const [overrideDate,setOverrideDate]=useState(initialDate||'');
-  const [place,setPlace]=useState('');
-  const [memoryId,setMemoryId]=useState('');
-  const [selectedSubjects,setSelectedSubjects]=useState<string[]>([]);
-  const [busy,setBusy]=useState(false);
-  const [errors,setErrors]=useState<string[]>([]);
-  const [done,setDone]=useState(0);
-  const [previews,setPreviews]=useState<string[]>([]);
-  const [inspections,setInspections]=useState<Array<PhotoInspection|undefined>>([]);
-  const [inspecting,setInspecting]=useState(false);
-  useEffect(()=>{
-    const urls=files.slice(0,12).map(f=>URL.createObjectURL(f));
-    setPreviews(urls);
-    return ()=>urls.forEach(url=>URL.revokeObjectURL(url));
-  },[files]);
-  useEffect(()=>{
-    let alive=true;
-    setInspections([]);
-    setInspecting(files.length>0);
-    if(files.length>0){
-      Promise.all(files.slice(0,12).map(f=>inspectPhoto(f).catch(()=>undefined))).then(data=>{
-        if(alive){setInspections(data);setInspecting(false);}
-      });
-    }
-    return ()=>{alive=false;};
-  },[files]);
-  async function submit(e:React.FormEvent){
-    e.preventDefault();if(!files.length||busy)return;
-    setBusy(true);setErrors([]);
-    try{
-      const result=await onCommit(files,{overrideDate:overrideDate||undefined,place,memoryId:memoryId||undefined,subjectIds:selectedSubjects});
-      setDone(result.imported);setErrors(result.errors);
-      if(!result.errors.length)onClose();
-    }catch(err){setErrors([String(err)]);}
-    finally{setBusy(false);}
-  }
-  return <Dialog title="Importar fotografías" onClose={onClose} wide>
-    <form onSubmit={submit} className="form-stack">
-      <div className="import-steps"><span className="current">1. Seleccionar</span><span>2. Organizar</span><span>3. Guardar offline</span></div>
-      <label className="upload-zone">
-        <ImagePlus size={31}/><strong>{files.length?`${files.length} fotografías seleccionadas`:'Seleccionar fotografías'}</strong>
-        <small>Puedes elegir varias imágenes a la vez. Se guardarán en este dispositivo, con su archivo original.</small>
-        <input type="file" multiple accept="image/*,.heic,.heif" onChange={e=>{setFiles(Array.from(e.target.files||[]));setErrors([]);setDone(0);}}/>
-      </label>
-      {files.length>0&&<section className="detected-meta" aria-live="polite">
-        <div className="detected-meta-header"><strong>Fechas y ubicaciones detectadas</strong><small>{inspecting?'Leyendo metadatos...':`${inspections.filter(x=>x?.dateSource==='exif').length} fechas EXIF de ${Math.min(files.length,12)} fotos revisadas`}</small></div>
-        <div className="import-file-list">{previews.map((url,i)=><div className="import-file" key={url}>
-          <img src={url} alt="" onError={e=>{e.currentTarget.style.opacity='.25';}}/>
-          <div><strong title={files[i].name}>{files[i].name}</strong>
-            <small>{inspections[i]?`${dateLabel(inspections[i]!.takenOn,'short')} · ${inspections[i]!.takenTime} · ${inspections[i]!.dateSource==='exif'?'EXIF ✓':'Fecha del archivo (sin EXIF)'}`:'Leyendo fecha...'}</small>
-            <small>{inspections[i]?.latitude!==undefined?`GPS: ${inspections[i]!.latitude!.toFixed(5)}, ${inspections[i]!.longitude!.toFixed(5)}`:'Sin coordenadas GPS detectadas'}</small>
-          </div>
-        </div>)}</div>
-        {files.length>12&&<small>Se muestran los primeros 12 archivos. Se analizarán todos durante la importación.</small>}
-      </section>}
-      <div className="form-grid">
-        <label className="field"><span>Corregir fecha (opcional)</span><input type="date" value={overrideDate} onChange={e=>setOverrideDate(e.target.value)}/><small>Si la dejas vacía, cada foto conserva su fecha detectada. Esta corrección se aplica a TODAS las fotos seleccionadas.</small></label>
-        <label className="field"><span>Lugar (opcional)</span><input value={place} onChange={e=>setPlace(e.target.value)} placeholder="Barcelona, Roma..."/></label>
-      </div>
-      <label className="field"><span>Asignar a viaje, evento o momento</span>
-        <select value={memoryId} onChange={e=>setMemoryId(e.target.value)}>
-          <option value="">Sin recuerdo asociado</option>
-          {memories.map(m=><option value={m.id} key={m.id}>{m.title} · {dateLabel(m.startDate,'short')}</option>)}
-        </select>
-      </label>
-      <div className="field"><span>¿Quién aparece? Selecciona personas y animales</span>
-        {subjects.length?<div className="chips">{subjects.map(s=><button type="button" key={s.id} className={'chip '+(selectedSubjects.includes(s.id)?'selected':'')} onClick={()=>setSelectedSubjects(v=>v.includes(s.id)?v.filter(x=>x!==s.id):[...v,s.id])}>{s.kind==='animal'?'🐾':'♡'} {s.name} {selectedSubjects.includes(s.id)&&<Check size={12}/>}</button>)}</div>:<small>Añade primero personas o mascotas desde su sección. Puedes etiquetar la foto más adelante.</small>}
-      </div>
-      <p className="helper-text">Se muestran fechas EXIF y coordenadas GPS si existen. La ubicación escrita se aplicará a todas las fotos. No realizará reconocimiento facial automático. No hay todavía conexión con el servidor.</p>
-      {done>0&&<p className="success-text">{done} fotografías guardadas en este dispositivo.</p>}
-      {errors.length>0&&<div className="form-errors" role="alert">{errors.slice(0,8).map((e,i)=><p key={i}>{e}</p>)}</div>}
-      <div className="form-actions"><button type="button" className="btn subtle" onClick={onClose}>Cerrar</button><button className="btn primary" disabled={!files.length||busy} type="submit">{busy?'Guardando fotografías...':`Importar ${files.length||''} fotos`}</button></div>
-    </form>
-  </Dialog>;
 }
 
 export function MemoryDialog({onClose,onSave,initial,defaultKind,initialDate}:{
@@ -314,3 +232,5 @@ export function PhotoDialog({photo,memories,subjects,settings,onClose,onSave,onD
     </form>
   </Dialog>;
 }
+
+export { ImportDialog } from './Importer';
