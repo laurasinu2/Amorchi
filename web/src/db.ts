@@ -292,8 +292,8 @@ export async function importPhoto(file:File,opts:ImportOptions):Promise<Photo> {
   const inspected=await inspectPhoto(file);
   const takenOn=opts.overrideDate || inspected.takenOn;
   const takenTime=inspected.takenTime;
-  const latitude=inspected.latitude;
-  const longitude=inspected.longitude;
+  const latitude=opts.latitude ?? inspected.latitude;
+  const longitude=opts.longitude ?? inspected.longitude;
   const photo:Photo={
     id:createId(), filename:file.name,mimeType:file.type||'application/octet-stream',
     size:file.size, hash, takenOn, takenTime,
