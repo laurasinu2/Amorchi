@@ -68,7 +68,7 @@ export async function uploadOnlinePhoto(file:File,opts:ImportOptions,token:strin
   const examined=await inspectPhoto(file);
   const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await file.arrayBuffer())))
     .map(v=>v.toString(16).padStart(2,'0')).join('');
-  const mime=file.type||(/\.heic$/i.test(file.name)?'image/heic':/\.png$/i.test(file.name)?'image/png':/\.webp$/i.test(file.name)?'image/webp':'image/jpeg');
+  const mime=file.type||(/\.heic$/i.test(file.name)?'image/heic':/\.heif$/i.test(file.name)?'image/heif':/\.avif$/i.test(file.name)?'image/avif':/\.png$/i.test(file.name)?'image/png':/\.webp$/i.test(file.name)?'image/webp':'image/jpeg');
   const photo:Photo={
     id:createId(),filename:file.name,mimeType:mime,size:file.size,hash,
     takenOn:opts.overrideDate||examined.takenOn,takenTime:examined.takenTime,
