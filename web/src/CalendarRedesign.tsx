@@ -19,10 +19,10 @@ function displayLocation(place:string,lat?:number,long?:number){
   return typeof lat==='number'&&typeof long==='number'?`${lat.toFixed(3)}, ${long.toFixed(3)}`:'';
 }
 
-export function CalendarPage({year,month,mode,selectedDay,photos,memories,settings,onMode,onYear,onMonth,onDay,onViewPhoto,onAddPhotos,onCreateMemory,onAddToCollection}:{
+export function CalendarPage({year,month,mode,selectedDay,photos,memories,settings,onMode,onYear,onMonth,onDay,onViewPhoto,onAddPhotos,onCreateMemory,onCreateRange,onAddToCollection}:{
   year:number;month:number;mode:CalendarMode;selectedDay:string;photos:Photo[];memories:Memory[];settings:AppSettings;
   onMode:(mode:CalendarMode)=>void;onYear:(year:number)=>void;onMonth:(year:number,month:number)=>void;onDay:(date:string)=>void;
-  onViewPhoto:(id:string)=>void;onAddPhotos:(date:string)=>void;onCreateMemory:(date:string)=>void;onAddToCollection:(date:string)=>void;
+  onViewPhoto:(id:string)=>void;onAddPhotos:(date:string)=>void;onCreateMemory:(date:string)=>void;onCreateRange:(start:string,end:string)=>void;onAddToCollection:(date:string)=>void;
 }){
   const [jumpOpen,setJumpOpen]=useState(false);
   const [targetYear,setTargetYear]=useState(year);
@@ -149,14 +149,15 @@ export function CalendarPage({year,month,mode,selectedDay,photos,memories,settin
         </div>
 
         {mode==='month'&&<div className="memrly-month-calendar">
-          <CalendarGrid year={year} month={month} selectedDay={selectedDay} photos={photos} memories={memories} settings={settings} onDay={selectDate}/>
+          <CalendarGrid year={year} month={month} selectedDay={selectedDay} photos={photos} memories={memories} settings={settings} onDay={selectDate} onRange={onCreateRange}/>
+          <p className="memrly-calendar-drag-help">Arrastra desde un día hasta otro para crear un momento, evento o viaje con esas fechas.</p>
           <div className="memrly-calendar-key"><span><i/>Foto</span><span><i/>Viaje o evento</span><span><i/>Día seleccionado</span><span className="memrly-key-holiday"><i/>Festivo</span><span className="memrly-key-anniversary"><i/>Aniversario</span></div>
         </div>}
 
         {mode==='year'&&<div className="memrly-mini-months">
           {monthNames.map((name,m)=><article key={m} className="memrly-mini-month">
             <button type="button" className="memrly-mini-month-title" onClick={()=>onMonth(year,m)}>{name}<ChevronRight size={13}/></button>
-            <CalendarGrid year={year} month={m} photos={photos} memories={memories} settings={settings} compact selectedDay={selectedDay} onDay={selectDate}/>
+            <CalendarGrid year={year} month={m} photos={photos} memories={memories} settings={settings} compact selectedDay={selectedDay} onDay={selectDate} onRange={onCreateRange}/>
           </article>)}
         </div>}
 
