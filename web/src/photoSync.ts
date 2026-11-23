@@ -46,10 +46,15 @@ export async function synchronizePhotos(userId:string,token:string,onProgress:(p
     pendingById.get(op.entityId)!.push(op);
   }
   const remote=await remoteList(token);
+  // Bind this browser library before transferring the first byte, even if a later request fails.
+  rememberOwner(userId);
   const remoteIds=new Set(remote.map(p=>p.id));
   const upload=local.photos.filter(p=>!remoteIds.has(p.id));
   const update=local.photos.filter(p=>remoteIds.has(p.id)&&pendingById.get(p.id)?.some(op=>op.type==='upsert'));
-  const download=remote.filter(p=>!originalMap.has(p.id));
+  // A pending local delete is intentionally NOT resurrected from the server.
+  // Remote deletions are not sent in this first safe release.
+  const deletedHere=new Set(operations.filter(op=>op.type==='delete').map(op=>op.entityId));
+  const download=remote.filter(p=>!originalMap.has(p.id)&&!deletedHere.has(p.id));
   const total=upload.length+update.length+download.length;
   let done=0;
   const progress=(stage:string)=>onProgress({done,total,stage});
@@ -90,7 +95,6 @@ export async function synchronizePhotos(userId:string,token:string,onProgress:(p
     await restoreRemotePhoto(photo.metadata,blob);
     done++;progress('Original recuperado');
   }
-  rememberOwner(userId);
   progress('Sincronización completada');
   return {uploaded:upload.length,updated:update.length,downloaded:download.length,total};
 }
