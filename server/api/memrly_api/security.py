@@ -17,14 +17,23 @@ def verify_password(password: str, stored_hash: str | None) -> bool:
     except (exceptions.VerifyMismatchError, exceptions.VerificationError, exceptions.InvalidHashError):
         return False
 
-def create_token(user_id: UUID) -> str:
+def create_token(user_id: UUID, session_id: UUID | None = None) -> str:
     now = datetime.now(timezone.utc)
     return jwt.encode({
         "sub": str(user_id), "aud": "memrly", "iss": "memrly-api",
         "iat": now, "exp": now + timedelta(hours=12),
+        "sid": str(session_id) if session_id else None,
     }, settings()["jwt"], algorithm="HS256")
 
 def decode_token(token: str) -> UUID:
     data = jwt.decode(token, settings()["jwt"], algorithms=["HS256"], audience="memrly",
                       issuer="memrly-api", options={"require": ["sub", "iat", "exp"]})
     return UUID(data["sub"])
+
+
+def session_id_from_token(token: str) -> UUID:
+    data = jwt.decode(token, settings()["jwt"], algorithms=["HS256"], audience="memrly",
+                      issuer="memrly-api", options={"require": ["sub", "iat", "exp", "sid"]})
+    if not data["sid"]:
+        raise ValueError("Legacy token without a revocable session.")
+    return UUID(data["sid"])
