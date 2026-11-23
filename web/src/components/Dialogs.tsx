@@ -22,56 +22,6 @@ export function Dialog({title,children,onClose,wide=false}:{
   </div>;
 }
 
-export function MemoryDialog({onClose,onSave,initial,defaultKind,initialDate}:{
-  onClose:()=>void;onSave:(memory:Memory)=>Promise<void>;initial?:Memory;defaultKind?:MemoryKind;initialDate?:string;
-}){
-  const [kind,setKind]=useState<MemoryKind>(initial?.kind||defaultKind||'moment');
-  const [title,setTitle]=useState(initial?.title||'');
-  const [description,setDescription]=useState(initial?.description||'');
-  const [startDate,setStartDate]=useState(initial?.startDate||initialDate||localISO(new Date()));
-  const [endDate,setEndDate]=useState(initial?.endDate||initialDate||localISO(new Date()));
-  const [place,setPlace]=useState(initial?.place||'');
-  const [lat,setLat]=useState(initial?.latitude?.toString()||'');
-  const [lon,setLon]=useState(initial?.longitude?.toString()||'');
-  const [busy,setBusy]=useState(false);
-  const [error,setError]=useState('');
-  async function submit(e:React.FormEvent){
-    e.preventDefault();setError('');
-    const actualEnd=kind==='moment'?startDate:endDate;
-    if(actualEnd<startDate){setError('La fecha final no puede ser anterior a la inicial.');return;}
-    if((lat&&!lon)||(!lat&&lon)){setError('Indica latitud y longitud juntas, o deja ambas vacías.');return;}
-    if(lat&&(Number(lat)<-90||Number(lat)>90||Number(lon)<-180||Number(lon)>180)){setError('Las coordenadas están fuera del rango válido.');return;}
-    setBusy(true);
-    try{
-      await onSave({id:initial?.id||createId(),kind,title:title.trim(),description,
-        startDate,endDate:actualEnd,place:place.trim(),
-        latitude:lat?Number(lat):undefined,longitude:lon?Number(lon):undefined,
-        favorite:initial?.favorite||false,coverPhotoId:initial?.coverPhotoId,coverPosition:initial?.coverPosition,createdAt:initial?.createdAt||new Date().toISOString()});
-      onClose();
-    }catch(err){setError(String(err));}
-    finally{setBusy(false);}
-  }
-  return <Dialog title={initial?'Editar recuerdo':'Crear recuerdo'} onClose={onClose}>
-    <form className="form-stack" onSubmit={submit}>
-      <div className="segmented">{(['moment','event','trip'] as MemoryKind[]).map(k=><button type="button" key={k} className={kind===k?'active':''} onClick={()=>setKind(k)}>{k==='moment'?'♡ Momento':k==='event'?'✦ Evento':'✈ Viaje'}</button>)}</div>
-      <label className="field"><span>Nombre</span><input required maxLength={110} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Nuestra primera escapada"/></label>
-      <div className="form-grid">
-        <label className="field"><span>{kind==='moment'?'Fecha':'Fecha de inicio'}</span><input type="date" required value={startDate} onChange={e=>setStartDate(e.target.value)}/></label>
-        {kind!=='moment'&&<label className="field"><span>Fecha final</span><input type="date" required value={endDate} onChange={e=>setEndDate(e.target.value)}/></label>}
-      </div>
-      <label className="field"><span>Lugar principal</span><input value={place} onChange={e=>setPlace(e.target.value)} placeholder="Lisboa, Portugal"/></label>
-      <div className="form-grid">
-        <label className="field"><span>Latitud (opcional)</span><input type="number" step="any" min="-90" max="90" placeholder="41.3874" value={lat} onChange={e=>setLat(e.target.value)}/></label>
-        <label className="field"><span>Longitud (opcional)</span><input type="number" step="any" min="-180" max="180" placeholder="2.1686" value={lon} onChange={e=>setLon(e.target.value)}/></label>
-      </div>
-      <small className="helper-text"><MapPin size={13}/> Solo los recuerdos con coordenadas aparecerán como marcadores en el mapa mundial.</small>
-      <label className="field"><span>Descripción</span><textarea rows={3} value={description} onChange={e=>setDescription(e.target.value)} placeholder="¿Qué queréis recordar de ese día?"/></label>
-      {error&&<p className="form-errors" role="alert">{error}</p>}
-      <div className="form-actions"><button type="button" className="btn subtle" onClick={onClose}>Cancelar</button><button type="submit" className="btn primary" disabled={busy||!title.trim()}>{busy?'Guardando...':'Guardar recuerdo'}</button></div>
-    </form>
-  </Dialog>;
-}
-
 export function SubjectDialog({onClose,onSave,photos,initial}:{
   onClose:()=>void;onSave:(subject:Subject)=>Promise<void>;
   photos:Photo[];initial?:Subject;
@@ -234,3 +184,5 @@ export function PhotoDialog({photo,memories,subjects,settings,onClose,onSave,onD
 }
 
 export { ImportDialog } from './Importer';
+
+export { MemoryDialog } from './MemoryEditor';
