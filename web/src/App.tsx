@@ -159,8 +159,12 @@ export default function App(){
   }
   async function commitImport(files:File[],options:ImportOptions){
     const errors:string[]=[];let imported=0;
-    for(const file of files){
-      try{await importPhoto(file,options);imported++;}
+    for(const [index,file] of files.entries()){
+      try{
+        const item=options.perFile?.[index];
+        await importPhoto(file,item?{...options,...item,perFile:undefined}:options);
+        imported++;
+      }
       catch(err){errors.push(file.name+': '+(err instanceof Error?err.message:String(err)));}
     }
     await refresh();if(imported>0)navigate('album');
