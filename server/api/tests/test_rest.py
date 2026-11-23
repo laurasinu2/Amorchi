@@ -154,3 +154,72 @@ def test_private_photo_sync_upload_restore_and_metadata(tmp_path, monkeypatch):
         assert client.put(f"/api/v1/sync/photos/{photo_id}/metadata",headers=auth_b,
             json={"metadata":modified}).status_code==404
     settings.cache_clear()
+
+
+def test_online_private_library_and_lossless_original_storage(tmp_path,monkeypatch):
+    """Metadata is server-owned; thumbnail generation never creates another stored file."""
+    import io, json, hashlib
+    from PIL import Image
+    monkeypatch.setenv("MEMRLY_STORAGE_ROOT",str(tmp_path))
+    monkeypatch.setenv("MEMRLY_ALLOW_SIGNUP","true")
+    monkeypatch.delenv("MEMRLY_SMTP_HOST",raising=False)
+    settings.cache_clear()
+    png=io.BytesIO()
+    Image.new("RGB",(960,720),(40,95,145)).save(png,format="PNG")
+    original=png.getvalue()
+    suffix=uuid4().hex[:12]
+    with TestClient(app) as client:
+        def session(label):
+            email=f"online-{label}-{suffix}@example.com"
+            registration=client.post("/api/v1/account/register",json={
+                "email":email,"password":"a-long-private-password-123",
+                "repeat_password":"a-long-private-password-123","display_name":label
+            })
+            assert registration.status_code==201,registration.text
+            result=client.post("/api/v1/account/login",json={
+                "email":email,"password":"a-long-private-password-123","remember":True
+            })
+            assert result.status_code==200,result.text
+            return {"Authorization":"Bearer "+result.json()["access_token"]}
+        own=session("owner")
+        other=session("other")
+        image_id=str(uuid4())
+        photo={"id":image_id,"filename":"viaje.png","mimeType":"image/png","size":len(original),
+               "hash":hashlib.sha256(original).hexdigest(),"takenOn":"2026-11-21",
+               "dateSource":"manual","place":"Barcelona","memoryIds":[],"subjectIds":[],
+               "description":"","favorite":False,"createdAt":"2026-11-23T10:00:00Z"}
+        assert client.get("/api/v1/library/entities",headers=other).json()["memory"]==[]
+        memory_id=str(uuid4())
+        memo={"id":memory_id,"kind":"trip","title":"Viaje","startDate":"2026-11-21",
+              "endDate":"2026-11-23","description":"","place":"Barcelona",
+              "favorite":False,"createdAt":"2026-11-23T10:00:00Z"}
+        saved=client.put(f"/api/v1/library/entities/memory/{memory_id}",headers=own,
+                         json={"payload":memo})
+        assert saved.status_code==200,saved.text
+        assert client.get("/api/v1/library/entities",headers=own).json()["memory"]==[memo]
+        assert client.get("/api/v1/library/entities",headers=other).json()["memory"]==[]
+        result=client.post("/api/v1/sync/photos",headers=own,
+            data={"photo_id":image_id,"metadata":json.dumps(photo)},
+            files={"file":("viaje.png",original,"image/png")})
+        assert result.status_code==201,result.text
+        assert client.get("/api/v1/sync/photos",headers=own).json()[0]["id"]==image_id
+        assert client.get("/api/v1/sync/photos",headers=other).json()==[]
+        assert client.get(f"/api/v1/sync/photos/{image_id}/preview",headers=other).status_code==404
+        raw=client.get(f"/api/v1/sync/photos/{image_id}/file",headers=own)
+        assert raw.status_code==200 and raw.content==original
+        stored=list((tmp_path/"originals").rglob("*.png"))
+        assert len(stored)==1 and stored[0].read_bytes()==original
+        thumbnail=client.get(f"/api/v1/sync/photos/{image_id}/preview?size=360",headers=own)
+        assert thumbnail.status_code==200,thumbnail.text[:200]
+        assert thumbnail.headers["content-type"].startswith("image/webp")
+        with Image.open(io.BytesIO(thumbnail.content)) as im:
+            assert im.width<=360 and im.height<=360
+        assert list((tmp_path/"originals").rglob("*.png"))==stored
+        assert list(tmp_path.rglob("*.webp"))==[]
+        deleted=client.delete(f"/api/v1/sync/photos/{image_id}",headers=own)
+        assert deleted.status_code==200,deleted.text
+        assert client.get("/api/v1/sync/photos",headers=own).json()==[]
+        assert not stored[0].exists()
+        assert client.delete(f"/api/v1/library/entities/memory/{memory_id}",headers=own).status_code==200
+        assert client.get("/api/v1/library/entities",headers=own).json()["memory"]==[]
+    settings.cache_clear()
