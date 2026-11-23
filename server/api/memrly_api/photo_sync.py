@@ -110,6 +110,7 @@ def preview_photo(photo_id:UUID, size:int=360, uid:UUID=Depends(current_user), c
         raise HTTPException(404,"Archivo original no encontrado.")
     try:
         from PIL import Image, ImageOps, UnidentifiedImageError
+        Image.MAX_IMAGE_PIXELS = 40_000_000
         with Image.open(path) as im:
             im=ImageOps.exif_transpose(im)
             im.thumbnail((size,size),Image.Resampling.LANCZOS)
@@ -120,7 +121,7 @@ def preview_photo(photo_id:UUID, size:int=360, uid:UUID=Depends(current_user), c
             return Response(output.getvalue(),media_type="image/webp",
                             headers={"Cache-Control":"private, no-store",
                                      "X-Content-Type-Options":"nosniff"})
-    except (UnidentifiedImageError,OSError,ValueError):
+    except (UnidentifiedImageError,OSError,ValueError,Image.DecompressionBombError):
         # HEIC may not be decoded by Pillow; the original is still safely served privately.
         return FileResponse(path,media_type=row["mime_type"],filename=row["filename"],
                             headers={"Cache-Control":"private, no-store"})
