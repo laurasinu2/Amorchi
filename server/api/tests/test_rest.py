@@ -100,3 +100,57 @@ def test_private_upload_workflow(tmp_path, monkeypatch):
         assert (email_a, "reset") not in codes
         # Password recovery remains unavailable until mail delivery is configured.
     settings.cache_clear()
+
+def test_private_photo_sync_upload_restore_and_metadata(tmp_path, monkeypatch):
+    import json
+    monkeypatch.setenv("MEMRLY_STORAGE_ROOT", str(tmp_path))
+    monkeypatch.setenv("MEMRLY_ALLOW_SIGNUP", "true")
+    monkeypatch.delenv("MEMRLY_SMTP_HOST", raising=False)
+    settings.cache_clear()
+    suffix=uuid4().hex[:12]
+    with TestClient(app) as client:
+        def token(alias):
+            email=f"sync-{alias}-{suffix}@example.com"
+            response=client.post("/api/v1/account/register",json={
+                "email":email,"password":"a-long-private-password-123",
+                "repeat_password":"a-long-private-password-123","display_name":alias
+            })
+            assert response.status_code==201, response.text
+            login=client.post("/api/v1/account/login",json={
+                "email":email,"password":"a-long-private-password-123","remember":True
+            })
+            assert login.status_code==200,login.text
+            return login.json()["access_token"]
+        auth_a={"Authorization":"Bearer "+token("a")}
+        auth_b={"Authorization":"Bearer "+token("b")}
+        photo_id=str(uuid4())
+        original={
+            "id":photo_id,"filename":"playa.png","mimeType":"image/png",
+            "takenOn":"2026-07-14","dateSource":"manual","place":"Barcelona",
+            "latitude":41.38,"longitude":2.17,"memoryIds":[],"subjectIds":[],
+            "description":"Día de verano","favorite":False
+        }
+        assert client.get("/api/v1/sync/photos").status_code==401
+        response=client.post("/api/v1/sync/photos",headers=auth_a,
+            files={"file":("playa.png",PNG,"image/png")},
+            data={"photo_id":photo_id,"metadata":json.dumps(original)})
+        assert response.status_code==201,response.text
+        assert response.json()["id"]==photo_id
+        assert response.json()["metadata"]["place"]=="Barcelona"
+        assert client.get("/api/v1/sync/photos",headers=auth_b).json()==[]
+        assert client.get(f"/api/v1/sync/photos/{photo_id}/file",headers=auth_b).status_code==404
+        assert client.get(f"/api/v1/sync/photos/{photo_id}/file",headers=auth_a).content==PNG
+        again=client.post("/api/v1/sync/photos",headers=auth_a,
+            files={"file":("playa.png",PNG,"image/png")},
+            data={"photo_id":photo_id,"metadata":json.dumps(original)})
+        assert again.status_code==201,again.text
+        assert len(client.get("/api/v1/sync/photos",headers=auth_a).json())==1
+        modified={**original,"place":"Girona","description":"Actualizado"}
+        updated=client.put(f"/api/v1/sync/photos/{photo_id}/metadata",headers=auth_a,
+            json={"metadata":modified})
+        assert updated.status_code==200,updated.text
+        records=client.get("/api/v1/sync/photos",headers=auth_a).json()
+        assert records[0]["metadata"]["place"]=="Girona"
+        assert client.put(f"/api/v1/sync/photos/{photo_id}/metadata",headers=auth_b,
+            json={"metadata":modified}).status_code==404
+    settings.cache_clear()
