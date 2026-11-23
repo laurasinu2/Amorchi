@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Check, Heart, ImagePlus, MapPin, Trash2, X } from 'lucide-react';
+import { Heart, ImagePlus, MapPin, Trash2, X } from 'lucide-react';
 import type { AppSettings, Memory, MemoryKind, Photo, Subject, SubjectKind } from '../types';
 import { celebrationCatalog, automaticCelebrationIds, overrideCelebration } from '../celebrations';
 import { dateLabel, localISO } from '../dates';
