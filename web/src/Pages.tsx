@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { Account } from './account';
-import { ArrowRight, CalendarDays, Camera, CloudUpload, HardDrive, Heart, MapPin, PawPrint, Plus, Search, ShieldCheck, Star, Trash2, Users } from 'lucide-react';
+import { ArrowRight, CalendarDays, Camera, CloudUpload, Heart, MapPin, PawPrint, Plus, Search, ShieldCheck, Star, Trash2, Users } from 'lucide-react';
 import type { AppSettings, Memory, Photo, Subject } from './types';
 import { dateLabel, kindName } from './dates';
-import { getLocalUsage, requestPersistence } from './db';
 import { CalendarGrid } from './components/CalendarGrid';
 import { PhotoView } from './components/PhotoView';
 import { WorldMap } from './components/WorldMap';
@@ -145,27 +144,51 @@ export function SearchPage({photos,memories,onView,onOpen}:{photos:Photo[];memor
   </div>;
 }
 
-export function SettingsPage({pending,settings,photos,subjects,onSaveSettings,account,accountChecking,onLogin,onLogout,onSyncPhotos,syncingPhotos,syncMessage}:{pending:number;settings:AppSettings;photos:Photo[];subjects:Subject[];onSaveSettings:(settings:AppSettings)=>Promise<void>;account:Account|null;accountChecking:boolean;onLogin:()=>void;onLogout:()=>void;onSyncPhotos:()=>void;syncingPhotos:boolean;syncMessage:string}){
-  const [bytes,setBytes]=useState(0);
-  const [quota,setQuota]=useState<number|undefined>();
-  const [persistent,setPersistent]=useState<boolean|undefined>();
+export function SettingsPage({settings,photos,subjects,onSaveSettings,account,accountChecking,onLogin,onLogout,onRescueLegacy,rescuingLegacy,rescueMessage,legacyCount}:{
+  settings:AppSettings;photos:Photo[];subjects:Subject[];
+  onSaveSettings:(settings:AppSettings)=>Promise<void>;
+  account:Account|null;accountChecking:boolean;onLogin:()=>void;onLogout:()=>void;
+  onRescueLegacy:()=>void;rescuingLegacy:boolean;rescueMessage:string;legacyCount:number;
+}){
   const [error,setError]=useState('');
   const [profilePicker,setProfilePicker]=useState(false);
-  useEffect(()=>{getLocalUsage().then(v=>{setBytes(v.bytes);setQuota(v.quota);}).catch(e=>setError(String(e)));navigator.storage?.persisted?.()?.then(setPersistent).catch(()=>undefined);},[]);
-  const format=(n:number)=>n>1024**3?(n/1024**3).toFixed(2)+' GB':(n/1024**2).toFixed(1)+' MB';
-  return <div className="page-stack"><div className="page-intro"><span className="eyebrow">ALMACENAMIENTO Y SEGURIDAD</span><h1>Ajustes</h1><p>Estado de tu biblioteca en este dispositivo.</p></div>
+  const storedBytes=photos.reduce((sum,photo)=>sum+photo.size,0);
+  const format=(n:number)=>n>=1024**3?(n/1024**3).toFixed(2)+' GB':(n/1024**2).toFixed(1)+' MB';
+  return <div className="page-stack"><div className="page-intro">
+    <span className="eyebrow">ALMACENAMIENTO Y SEGURIDAD</span>
+    <h1>Ajustes</h1><p>Tu biblioteca se guarda en tu cuenta de Memrly, en Contabo.</p>
+  </div>
     <section className="account-panel">
       <h3><ShieldCheck size={20}/> Cuenta de Memrly</h3>
       {accountChecking?<p>Comprobando sesión…</p>:account?<><p className="account-email">{account.display_name}</p>
-        <p>{account.email}</p><small>{account.email_verified_at ? "Correo verificado" : "Correo pendiente de verificar"}</small><p><small>Cuenta iniciada en este dispositivo.</small></p>
-      </>:<><p>Inicia sesión para acceder a tu cuenta y preparar la sincronización de tus recuerdos.</p>
+        <p>{account.email}</p><small>{account.email_verified_at?"Correo verificado":"Correo pendiente de verificar"}</small>
+        <p><small>Las fotografías se consultan directamente desde el servidor.</small></p>
+      </>:<><p>Inicia sesión para acceder a tus archivos privados.</p>
         <div className="account-actions"><button type="button" className="btn primary" onClick={onLogin}>Iniciar sesión</button></div>
       </>}
     </section>
+    <section className="settings-cards">
+      <section className="panel"><h3><CloudUpload size={20}/> Biblioteca online</h3>
+        <p className="large-stat">{photos.length} fotografías</p>
+        <p>{format(storedBytes)} de originales guardados en Contabo, sin reducir su resolución.</p>
+        <small>Las miniaturas se generan bajo demanda. No se guardan originales nuevos en este navegador.</small>
+      </section>
+      <section className="panel"><h3><ShieldCheck size={20}/> Acceso privado</h3>
+        <p>Los archivos solo se cargan cuando estás conectado con tu cuenta. Los cambios se guardan directamente en el servidor.</p>
+        <small>Se necesita Internet. La biblioteca ya no utiliza sincronización manual ni funciona offline.</small>
+      </section>
+    </section>
+    {legacyCount>0&&<section className="panel">
+      <h3>Recuperar biblioteca antigua de este navegador</h3>
+      <p>Hemos detectado {legacyCount} fotografías de la versión anterior que podrían estar guardadas solo en este navegador. Puedes copiarlas una única vez a Contabo sin borrar los originales anteriores.</p>
+      <button type="button" className="btn primary" disabled={!account||rescuingLegacy} onClick={onRescueLegacy}>
+        <CloudUpload size={17}/>{rescuingLegacy?'Importando biblioteca antigua…':'Recuperar fotografías antiguas'}
+      </button>
+    </section>}
+    {rescueMessage&&<p role="status" className="helper-text">{rescueMessage}</p>}
     <SpecialDatesSettings settings={settings} onSave={onSaveSettings}/>
     <section className="panel memrly-profile-settings">
-      <h3>Perfil en este dispositivo</h3>
-      <p>Elige una foto que te represente. Cuando conectemos las cuentas, se podrá vincular al usuario.</p>
+      <h3>Perfil de Memrly</h3><p>La fotografía de perfil se guarda en tu cuenta, igual que los demás ajustes.</p>
       <div className="memrly-profile-settings-row">
         <div className="memrly-local-profile-avatar">
           {settings.profilePhotoId?<PhotoView id={settings.profilePhotoId} className="memrly-local-profile-photo"/>:<Users size={29}/>}
@@ -175,24 +198,19 @@ export function SettingsPage({pending,settings,photos,subjects,onSaveSettings,ac
           {settings.profilePhotoId&&<button type="button" className="memrly-avatar-clear" onClick={()=>onSaveSettings({...settings,profilePhotoId:undefined}).catch(e=>setError(String(e)))}>Quitar foto</button>}
         </div>
       </div>
-      <label className="field"><span>Relacionar tu perfil local con una persona</span>
+      <label className="field"><span>Relacionar tu perfil con una persona</span>
         <select value={settings.profileSubjectId||''} onChange={e=>onSaveSettings({...settings,profileSubjectId:e.target.value||undefined}).catch(err=>setError(String(err)))}>
           <option value="">Ninguna (sin vincular)</option>
-          {subjects.filter(s=>s.kind==='person').map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+          {subjects.filter(subject=>subject.kind==='person').map(subject=><option key={subject.id} value={subject.id}>{subject.name}</option>)}
         </select>
       </label>
       {profilePicker&&<CoverPicker photos={photos} title="Elegir foto de perfil" selectedId={settings.profilePhotoId} previewKind="memory"
         onClose={()=>setProfilePicker(false)} onSelect={async id=>{await onSaveSettings({...settings,profilePhotoId:id});}}/>}
     </section>
-    <div className="settings-cards"><section className="panel"><h3><HardDrive size={20}/> Biblioteca offline</h3><p className="large-stat">{format(bytes)}</p><p>Fotografías originales y variantes guardadas localmente.</p>{quota!==undefined&&<small>Cuota estimada del navegador: {format(quota)}</small>}
-      <button className="btn subtle" onClick={async()=>{const ok=await requestPersistence();setPersistent(ok);}}><ShieldCheck size={16}/>{persistent?'Almacenamiento persistente concedido':'Solicitar almacenamiento persistente'}</button>
-    </section><section className="panel"><h3><CloudUpload size={20}/> Cola de sincronización</h3><p className="large-stat">{pending}</p><p>Operaciones pendientes en este dispositivo.</p><p>La sincronización de fotografías es manual. Las otras operaciones locales todavía no se envían al servidor.</p>
-      <button type="button" className="btn primary" disabled={!account||syncingPhotos} onClick={onSyncPhotos}>
-        <CloudUpload size={17}/>{syncingPhotos?'Sincronizando…':'Sincronizar fotografías'}
-      </button>
-      {syncMessage&&<p role="status" className="helper-text">{syncMessage}</p>}
-      {!account&&<small>Inicia sesión para subir o recuperar fotografías de tu cuenta.</small>}</section></div>
-    <section className="panel"><h3>Estado del proyecto</h3><p>Los originales se pueden copiar a tu cuenta de Memrly desde el botón Sincronizar fotografías. El navegador conserva las copias locales. Esta primera fase no sincroniza recuerdos, colecciones ni eliminaciones; no se deben borrar originales manualmente hasta comprobar su copia en el servidor.</p><p>Para una instalación segura en móviles de la misma Wi-Fi será necesario HTTPS fiable y un servidor accesible por dirección local.</p></section>
+    <section className="panel"><h3>Almacenamiento seguro</h3>
+      <p>Memrly guarda los originales en un volumen privado de Contabo y los metadatos en PostgreSQL. Las fotografías idénticas se deduplican dentro del álbum.</p>
+      <p>Para evitar pérdidas por avería del VPS, mantén copias de seguridad externas de la base de datos y del volumen de fotografías.</p>
+    </section>
     {account&&<div className="account-signout"><button type="button" onClick={onLogout}>Cerrar sesión</button></div>}
     {error&&<p role="alert" className="form-errors">{error}</p>}
   </div>;
