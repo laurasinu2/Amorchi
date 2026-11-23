@@ -141,7 +141,7 @@ export function ImportDialog({ memories, subjects, settings, onClose, onCommit, 
       <form className="memrly-import-layout" onSubmit={submit}>
         <div className="memrly-import-intro">
           <div className="memrly-import-steps" aria-label="Pasos de importación">
-            <span className="is-active">1. Seleccionar</span><span>2. Organizar</span><span>3. Guardar offline</span>
+            <span className="is-active">1. Seleccionar</span><span>2. Organizar</span><span>3. Guardar en la nube</span>
           </div>
           <div className="memrly-import-drop" role="button" tabIndex={0}
             onClick={() => input.current?.click()}
