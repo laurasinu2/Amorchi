@@ -7,6 +7,7 @@ import { getLocalUsage, requestPersistence } from './db';
 import { CalendarGrid } from './components/CalendarGrid';
 import { PhotoView } from './components/PhotoView';
 import { WorldMap } from './components/WorldMap';
+import { LocationSearch, type LocationChoice } from './components/LocationSearch';
 import { CoverMenu, CoverPicker } from './components/CoverPicker';
 import { SpecialDatesSettings } from './components/SpecialDatesSettings';
 import { CelebrationGallery } from './components/CelebrationGallery';
@@ -91,12 +92,37 @@ export function AlbumPage({photos,memories,settings,onView,filterFavorites=false
   return <CelebrationGallery photos={photos} memories={memories} settings={settings} onView={onView} onlyFavorites={filterFavorites}/>;
 }
 
-export function PlacesPage({memories,onOpen}:{memories:Memory[];onOpen:(id:string)=>void}){
+export function PlacesPage({memories,photos,onOpen,onViewPhoto}:{
+  memories:Memory[];photos:Photo[];onOpen:(id:string)=>void;onViewPhoto:(id:string)=>void;
+}){
+  const [focus,setFocus]=useState<LocationChoice|undefined>();
   const pinned=memories.filter(m=>m.latitude!==undefined&&m.longitude!==undefined);
-  return <div className="page-stack"><div className="page-intro"><span className="eyebrow">NUESTRO MUNDO</span><h1>Mapa de recuerdos</h1><p>Un marcador por viaje, evento o momento, nunca una chincheta por fotografía.</p></div>
-    <WorldMap memories={pinned} onSelect={onOpen}/>
+  const locatedPhotos=photos.filter(p=>p.latitude!==undefined&&p.longitude!==undefined);
+  const places=new Map<string,{name:string;lat:number;lon:number;count:number}>();
+  for(const item of [...pinned,...locatedPhotos]){
+    if(item.latitude===undefined||item.longitude===undefined)continue;
+    const key=`${item.latitude.toFixed(4)}:${item.longitude.toFixed(4)}`;
+    const old=places.get(key);
+    if(old){old.count++;continue;}
+    places.set(key,{name:item.place||`${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}`,
+      lat:item.latitude,lon:item.longitude,count:1});
+  }
+  return <div className="page-stack"><div className="page-intro"><span className="eyebrow">NUESTRO MUNDO</span>
+    <h1>Mapa de recuerdos</h1><p>Busca lugares y descubre dónde guardaste tus fotografías, viajes y momentos.</p></div>
+    <section className="memrly-place-page-search">
+      <LocationSearch onSelect={setFocus} placeholder="Buscar una ciudad, país o lugar del mundo…"/>
+      {focus&&<p className="memrly-place-selection"><MapPin size={16}/> Mostrando: {focus.label}</p>}
+    </section>
+    <WorldMap memories={memories} photos={photos} onSelect={onOpen} onSelectPhoto={onViewPhoto} focus={focus}/>
+    <SectionTitle title={`Lugares guardados (${places.size})`}/>
+    {places.size?<div className="memrly-online-location-list">{[...places.values()].sort((a,b)=>a.name.localeCompare(b.name,'es')).map(place=>
+      <button type="button" key={place.lat+':'+place.lon} onClick={()=>setFocus({label:place.name,latitude:place.lat,longitude:place.lon,id:'saved:'+place.lat+':'+place.lon})}>
+        <MapPin size={19}/><span><strong>{place.name}</strong><small>{place.count} ${place.count===1?'elemento':'elementos'} en esta ubicación</small></span><ArrowRight size={16}/>
+      </button>)}</div>:
+      <EmptyState title="Todavía no hay lugares guardados" description="Busca un lugar y selecciónalo al crear un recuerdo o editar una fotografía para que aparezca en el mapa."/>}
     <SectionTitle title={`Recuerdos localizados (${pinned.length})`}/>
-    {pinned.length?<div className="location-list">{pinned.map(m=><button key={m.id} onClick={()=>onOpen(m.id)}><MapPin size={18}/><span><strong>{m.title}</strong><small>{m.place||kindName(m.kind)}</small></span><ArrowRight size={15}/></button>)}</div>:<EmptyState title="El mapa está esperando recuerdos" description="Edita un viaje o momento y añade sus coordenadas para localizarlo en el mapa."/>}
+    {pinned.length>0&&<div className="location-list">{pinned.map(m=><button key={m.id} onClick={()=>onOpen(m.id)}>
+      <MapPin size={18}/><span><strong>{m.title}</strong><small>{m.place||kindName(m.kind)}</small></span><ArrowRight size={15}/></button>)}</div>}
   </div>;
 }
 
