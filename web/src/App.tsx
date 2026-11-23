@@ -1,11 +1,10 @@
 import { useEffect, useState, type ComponentType } from 'react';
 import { AuthDialog } from './AuthDialog';
 import { useAccount } from './account';
-import { synchronizePhotos, canSyncAccount } from './photoSync';
+import { loadOnlineLibrary, uploadOnlinePhoto, updateOnlinePhoto, deleteOnlinePhoto, saveOnlineEntity, deleteOnlineEntity, rescueLegacyLibrary, countLegacyPhotos } from './onlineLibrary';
 import { CalendarDays, CloudUpload, Compass, Heart, Home, Images, Layers, MapPin, Menu, Plane, Plus, Search, Settings, Star, Trash2, Users, WifiOff } from 'lucide-react';
 import { defaultSettings, type AppSettings, type CoverPosition, type ImportOptions, type Memory, type MemoryKind, type Page, type Photo, type PhotoCollection, type Subject } from './types';
 import { localISO } from './dates';
-import { deleteMemory, deletePhoto, importPhoto, loadLibrary, saveCollection, saveMemory, savePhoto, saveSubject, saveSettings } from './db';
 import { ImportDialog, MemoryDeleteDialog, MemoryDialog, PhotoDialog, SubjectDialog } from './components/Dialogs';
 import { CoverPicker } from './components/CoverPicker';
 import { PhotoDetailPage } from './PhotoDetailPage';
@@ -37,8 +36,9 @@ export default function App(){
   const [authOpen,setAuthOpen]=useState(false);
   const [logoutConfirm,setLogoutConfirm]=useState(false);
   const [logoutError,setLogoutError]=useState('');
-  const [syncingPhotos,setSyncingPhotos]=useState(false);
-  const [syncMessage,setSyncMessage]=useState('');
+  const [rescuingLegacy,setRescuingLegacy]=useState(false);
+  const [rescueMessage,setRescueMessage]=useState('');
+  const [legacyCount,setLegacyCount]=useState(0);
   const [page,setPage]=useState<Page>('inicio');
   const [photos,setPhotos]=useState<Photo[]>([]);
   const [memories,setMemories]=useState<Memory[]>([]);
@@ -46,7 +46,6 @@ export default function App(){
   const [collections,setCollections]=useState<PhotoCollection[]>([]);
   const [settings,setSettings]=useState<AppSettings>(defaultSettings);
   const [coverTarget,setCoverTarget]=useState<'home'|{memoryId:string}|{year:number}|null>(null);
-  const [pending,setPending]=useState(0);
   const [ready,setReady]=useState(false);
   const [error,setError]=useState('');
   const [isOnline,setOnline]=useState(navigator.onLine);
@@ -71,44 +70,60 @@ export default function App(){
   const [subjectOpen,setSubjectOpen]=useState(false);
   const [editSubject,setEditSubject]=useState<Subject|undefined>();
 
-  async function refresh(){
-    const library=await loadLibrary();
+  function displayLibrary(library:Awaited<ReturnType<typeof loadOnlineLibrary>>){
     setPhotos(library.photos);setMemories(library.memories);
-    setSubjects(library.subjects);setPending(library.operations.length);setSettings(library.settings);setCollections(library.collections);
+    setSubjects(library.subjects);setCollections(library.collections);setSettings(library.settings);
+  }
+  async function refresh(){
+    if(!account.token)return;
+    const library=await loadOnlineLibrary(account.token);
+    displayLibrary(library);
   }
   useEffect(()=>{
-    refresh().catch(e=>setError('No se pudo abrir el almacenamiento local: '+String(e))).finally(()=>setReady(true));
     const online=()=>setOnline(true),offline=()=>setOnline(false);
     window.addEventListener('online',online);window.addEventListener('offline',offline);
     return ()=>{window.removeEventListener('online',online);window.removeEventListener('offline',offline);};
   },[]);
-  async function syncPhotosNow(){
-    if(!account.user || !account.token){
-      setSyncMessage('Inicia sesión antes de sincronizar fotografías.');
+  useEffect(()=>{
+    let active=true;
+    setPhotos([]);setMemories([]);setSubjects([]);setCollections([]);setSettings(defaultSettings);
+    setError('');
+    setReady(false);
+    if(!account.token||!account.user){
+      setLegacyCount(0);
+      setReady(!account.checking);
+      return ()=>{active=false;};
+    }
+    const token=account.token;
+    const fetchLibrary=async()=>{
+      try{
+        const library=await loadOnlineLibrary(token);
+        if(active){displayLibrary(library);setError('');}
+      }catch(e){
+        if(active)setError('No se pudo consultar el servidor: '+(e instanceof Error?e.message:String(e)));
+      }finally{if(active)setReady(true);}
+    };
+    void fetchLibrary();
+    void countLegacyPhotos().then(count=>{if(active)setLegacyCount(count);}).catch(()=>undefined);
+    const onFocus=()=>{if(document.visibilityState==='visible')void fetchLibrary();};
+    document.addEventListener('visibilitychange',onFocus);
+    window.addEventListener('focus',onFocus);
+    return ()=>{active=false;document.removeEventListener('visibilitychange',onFocus);window.removeEventListener('focus',onFocus);};
+  },[account.token,account.user?.id,account.checking]);
+  async function rescueExistingPhotos(){
+    if(!account.user||!account.token||rescuingLegacy)return;
+    if(!window.confirm('Se han encontrado fotos de la versión antigua guardadas SOLO en este navegador. ¿Quieres transferirlas a tu cuenta de Memrly? Se conservarán las copias locales anteriores.')){
       return;
     }
-    if(!navigator.onLine){
-      setSyncMessage('Conéctate a Internet para sincronizar.');
-      return;
-    }
-    if(!canSyncAccount(account.user.id)){
-      setSyncMessage('La biblioteca de este navegador pertenece a otra cuenta. Utiliza un perfil de navegador separado.');
-      return;
-    }
-    if(!window.confirm('¿Quieres sincronizar tus fotografías originales con tu cuenta de Memrly? Se subirán al almacenamiento privado de Contabo y las copias locales permanecerán intactas.')){
-      return;
-    }
-    setSyncingPhotos(true);setSyncMessage('Preparando sincronización…');
+    setRescuingLegacy(true);setRescueMessage('Preparando importación de fotografías antiguas…');
     try{
-      const outcome=await synchronizePhotos(account.user.id,account.token,progress=>{
-        setSyncMessage(`${progress.stage} (${progress.done}/${progress.total})`);
-      });
+      const outcome=await rescueLegacyLibrary(account.token,account.user.id,setRescueMessage);
       await refresh();
-      setSyncMessage(`Completado: ${outcome.uploaded} originales subidos, ${outcome.downloaded} recuperados y ${outcome.updated} fichas actualizadas.`);
+      setLegacyCount(0);
+      setRescueMessage(`Rescate completado: ${outcome.imported} originales añadidos, ${outcome.skipped} ya existentes. Los archivos anteriores siguen en este navegador.`);
     }catch(err){
-      setSyncMessage('No se completó la sincronización: '+(err instanceof Error?err.message:String(err))+' Puedes volver a intentarlo sin borrar las copias locales.');
-      await refresh().catch(()=>undefined);
-    }finally{setSyncingPhotos(false);}
+      setRescueMessage('No se pudieron recuperar todos los archivos: '+(err instanceof Error?err.message:String(err))+'. Puedes volver a intentarlo.');
+    }finally{setRescuingLegacy(false);}
   }
   function navigate(to:Page){
     setPage(to);setMenu(false);window.scrollTo({top:0,behavior:'instant'});
