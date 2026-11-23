@@ -46,6 +46,19 @@ export function useAccount() {
     }).finally(() => setChecking(false));
   }, [accept]);
 
+  useEffect(() => {
+    if (!user) return;
+    const renew = () => {
+      request<Tokens>('/account/refresh', {}).then(accept).catch(() => {
+        setToken(null); setUser(null);
+      });
+    };
+    const timer = window.setInterval(renew, 11 * 60 * 60 * 1000);
+    const onVisible = () => { if (document.visibilityState === 'visible') renew(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { clearInterval(timer); document.removeEventListener('visibilitychange', onVisible); };
+  }, [user?.id, accept]);
+
   async function login(credentials: AuthPayload) {
     const tokens = await request<Tokens>('/account/login', credentials);
     await accept(tokens);
