@@ -1,0 +1,68 @@
+/* Memrly photo importer, isolated from the other dialogs. */
+.memrly-import-dialog{width:min(96vw,1300px)!important;height:min(92dvh,960px);max-height:92dvh!important;background:#fff!important;color:#0b2344;border:1px solid #e1e7f1!important;border-radius:22px}
+.memrly-import-dialog>.dialog-header{flex-shrink:0;padding:16px 24px;border-bottom:1px solid #e6eaf0}
+.memrly-import-dialog>.dialog-header h2{font-size:clamp(1.4rem,2vw,1.9rem);color:#0b2344}
+.memrly-import-layout{display:flex;flex-direction:column;min-height:0;flex:1}
+.memrly-import-intro{padding:16px 24px 12px;display:grid;gap:13px;flex-shrink:0}
+.memrly-import-steps{display:flex;gap:8px;flex-wrap:wrap}
+.memrly-import-steps span{border-radius:30px;padding:9px 16px;background:#edf1f7;color:#50627d;font-size:.79rem;font-weight:650}
+.memrly-import-steps .is-active{background:#092548;color:#fff}
+.memrly-import-drop{display:flex;align-items:center;justify-content:center;gap:16px;min-height:108px;border:2px dashed #c0d0e4;background:#f5f8fd;border-radius:16px;cursor:pointer;color:#0b2c54;padding:16px;text-align:center}
+.memrly-import-drop:hover,.memrly-import-drop:focus-visible{background:#ecf3ff;border-color:#7396c5}
+.memrly-import-drop>div{display:grid;gap:5px}.memrly-import-drop strong{font-size:1rem}.memrly-import-drop small{color:#52627b}
+.memrly-import-file-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.memrly-import-scroll{height:45dvh;min-height:120px;flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;padding:10px 24px 18px;scrollbar-width:thin;scrollbar-color:#aebfd6 transparent}
+.memrly-import-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.memrly-import-card{border:1px solid #e0e7f1;border-radius:14px;overflow:hidden;background:white;box-shadow:0 2px 8px rgba(12,38,76,.04);min-width:0}
+.memrly-import-image{position:relative;height:155px;width:100%;background:#eef3f8;overflow:hidden}
+.memrly-import-image img{display:block;width:100%;height:100%;object-fit:cover}
+.memrly-import-remove{position:absolute;top:9px;right:9px;width:33px;height:33px;border-radius:50%;border:1px solid rgba(255,255,255,.8);display:grid;place-items:center;background:rgba(9,31,62,.89);color:white}
+.memrly-import-remove:hover{background:#9c2937}
+.memrly-import-card-content{padding:10px;display:grid;gap:9px}
+.memrly-import-filename{font-size:.77rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#142b4f}
+.memrly-import-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.memrly-import-tools button{min-width:0;display:flex;justify-content:center;align-items:center;gap:4px;background:#edf2f8;border:1px solid #e4eaf3;border-radius:9px;color:#112f58;padding:8px 3px;font-size:.73rem;font-weight:600}
+.memrly-import-tools button:hover{background:#dae6f7}
+.memrly-import-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;border-top:1px solid #e5ebf3;padding-top:9px}
+.memrly-import-meta>span{display:flex;align-items:center;gap:4px;min-width:0;color:#435775;font-size:.68rem}
+.memrly-import-meta>span>span{min-width:0;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+.memrly-import-meta svg{flex:none}
+.memrly-import-empty{display:grid;place-items:center;min-height:150px;color:#62738b;background:#f7faff;border-radius:12px}
+.memrly-import-bottom{display:flex;flex-shrink:0;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid #e5ebf2;background:#fff;padding:15px 24px}
+.memrly-import-count{display:flex;align-items:center;gap:12px;min-width:0}
+.memrly-import-count>svg{flex-shrink:0;background:#eef3f9;border-radius:10px;padding:10px;width:44px;height:44px}
+.memrly-import-count>div{display:grid;gap:4px}.memrly-import-count strong{font-size:.94rem;color:#0b2344}.memrly-import-count small{font-size:.74rem;color:#677992}
+.memrly-import-bottom-buttons{display:flex;flex-shrink:0;gap:10px}
+.memrly-import-cancel,.memrly-import-submit{min-height:43px;border-radius:11px;padding:10px 18px;font-size:.88rem;font-weight:700}
+.memrly-import-cancel{background:#f0f3f7;color:#40546f;border:1px solid #dde5ee}
+.memrly-import-submit{background:#092548;color:white;border:1px solid #092548}
+.memrly-import-submit:hover{background:#163b69}
+.memrly-import-submit:disabled{opacity:.5;cursor:not-allowed}
+.memrly-import-subjects{padding:0 24px 12px;font-size:.8rem;color:#334968;flex-shrink:0}
+.memrly-import-subjects summary{cursor:pointer}.memrly-import-subjects .chips{margin:9px 0 0}
+.memrly-import-dialog>.memrly-import-layout>.form-errors,.memrly-import-dialog>.memrly-import-layout>.success-text{margin:0 24px 12px}
+.memrly-import-editor-backdrop{position:absolute;inset:0;display:grid;place-items:center;background:rgba(9,27,52,.5);padding:18px;z-index:2}
+.memrly-import-dialog{position:relative}
+.memrly-import-editor{width:min(100%,425px);display:grid;gap:17px;background:#fff;border-radius:16px;padding:24px;color:#0b2344;box-shadow:0 24px 70px rgba(0,0,0,.18)}
+.memrly-import-editor-header{display:flex;justify-content:space-between;align-items:center}
+.memrly-import-editor-header h3{margin:0;font-size:1.15rem}.memrly-import-editor-header button{background:transparent;border:0}
+.memrly-import-editor-filename{font-size:.83rem;color:#60728a;overflow-wrap:anywhere;margin:0}
+.memrly-import-editor .field input,.memrly-import-editor .field select{background:white;border:1px solid #d5dfed;color:#0b2344}
+@media(max-width:1100px){.memrly-import-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.memrly-import-image{height:185px}}
+@media(max-width:640px){
+.memrly-import-backdrop{padding:0!important;align-items:stretch!important}
+.memrly-import-dialog{width:100%!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important}
+.memrly-import-dialog>.dialog-header{padding:15px}
+.memrly-import-intro{padding:13px 15px}.memrly-import-steps span{padding:7px 10px;font-size:.72rem}
+.memrly-import-drop{min-height:95px}.memrly-import-drop small{font-size:.74rem}
+.memrly-import-scroll{padding:7px 15px 15px;height:50dvh}
+.memrly-import-grid{grid-template-columns:1fr}
+.memrly-import-image{height:210px}
+.memrly-import-card-content{padding:12px}
+.memrly-import-tools button{padding:10px 5px;font-size:.8rem}
+.memrly-import-meta>span{font-size:.75rem}
+.memrly-import-bottom{padding:12px 15px calc(12px + env(safe-area-inset-bottom));align-items:stretch;flex-direction:column;gap:12px}
+.memrly-import-bottom-buttons{display:grid;grid-template-columns:1fr 1.4fr}
+.memrly-import-bottom-buttons button{padding:10px 8px}
+.memrly-import-subjects{padding:0 15px 8px}
+}
