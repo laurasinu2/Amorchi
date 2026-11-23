@@ -63,18 +63,20 @@ export function MemoryDialog({onClose,onSave,initial,defaultKind,initialDate,ini
               {coverId?<PhotoView id={coverId} className="memrly-memory-cover-photo"/>:
                 <span><Camera size={30}/><strong>Elegir portada</strong><small>Fotografía del recuerdo</small></span>}
             </button>
-            <div className="memrly-memory-kind" role="group" aria-label="Tipo de recuerdo">
-              {([{id:'moment',label:'Momento',icon:Heart},{id:'event',label:'Evento',icon:CalendarDays},{id:'trip',label:'Viaje',icon:Plane}] as const).map(({id,label,icon:Icon})=>
-                <button key={id} type="button" className={kind===id?'active':''} aria-pressed={kind===id} onClick={()=>setKind(id)}><Icon size={17}/>{label}</button>)}
+            <div className="memrly-memory-details">
+              <div className="memrly-memory-kind" role="group" aria-label="Tipo de recuerdo">
+                {([{id:'moment',label:'Momento',icon:Heart},{id:'event',label:'Evento',icon:CalendarDays},{id:'trip',label:'Viaje',icon:Plane}] as const).map(({id,label,icon:Icon})=>
+                  <button key={id} type="button" className={kind===id?'active':''} aria-pressed={kind===id} onClick={()=>setKind(id)}><Icon size={17}/>{label}</button>)}
+              </div>
+              <label className="memrly-memory-input"><span>Nombre</span>
+                <input value={title} required maxLength={110} onChange={e=>setTitle(e.target.value)}
+                  placeholder={kind==='trip'?'Nuestro viaje a…':kind==='event'?'Nombre del evento':'Un momento para recordar'}/>
+              </label>
+              <label className="memrly-memory-input"><span>Descripción</span>
+                <textarea value={description} rows={3} onChange={e=>setDescription(e.target.value)} placeholder="¿Qué quieres recordar?"/>
+              </label>
             </div>
           </div>
-          <label className="memrly-memory-input"><span>Nombre</span>
-            <input value={title} required maxLength={110} onChange={e=>setTitle(e.target.value)}
-              placeholder={kind==='trip'?'Nuestro viaje a…':kind==='event'?'Nombre del evento':'Un momento para recordar'}/>
-          </label>
-          <label className="memrly-memory-input"><span>Descripción</span>
-            <textarea value={description} rows={3} onChange={e=>setDescription(e.target.value)} placeholder="¿Qué quieres recordar?"/>
-          </label>
           <div className="memrly-memory-divider"/>
           <section className="memrly-memory-fields">
             <div className="memrly-memory-row">
