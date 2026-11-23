@@ -44,6 +44,7 @@ export interface Memory {
   latitude?: number;
   longitude?: number;
   favorite: boolean;
+  relatedMemoryIds?: string[];
   coverPhotoId?: string;
   coverPosition?:CoverPosition;
   createdAt: string;
