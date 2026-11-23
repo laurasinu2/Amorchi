@@ -18,6 +18,7 @@ def test_signup_requires_explicit_enable(monkeypatch):
     with TestClient(app) as client:
         result = client.post("/api/v1/account/register", json={
             "email": "not-registered@gmail.com", "password": "strong-password-123",
+            "repeat_password": "strong-password-123",
             "display_name": "Usuario",
         })
     assert result.status_code == 403
