@@ -1,6 +1,7 @@
 import { useEffect, useState, type ComponentType } from 'react';
 import { AuthDialog } from './AuthDialog';
 import { useAccount } from './account';
+import { synchronizePhotos, canSyncAccount } from './photoSync';
 import { CalendarDays, CloudUpload, Compass, Heart, Home, Images, Layers, MapPin, Menu, Plane, Plus, Search, Settings, Star, Trash2, Users, WifiOff } from 'lucide-react';
 import { defaultSettings, type AppSettings, type CoverPosition, type ImportOptions, type Memory, type MemoryKind, type Page, type Photo, type PhotoCollection, type Subject } from './types';
 import { localISO } from './dates';
@@ -36,6 +37,8 @@ export default function App(){
   const [authOpen,setAuthOpen]=useState(false);
   const [logoutConfirm,setLogoutConfirm]=useState(false);
   const [logoutError,setLogoutError]=useState('');
+  const [syncingPhotos,setSyncingPhotos]=useState(false);
+  const [syncMessage,setSyncMessage]=useState('');
   const [page,setPage]=useState<Page>('inicio');
   const [photos,setPhotos]=useState<Photo[]>([]);
   const [memories,setMemories]=useState<Memory[]>([]);
@@ -79,6 +82,34 @@ export default function App(){
     window.addEventListener('online',online);window.addEventListener('offline',offline);
     return ()=>{window.removeEventListener('online',online);window.removeEventListener('offline',offline);};
   },[]);
+  async function syncPhotosNow(){
+    if(!account.user || !account.token){
+      setSyncMessage('Inicia sesión antes de sincronizar fotografías.');
+      return;
+    }
+    if(!navigator.onLine){
+      setSyncMessage('Conéctate a Internet para sincronizar.');
+      return;
+    }
+    if(!canSyncAccount(account.user.id)){
+      setSyncMessage('La biblioteca de este navegador pertenece a otra cuenta. Utiliza un perfil de navegador separado.');
+      return;
+    }
+    if(!window.confirm('¿Quieres sincronizar tus fotografías originales con tu cuenta de Memrly? Se subirán al almacenamiento privado de Contabo y las copias locales permanecerán intactas.')){
+      return;
+    }
+    setSyncingPhotos(true);setSyncMessage('Preparando sincronización…');
+    try{
+      const outcome=await synchronizePhotos(account.user.id,account.token,progress=>{
+        setSyncMessage(`${progress.stage} (${progress.done}/${progress.total})`);
+      });
+      await refresh();
+      setSyncMessage(`Completado: ${outcome.uploaded} originales subidos, ${outcome.downloaded} recuperados y ${outcome.updated} fichas actualizadas.`);
+    }catch(err){
+      setSyncMessage('No se completó la sincronización: '+(err instanceof Error?err.message:String(err))+' Puedes volver a intentarlo sin borrar las copias locales.');
+      await refresh().catch(()=>undefined);
+    }finally{setSyncingPhotos(false);}
+  }
   function navigate(to:Page){
     setPage(to);setMenu(false);window.scrollTo({top:0,behavior:'instant'});
   }
@@ -204,7 +235,7 @@ export default function App(){
           {page==='album'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={openPhoto}/>}
           {page==='favoritos'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={openPhoto} filterFavorites/>}
           {page==='buscar'&&<SearchPage photos={photos} memories={memories} onView={openPhoto} onOpen={openMemory}/>}
-          {page==='ajustes'&&<SettingsPage pending={pending} settings={settings} photos={photos} subjects={subjects} onSaveSettings={commitSettings} account={account.user} accountChecking={account.checking} onLogin={()=>setAuthOpen(true)} onLogout={()=>{setLogoutError('');setLogoutConfirm(true);}}/>}
+          {page==='ajustes'&&<SettingsPage pending={pending} settings={settings} photos={photos} subjects={subjects} onSaveSettings={commitSettings} account={account.user} accountChecking={account.checking} onLogin={()=>setAuthOpen(true)} onLogout={()=>{setLogoutError('');setLogoutConfirm(true);}} onSyncPhotos={()=>void syncPhotosNow()} syncingPhotos={syncingPhotos} syncMessage={syncMessage}/>}
           {page==='colecciones'&&<CollectionsPage collections={collections} photos={photos} onView={openPhoto} onCreate={day=>setCollectionDate(day)}/>}
           {page==='papelera'&&<EmptyState title="Papelera" description="El borrado seguro y la recuperación de fotos se añadirán con el servidor. Esta versión no borra originales desde la interfaz."/>}
         </>}
