@@ -159,10 +159,17 @@ export default function App(){
     setImportDate(initialDate);
     setImportOpen(true);
   }
-  async function commitMemory(memory:Memory){await saveMemory(memory);await refresh();}
-  async function commitCollection(collection:PhotoCollection){await saveCollection(collection);await refresh();}
+  async function commitMemory(memory:Memory){
+    if(!account.token)throw new Error('Inicia sesión.');
+    await saveOnlineEntity('memory',memory.id,memory,account.token);await refresh();
+  }
+  async function commitCollection(collection:PhotoCollection){
+    if(!account.token)throw new Error('Inicia sesión.');
+    await saveOnlineEntity('collection',collection.id,collection,account.token);await refresh();
+  }
   async function commitSettings(next:AppSettings){
-    await saveSettings(next);await refresh();
+    if(!account.token)throw new Error('Inicia sesión.');
+    await saveOnlineEntity('settings','main',next,account.token);await refresh();
   }
   async function commitCover(photoId?:string,position?:CoverPosition){
     if(coverTarget==='home'){
@@ -176,45 +183,77 @@ export default function App(){
     }else if(coverTarget&&'memoryId' in coverTarget){
       const memory=memories.find(m=>m.id===coverTarget.memoryId);
       if(!memory)throw new Error('No se encontró el recuerdo.');
-      await saveMemory({...memory,coverPhotoId:photoId,coverPosition:photoId?position:undefined});
-      await refresh();
+      await commitMemory({...memory,coverPhotoId:photoId,coverPosition:photoId?position:undefined});
     }
   }
   async function commitDeleteMemory(){
+    if(!account.token)throw new Error('Inicia sesión.');
     const memory=memories.find(m=>m.id===memoryToDeleteId);
     if(!memory)throw new Error('El recuerdo ya no está disponible.');
-    await deleteMemory(memory.id);
+    for(const photo of photos.filter(p=>p.memoryIds.includes(memory.id))){
+      await updateOnlinePhoto({...photo,memoryIds:photo.memoryIds.filter(id=>id!==memory.id)},account.token);
+    }
+    for(const other of memories.filter(m=>(m.relatedMemoryIds||[]).includes(memory.id))){
+      await saveOnlineEntity('memory',other.id,
+        {...other,relatedMemoryIds:(other.relatedMemoryIds||[]).filter(id=>id!==memory.id)},account.token);
+    }
+    await deleteOnlineEntity('memory',memory.id,account.token);
     await refresh();
-    setMemoryToDeleteId(undefined);
-    setSelectedMemoryId(undefined);
+    setMemoryToDeleteId(undefined);setSelectedMemoryId(undefined);
     navigate(memory.kind==='trip'?'viajes':'recuerdos');
   }
   async function commitSubject(subject:Subject){
-    await saveSubject(subject);
-    // Al crear desde la ficha de foto, se vincula automáticamente.
+    if(!account.token)throw new Error('Inicia sesión.');
+    await saveOnlineEntity('subject',subject.id,subject,account.token);
     if(page==='foto'&&!editSubject&&selectedPhotoId){
       const current=photos.find(p=>p.id===selectedPhotoId);
-      if(current&&!current.subjectIds.includes(subject.id))await savePhoto({...current,subjectIds:[...current.subjectIds,subject.id]});
+      if(current&&!current.subjectIds.includes(subject.id))
+        await updateOnlinePhoto({...current,subjectIds:[...current.subjectIds,subject.id]},account.token);
     }
     await refresh();
   }
-  async function commitPhoto(photo:Photo){await savePhoto(photo);await refresh();}
+  async function commitPhoto(photo:Photo){
+    if(!account.token)throw new Error('Inicia sesión.');
+    await updateOnlinePhoto(photo,account.token);await refresh();
+  }
   async function commitDeletePhoto(id:string){
-    await deletePhoto(id);
+    if(!account.token)throw new Error('Inicia sesión.');
+    // Remove related cover and collection references before deleting the original.
+    for(const memory of memories.filter(m=>m.coverPhotoId===id))
+      await saveOnlineEntity('memory',memory.id,
+        {...memory,coverPhotoId:undefined,coverPosition:undefined},account.token);
+    for(const collection of collections.filter(c=>c.photoIds.includes(id)))
+      await saveOnlineEntity('collection',collection.id,
+        {...collection,photoIds:collection.photoIds.filter(photoId=>photoId!==id)},account.token);
+    for(const subject of subjects.filter(subject=>subject.avatarPhotoId===id))
+      await saveOnlineEntity('subject',subject.id,{...subject,avatarPhotoId:undefined},account.token);
+    if(settings.homeCoverPhotoId===id||settings.profilePhotoId===id||
+      Object.values(settings.yearCoverPhotoIds||{}).includes(id)){
+      const yearIds=Object.fromEntries(Object.entries(settings.yearCoverPhotoIds||{}).filter(([,value])=>value!==id));
+      await saveOnlineEntity('settings','main',{
+        ...settings,homeCoverPhotoId:settings.homeCoverPhotoId===id?undefined:settings.homeCoverPhotoId,
+        homeCoverPosition:settings.homeCoverPhotoId===id?undefined:settings.homeCoverPosition,
+        profilePhotoId:settings.profilePhotoId===id?undefined:settings.profilePhotoId,
+        yearCoverPhotoIds:yearIds
+      },account.token);
+    }
+    await deleteOnlinePhoto(id,account.token);
     await refresh();
     if(selectedPhotoId===id){setPhotoEditOpen(false);setSelectedPhotoId(undefined);navigate(photoReturnPage);}
   }
   async function commitImport(files:File[],options:ImportOptions){
+    if(!account.token)throw new Error('Inicia sesión para subir fotografías.');
+    if(!navigator.onLine)throw new Error('Se necesita Internet para importar fotografías.');
     const errors:string[]=[];let imported=0;
     for(const [index,file] of files.entries()){
       try{
         const item=options.perFile?.[index];
-        await importPhoto(file,item?{...options,...item,perFile:undefined}:options);
+        await uploadOnlinePhoto(file,item?{...options,...item,perFile:undefined}:options,account.token);
         imported++;
-      }
-      catch(err){errors.push(file.name+': '+(err instanceof Error?err.message:String(err)));}
+      }catch(err){errors.push(file.name+': '+(err instanceof Error?err.message:String(err)));}
     }
-    await refresh();if(imported>0)navigate('album');
+    await refresh();
+    if(imported>0)navigate('album');
     return {imported,errors};
   }
   const selectedMemory=memories.find(m=>m.id===selectedMemoryId);
