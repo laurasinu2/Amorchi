@@ -1,7 +1,6 @@
 """Memrly account verification and revocable sessions. No Google login."""
 import hashlib
 import hmac
-import logging
 import secrets
 import smtplib
 from datetime import datetime, timedelta, timezone
@@ -18,7 +17,6 @@ from .security import create_token, hash_password, verify_password
 
 router = APIRouter(prefix="/api/v1/account", tags=["account"])
 COOKIE = "memrly_session"
-log = logging.getLogger(__name__)
 
 
 def digest(value: str) -> str:
