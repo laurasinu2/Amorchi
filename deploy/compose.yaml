@@ -12,6 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ../server/db/001_initial.sql:/docker-entrypoint-initdb.d/001_initial.sql:ro
       - ../server/db/002_preferences.sql:/docker-entrypoint-initdb.d/002_preferences.sql:ro
+      - ../server/db/003_auth.sql:/docker-entrypoint-initdb.d/003_auth.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
@@ -31,6 +32,12 @@ services:
       MEMRLY_DB_PASSWORD: ${MEMRLY_DB_PASSWORD:?Set MEMRLY_DB_PASSWORD}
       MEMRLY_JWT_SECRET: ${MEMRLY_JWT_SECRET:?Set MEMRLY_JWT_SECRET}
       MEMRLY_ALLOW_SIGNUP: ${MEMRLY_ALLOW_SIGNUP:-false}
+      MEMRLY_SMTP_HOST: ${MEMRLY_SMTP_HOST:-}
+      MEMRLY_SMTP_PORT: ${MEMRLY_SMTP_PORT:-587}
+      MEMRLY_SMTP_USER: ${MEMRLY_SMTP_USER:-}
+      MEMRLY_SMTP_PASSWORD: ${MEMRLY_SMTP_PASSWORD:-}
+      MEMRLY_SMTP_FROM: ${MEMRLY_SMTP_FROM:-}
+      MEMRLY_PUBLIC_ORIGIN: ${MEMRLY_PUBLIC_ORIGIN:-https://memrly.duckdns.org}
       MEMRLY_MAX_UPLOAD_BYTES: ${MEMRLY_MAX_UPLOAD_BYTES:-26214400}
       MEMRLY_STORAGE_ROOT: /data/files
     volumes:
