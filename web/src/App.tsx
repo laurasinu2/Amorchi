@@ -268,13 +268,15 @@ export default function App(){
           <button className={'sidebar-link '+(page===item.page||(page==='calendario'&&item.page==='anios')?'active':'')} onClick={()=>navigate(item.page)}><item.icon size={19}/><span>{item.label}</span></button>
         </div>)}
       </nav>
-      <div className="sidebar-bottom"><div className="sidebar-sync"><CloudUpload size={21}/><div><strong>Modo local</strong><small>{pending} cambios pendientes</small></div></div><span className="sidebar-foot">Amorchi · Primera versión</span></div>
+      <div className="sidebar-bottom"><div className="sidebar-sync"><CloudUpload size={21}/><div><strong>Almacenamiento online</strong><small>{account.user?'Biblioteca privada de tu cuenta':'Acceso con cuenta'}</small></div></div><span className="sidebar-foot">Memrly · Biblioteca en Contabo</span></div>
     </aside>
     {menu&&<button className="menu-scrim" aria-label="Cerrar menú" onClick={()=>setMenu(false)}/>}
     <div className="app-content">
-      <header className="topbar"><div className="topbar-left"><button className="icon-button mobile-menu" aria-label="Abrir menú" onClick={()=>setMenu(true)}><Menu/></button><img className="topbar-brand-image" src="/brand/memrly-horizontal.png" alt="Memrly, álbum Amorchi" onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src="/brand/memrly-horizontal.svg";}} /><span className="breadcrumbs">/ {mainTitle}</span></div><div className="topbar-right"><span className={'sync-indicator '+(!isOnline?'offline':'')} title="Servidor aún no conectado">{isOnline?<CloudUpload size={16}/>:<WifiOff size={16}/>}<span>{!isOnline?'Sin conexión':'Datos locales'}</span><b>{pending}</b></span><span className="topbar-divider" aria-hidden="true"/> <button className="btn topbar-add" onClick={()=>openImport()}><Plus size={17}/> Subir fotos</button></div></header>
+      <header className="topbar"><div className="topbar-left"><button className="icon-button mobile-menu" aria-label="Abrir menú" onClick={()=>setMenu(true)}><Menu/></button><img className="topbar-brand-image" src="/brand/memrly-horizontal.png" alt="Memrly, álbum Amorchi" onError={e=>{e.currentTarget.onerror=null;e.currentTarget.src="/brand/memrly-horizontal.svg";}} /><span className="breadcrumbs">/ {mainTitle}</span></div><div className="topbar-right"><span className={'sync-indicator '+(!isOnline?'offline':'')} title="Fotografías privadas en Contabo">{isOnline?<CloudUpload size={16}/>:<WifiOff size={16}/>}<span>{!isOnline?'Sin conexión':'Servidor online'}</span></span><span className="topbar-divider" aria-hidden="true"/> <button className="btn topbar-add" disabled={!account.user||!isOnline} onClick={()=>openImport()}><Plus size={17}/> Subir fotos</button></div></header>
       <main className="main-container">
-        {!ready?<div className="empty-state"><h2>Abriendo tus recuerdos...</h2></div>:<>
+        {account.checking?<div className="empty-state"><h2>Comprobando tu sesión…</h2></div>
+        :!account.user?<EmptyState title="Inicia sesión en Memrly" description="La biblioteca de fotos, recuerdos y viajes se consulta directamente en tu cuenta privada de Contabo." onAction={()=>setAuthOpen(true)} action="Iniciar sesión"/>
+        :!ready?<div className="empty-state"><h2>Consultando tu biblioteca en Contabo…</h2></div>:<>
           {error&&<div className="form-errors" role="alert">{error}</div>}
           {page==='inicio'&&<Dashboard photos={photos} memories={memories} settings={settings} onChangeCover={()=>setCoverTarget('home')} onNavigate={navigate} onOpenMemory={openMemory} onViewPhoto={openPhoto} onImport={()=>openImport()} onCreateMemory={createMemory}/>}
 
@@ -289,28 +291,28 @@ export default function App(){
           {page==='album'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={openPhoto}/>}
           {page==='favoritos'&&<AlbumPage photos={photos} memories={memories} settings={settings} onView={openPhoto} filterFavorites/>}
           {page==='buscar'&&<SearchPage photos={photos} memories={memories} onView={openPhoto} onOpen={openMemory}/>}
-          {page==='ajustes'&&<SettingsPage pending={pending} settings={settings} photos={photos} subjects={subjects} onSaveSettings={commitSettings} account={account.user} accountChecking={account.checking} onLogin={()=>setAuthOpen(true)} onLogout={()=>{setLogoutError('');setLogoutConfirm(true);}} onSyncPhotos={()=>void syncPhotosNow()} syncingPhotos={syncingPhotos} syncMessage={syncMessage}/>}
+          {page==='ajustes'&&<SettingsPage settings={settings} photos={photos} subjects={subjects} onSaveSettings={commitSettings} account={account.user} accountChecking={account.checking} onLogin={()=>setAuthOpen(true)} onLogout={()=>{setLogoutError('');setLogoutConfirm(true);}} onRescueLegacy={()=>void rescueExistingPhotos()} rescuingLegacy={rescuingLegacy} rescueMessage={rescueMessage} legacyCount={legacyCount}/>}
           {page==='colecciones'&&<CollectionsPage collections={collections} photos={photos} onView={openPhoto} onCreate={day=>setCollectionDate(day)}/>}
-          {page==='papelera'&&<EmptyState title="Papelera" description="El borrado seguro y la recuperación de fotos se añadirán con el servidor. Esta versión no borra originales desde la interfaz."/>}
+          {page==='papelera'&&<EmptyState title="Papelera" description="Esta versión elimina las fotografías del servidor al confirmar. La recuperación de fotografías borradas requiere una copia de seguridad."/>}
         </>}
       </main>
     </div>
     <nav className="mobile-bottom" aria-label="Navegación móvil">
       {bottomItems.slice(0,2).map(item=><button key={item.page} className={page===item.page?'active':''} onClick={()=>navigate(item.page)}><item.icon size={23}/><span>{item.label}</span></button>)}
-      <button className="add-tab" onClick={()=>setImportOpen(true)} aria-label="Subir fotografías"><Plus size={31}/><span>Subir</span></button>
+      <button className="add-tab" disabled={!account.user||!isOnline} onClick={()=>setImportOpen(true)} aria-label="Subir fotografías"><Plus size={31}/><span>Subir</span></button>
       {bottomItems.slice(2).map(item=><button key={item.page} className={page===item.page?'active':''} onClick={()=>navigate(item.page)}><item.icon size={23}/><span>{item.label}</span></button>)}
     </nav>
     {authOpen&&<AuthDialog onClose={()=>setAuthOpen(false)} onLogin={account.login}/>}
     {logoutConfirm&&<div className="account-confirm-backdrop" role="presentation"><section className="account-confirm" role="alertdialog" aria-modal="true" aria-labelledby="logout-title">
       <h2 id="logout-title">¿Seguro que quieres cerrar sesión?</h2>
-      <p>Tu cuenta seguirá conservando sus fotografías. Las fotos locales de este navegador no se borrarán.</p>
+      <p>Tus fotografías permanecen guardadas en Contabo y estarán disponibles cuando vuelvas a iniciar sesión.</p>
       {logoutError&&<p role="alert" className="form-errors">{logoutError}</p>}
       <div className="account-actions"><button className="btn subtle" onClick={()=>setLogoutConfirm(false)}>Cancelar</button>
-        <button className="btn primary" onClick={()=>account.logout().then(()=>setLogoutConfirm(false)).catch(e=>setLogoutError(String(e)))}>Cerrar sesión</button></div>
+        <button className="btn primary" onClick={()=>account.logout().then(()=>{setLogoutConfirm(false);setPhotos([]);setMemories([]);setSubjects([]);setCollections([]);}).catch(e=>setLogoutError(String(e)))}>Cerrar sesión</button></div>
     </section></div>}
     {coverTarget&&<CoverPicker photos={coverTarget&&coverTarget!=='home'&&'year' in coverTarget?photos.filter(p=>p.takenOn.startsWith(String(coverTarget.year))):photos} title={coverTarget==='home'?'Elegir foto de fondo de Inicio':'year' in coverTarget?`Portada del año ${coverTarget.year}`:'Elegir foto de fondo del recuerdo'} selectedId={coverTarget==='home'?settings.homeCoverPhotoId:'year' in coverTarget?settings.yearCoverPhotoIds?.[String(coverTarget.year)]:memories.find(m=>m.id===coverTarget.memoryId)?.coverPhotoId} selectedPosition={coverTarget==='home'?settings.homeCoverPosition:'year' in coverTarget?settings.yearCoverPositions?.[String(coverTarget.year)]:memories.find(m=>m.id===coverTarget.memoryId)?.coverPosition} previewKind={coverTarget==='home'?'home':'year' in coverTarget?'year':'memory'} onClose={()=>setCoverTarget(null)} onSelect={commitCover}/>}
     {memoryToDeleteId&&memories.find(m=>m.id===memoryToDeleteId)&&<MemoryDeleteDialog memory={memories.find(m=>m.id===memoryToDeleteId)!} photoCount={photos.filter(p=>p.memoryIds.includes(memoryToDeleteId)).length} onClose={()=>setMemoryToDeleteId(undefined)} onConfirm={commitDeleteMemory}/>}
-    {importOpen&&<ImportDialog initialDate={importDate} memories={memories} subjects={subjects} settings={settings} onClose={()=>{setImportOpen(false);setImportDate(undefined);}} onCommit={commitImport}/>}
+    {account.user&&importOpen&&<ImportDialog initialDate={importDate} memories={memories} subjects={subjects} settings={settings} onClose={()=>{setImportOpen(false);setImportDate(undefined);}} onCommit={commitImport}/>}
     {memoryOpen&&<MemoryDialog initial={editMemory} initialDate={memoryDate} initialEndDate={memoryEndDate} defaultKind={newKind} memories={memories} photos={photos} onClose={()=>{setMemoryOpen(false);setMemoryDate(undefined);setMemoryEndDate(undefined);}} onSave={commitMemory}/>}
     {collectionDate&&<AddToCollectionDialog date={collectionDate} photos={photos} collections={collections} onClose={()=>setCollectionDate(undefined)} onSave={commitCollection}/>}
     {subjectOpen&&<SubjectDialog initial={editSubject} photos={photos} onClose={()=>{setSubjectOpen(false);setEditSubject(undefined);}} onSave={commitSubject}/>} 
