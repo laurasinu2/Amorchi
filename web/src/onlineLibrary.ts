@@ -6,7 +6,16 @@ import { defaultSettings } from './types';
 type RemotePhoto={id:string;metadata:Photo;filename:string;size:number;sha256:string};
 type RemoteEntities={memory:Memory[];subject:Subject[];collection:PhotoCollection[];settings:AppSettings[]};
 let activeToken:string|null=null;
-export function setOnlinePhotoToken(token:string|null){activeToken=token;}
+// Short-lived RAM cache only. No originals or previews are persisted on disk.
+const previewCache=new Map<string,Blob>();
+const previewsLoading=new Map<string,Promise<Blob>>();
+let previewBytes=0;
+export function setOnlinePhotoToken(token:string|null){
+  if(activeToken!==token){
+    previewCache.clear();previewsLoading.clear();previewBytes=0;
+  }
+  activeToken=token;
+}
 
 async function request(path:string,token:string,init:RequestInit={}):Promise<Response>{
   let response:Response;
@@ -98,9 +107,36 @@ export async function deleteOnlineEntity(kind:'memory'|'subject'|'collection',id
   await json('library/entities/'+kind+'/'+encodeURIComponent(id),token,{method:'DELETE'});
 }
 export async function getOnlinePhotoBlob(id:string,quality:'thumb'|'preview'|'original'='thumb'):Promise<Blob>{
-  if(!activeToken)throw new Error('Debes iniciar sesión para ver las fotografías.');
+  const token=activeToken;
+  if(!token)throw new Error('Debes iniciar sesión para ver las fotografías.');
   const kind=quality==='original'?'file':'preview?size='+(quality==='thumb'?360:1280);
-  return await (await request('sync/photos/'+encodeURIComponent(id)+'/'+kind,activeToken)).blob();
+  if(quality==='original')
+    return await (await request('sync/photos/'+encodeURIComponent(id)+'/'+kind,token)).blob();
+  const key=id+'|'+quality;
+  const existing=previewCache.get(key);
+  if(existing){
+    previewCache.delete(key);previewCache.set(key,existing);
+    return existing;
+  }
+  const active=previewsLoading.get(key);
+  if(active)return active;
+  const task=(async()=>{
+    const blob=await (await request('sync/photos/'+encodeURIComponent(id)+'/'+kind,token)).blob();
+    if(activeToken===token&&blob.size<5*1024*1024){
+      const old=previewCache.get(key);
+      if(old)previewBytes-=old.size;
+      previewCache.delete(key);previewCache.set(key,blob);previewBytes+=blob.size;
+      while(previewBytes>32*1024*1024||previewCache.size>100){
+        const oldest=previewCache.keys().next().value;
+        if(oldest===undefined)break;
+        previewBytes-=previewCache.get(oldest)!.size;
+        previewCache.delete(oldest);
+      }
+    }
+    return blob;
+  })().finally(()=>{previewsLoading.delete(key);});
+  previewsLoading.set(key,task);
+  return task;
 }
 
 /** Existing browser-only photos require a one-time deliberate rescue; new photos never use IndexedDB. */
