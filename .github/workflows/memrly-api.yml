@@ -1,7 +1,7 @@
 name: Memrly REST API and Caddy checks
 on:
   push:
-    branches: ["feat/memrly-backend-rest-*"]
+    branches: ["feat/memrly-backend-rest-*", "feat/memrly-auth-*"]
   pull_request:
 jobs:
   backend:
@@ -29,6 +29,7 @@ jobs:
         run: |
           docker exec -i ${{ job.services.postgres.id }} psql -U memrly -d memrly -v ON_ERROR_STOP=1 < server/db/001_initial.sql
           docker exec -i ${{ job.services.postgres.id }} psql -U memrly -d memrly -v ON_ERROR_STOP=1 < server/db/002_preferences.sql
+          docker exec -i ${{ job.services.postgres.id }} psql -U memrly -d memrly -v ON_ERROR_STOP=1 < server/db/003_auth.sql
       - name: Compile REST modules
         run: python -m compileall -q server/api/memrly_api
       - name: Unit and real database tests
