@@ -181,16 +181,17 @@ def verify(data: Verify, conn=Depends(get_conn)):
 def start_session(cur, uid: UUID, response: Response, remember: bool):
     token = secrets.token_urlsafe(48)
     seconds = 30 * 24 * 3600 if remember else 12 * 3600
+    sid = uuid4()
     cur.execute(
-        """INSERT INTO device_sessions(user_id,device_name,refresh_token_hash,expires_at)
-           VALUES (%s,%s,%s,%s)""",
-        (uid, "Memrly web", digest(token), now_utc() + timedelta(seconds=seconds)),
+        """INSERT INTO device_sessions(id,user_id,device_name,refresh_token_hash,expires_at)
+           VALUES (%s,%s,%s,%s,%s)""",
+        (sid, uid, "Memrly web", digest(token), now_utc() + timedelta(seconds=seconds)),
     )
     response.set_cookie(
         COOKIE, token, httponly=True, secure=True, samesite="strict",
         path="/api/v1/account", max_age=seconds if remember else None,
     )
-    return {"access_token": create_token(uid), "token_type": "bearer", "expires_in": 43200}
+    return {"access_token": create_token(uid, sid), "token_type": "bearer", "expires_in": 43200}
 
 
 @router.post("/login")
@@ -234,7 +235,7 @@ def refresh(request: Request, response: Response, conn=Depends(get_conn)):
             COOKIE, new_token, httponly=True, secure=True, samesite="strict",
             path="/api/v1/account", max_age=seconds_left if seconds_left > 12 * 3600 else None,
         )
-        result = {"access_token": create_token(session["user_id"]), "token_type": "bearer", "expires_in": 43200}
+        result = {"access_token": create_token(session["user_id"], session["id"]), "token_type": "bearer", "expires_in": 43200}
     conn.commit()
     return result
 
