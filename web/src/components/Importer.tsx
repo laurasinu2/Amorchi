@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, type ChangeEvent, type DragEvent, type For
 import { CalendarDays, Check, ImagePlus, Link2, MapPin, Trash2, X } from 'lucide-react';
 import { dateLabel } from '../dates';
 import { inspectPhoto, type PhotoInspection } from '../db';
-import type { ImportOptions, Memory, Subject } from '../types';
+import type { AppSettings, ImportOptions, Memory, Subject } from '../types';
 import { createId } from '../id';
+import { automaticCelebrationIds, celebrationCatalog } from '../celebrations';
 import './importer-cards.css';
 
 type Draft = {
@@ -18,9 +19,10 @@ type Draft = {
 };
 type Editor = { id: string; field: 'date' | 'place' | 'memory' } | null;
 
-export function ImportDialog({ memories, subjects, onClose, onCommit, initialDate }: {
+export function ImportDialog({ memories, subjects, settings, onClose, onCommit, initialDate }: {
   memories: Memory[];
   subjects: Subject[];
+  settings: AppSettings;
   onClose: () => void;
   initialDate?: string;
   onCommit: (files: File[], options: ImportOptions) => Promise<{ imported: number; errors: string[] }>;
@@ -200,11 +202,26 @@ export function ImportDialog({ memories, subjects, onClose, onCommit, initialDat
           <input type="date" value={current.date} onChange={e => update(current.id, {date: e.target.value, editedDate: true})}/></label>}
         {editor.field === 'place' && <label className="field"><span>Lugar</span>
           <input autoFocus value={current.place} maxLength={180} placeholder="Barcelona, Roma…" onChange={e => update(current.id, {place:e.target.value})}/></label>}
-        {editor.field === 'memory' && <label className="field"><span>Viaje, evento o recuerdo</span>
-          <select value={current.memoryId} onChange={e => update(current.id, {memoryId:e.target.value})}>
-            <option value="">Sin asociar</option>
-            {memories.map(memory => <option key={memory.id} value={memory.id}>{memory.title} · {dateLabel(memory.startDate,'short')}</option>)}
-          </select></label>}
+        {editor.field === 'memory' && <div className="memrly-import-match-editor">
+          <label className="field"><span>Recuerdos que coinciden con la fecha</span>
+            <select value={current.memoryId} onChange={e => update(current.id, {memoryId:e.target.value})}>
+              <option value="">Sin asociar</option>
+              {memories.filter(memory => Boolean(current.date) && memory.startDate <= current.date && memory.endDate >= current.date)
+                .map(memory => <option key={memory.id} value={memory.id}>{memory.title} · {dateLabel(memory.startDate,'short')}</option>)}
+              {current.memoryId && !memories.some(memory => memory.id === current.memoryId && current.date >= memory.startDate && current.date <= memory.endDate) &&
+                <option value={current.memoryId}>{memories.find(memory => memory.id === current.memoryId)?.title || 'Asociación anterior'} (fuera de fecha)</option>}
+            </select>
+          </label>
+          {current.date && (() => {
+            const eligible = new Set(automaticCelebrationIds(current.date, settings));
+            const matches = celebrationCatalog(settings).filter(c => eligible.has(c.id));
+            return matches.length
+              ? <div className="memrly-import-celebrations"><strong>Días especiales coincidentes</strong>
+                {matches.map(c => <span key={c.id}>{c.title} · se asocia automáticamente por fecha</span>)}
+              </div>
+              : <small>Sin días especiales coincidentes.</small>;
+          })()}
+        </div>}
         {editor.field === 'place' && current.inspection?.latitude !== undefined &&
           <small>GPS EXIF: {current.inspection.latitude.toFixed(5)}, {current.inspection.longitude?.toFixed(5)}. Las coordenadas originales se conservan.</small>}
         <button type="button" className="memrly-import-submit" onClick={() => setEditor(null)}>Guardar cambios</button>
