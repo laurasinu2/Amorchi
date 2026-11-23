@@ -6,6 +6,7 @@
 .memrly-memory-main{padding:23px 26px;overflow-y:auto;display:grid;gap:17px}
 .memrly-memory-top{display:grid;grid-template-columns:190px minmax(0,1fr);gap:22px;align-items:stretch}
 .memrly-memory-details{display:grid;align-content:start;gap:14px;min-width:0}
+.memrly-memory-details .memrly-memory-input{min-width:0}
 .memrly-memory-cover{border:1px dashed #a9bfdc;background:#f0f5fb;border-radius:12px;min-height:250px;height:100%;overflow:hidden;color:#1a416d;padding:0;display:grid;place-items:center}
 .memrly-memory-cover>span{display:grid;justify-items:center;gap:5px;font-size:.8rem}
 .memrly-memory-cover small{font-size:.69rem}
