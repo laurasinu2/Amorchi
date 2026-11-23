@@ -13,7 +13,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from .config import settings
 from .database import get_conn
-from .security import create_token, decode_token, hash_password, verify_password
+from .security import create_token, decode_token, hash_password, verify_password, session_id_from_token
 from .storage import object_key, object_path, receive_file, safe_name
 from .accounts import router as account_router
 
@@ -69,10 +69,14 @@ def current_user(
                             headers={"WWW-Authenticate": "Bearer"})
     try:
         uid = decode_token(credential.credentials)
+        sid = session_id_from_token(credential.credentials)
     except (jwt.PyJWTError, ValueError):
         raise HTTPException(401, "Sesión inválida o caducada.")
     with conn.cursor() as cur:
-        cur.execute("SELECT id FROM app_users WHERE id=%s AND disabled_at IS NULL", (uid,))
+        cur.execute("""SELECT u.id FROM app_users u JOIN device_sessions d ON d.user_id=u.id
+                       WHERE u.id=%s AND d.id=%s AND u.disabled_at IS NULL
+                       AND u.email_verified_at IS NOT NULL AND d.revoked_at IS NULL
+                       AND d.expires_at>now()""", (uid, sid))
         if not cur.fetchone():
             raise HTTPException(401, "Usuario no disponible.")
     return uid
