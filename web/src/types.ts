@@ -95,10 +95,12 @@ export interface LocalOperation {
 }
 
 export interface ImportOptions {
-  perFile?: Array<{overrideDate?:string;place:string;memoryId?:string}>;
+  perFile?: Array<{overrideDate?:string;place:string;latitude?:number;longitude?:number;memoryId?:string}>;
   overrideDate?: string;
   place: string;
   memoryId?: string;
+  latitude?: number;
+  longitude?: number;
   subjectIds: string[];
 }
 
