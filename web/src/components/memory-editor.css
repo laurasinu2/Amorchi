@@ -4,12 +4,13 @@
 .memrly-memory-header button,.memrly-memory-picker header button{background:none;border:0;color:#092648}
 .memrly-memory-form{min-height:0;display:flex;flex-direction:column;flex:1}
 .memrly-memory-main{padding:23px 26px;overflow-y:auto;display:grid;gap:17px}
-.memrly-memory-top{display:grid;grid-template-columns:155px minmax(0,1fr);gap:24px;align-items:center}
-.memrly-memory-cover{border:1px dashed #a9bfdc;background:#f0f5fb;border-radius:12px;height:130px;overflow:hidden;color:#1a416d;padding:0;display:grid;place-items:center}
+.memrly-memory-top{display:grid;grid-template-columns:190px minmax(0,1fr);gap:22px;align-items:stretch}
+.memrly-memory-details{display:grid;align-content:start;gap:14px;min-width:0}
+.memrly-memory-cover{border:1px dashed #a9bfdc;background:#f0f5fb;border-radius:12px;min-height:250px;height:100%;overflow:hidden;color:#1a416d;padding:0;display:grid;place-items:center}
 .memrly-memory-cover>span{display:grid;justify-items:center;gap:5px;font-size:.8rem}
 .memrly-memory-cover small{font-size:.69rem}
 .memrly-memory-cover-photo{width:100%;height:100%;object-fit:cover}
-.memrly-memory-kind{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.memrly-memory-kind{display:flex;gap:8px;justify-content:flex-start;flex-wrap:wrap}
 .memrly-memory-kind button{display:flex;gap:7px;align-items:center;border:1px solid #d7e1ef;background:#f0f3f8;color:#2e4868;border-radius:10px;padding:12px 14px;font-weight:700;font-size:.85rem}
 .memrly-memory-kind button.active{background:#0a294f;color:#fff;border-color:#0a294f}
 .memrly-memory-input{display:grid;gap:7px}
@@ -48,7 +49,7 @@
 .memrly-calendar-grid .calendar-day.memrly-drag-selected{outline:2px solid #1d5ca6;outline-offset:-2px;background:#dceaff}
 .memrly-calendar-drag-help{font-size:.76rem;color:#62748d;margin:8px 0 0}
 @media(max-width:640px){.memrly-memory-backdrop{padding:0;align-items:stretch}.memrly-memory-editor{width:100%;max-height:100dvh;height:100dvh;border-radius:0}
-.memrly-memory-header{padding:17px}.memrly-memory-main{padding:16px;gap:14px}.memrly-memory-top{grid-template-columns:118px 1fr;gap:12px}
-.memrly-memory-cover{height:112px}.memrly-memory-kind{gap:5px;flex-direction:column}.memrly-memory-kind button{justify-content:center;padding:8px}
+.memrly-memory-header{padding:17px}.memrly-memory-main{padding:16px;gap:14px}.memrly-memory-top{grid-template-columns:110px minmax(0,1fr);gap:12px}
+.memrly-memory-cover{min-height:245px;height:100%}.memrly-memory-details{gap:10px}.memrly-memory-kind{gap:5px;flex-direction:column}.memrly-memory-kind button{justify-content:center;padding:8px}
 .memrly-memory-row{grid-template-columns:1fr;gap:9px}.memrly-memory-footer{padding:12px 17px calc(12px + env(safe-area-inset-bottom))}
 .memrly-memory-picker-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
