@@ -104,7 +104,7 @@ export default function App(){
       }finally{if(active)setReady(true);}
     };
     void fetchLibrary();
-    void countLegacyPhotos().then(count=>{if(active)setLegacyCount(count);}).catch(()=>undefined);
+    void countLegacyPhotos(account.user.id).then(count=>{if(active)setLegacyCount(count);}).catch(()=>undefined);
     const onFocus=()=>{if(document.visibilityState==='visible')void fetchLibrary();};
     document.addEventListener('visibilitychange',onFocus);
     window.addEventListener('focus',onFocus);
