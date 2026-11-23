@@ -110,6 +110,8 @@ def preview_photo(photo_id:UUID, size:int=360, uid:UUID=Depends(current_user), c
         raise HTTPException(404,"Archivo original no encontrado.")
     try:
         from PIL import Image, ImageOps, UnidentifiedImageError
+        from pillow_heif import register_heif_opener
+        register_heif_opener()
         Image.MAX_IMAGE_PIXELS = 40_000_000
         with Image.open(path) as im:
             im=ImageOps.exif_transpose(im)
