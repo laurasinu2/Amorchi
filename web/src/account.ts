@@ -28,6 +28,14 @@ async function request<T>(path: string, body?: object, token?: string): Promise<
   return response.json() as Promise<T>;
 }
 
+let refreshing: Promise<Tokens> | null = null;
+function refreshTokens(): Promise<Tokens> {
+  if (!refreshing) {
+    refreshing = request<Tokens>('/account/refresh', {}).finally(() => { refreshing = null; });
+  }
+  return refreshing;
+}
+
 export function useAccount() {
   const [user, setUser] = useState<Account | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -41,7 +49,7 @@ export function useAccount() {
 
   useEffect(() => {
     // Only the HttpOnly cookie persists. Never store access tokens in localStorage.
-    request<Tokens>('/account/refresh', {}).then(accept).catch(() => {
+    refreshTokens().then(accept).catch(() => {
       setToken(null); setUser(null);
     }).finally(() => setChecking(false));
   }, [accept]);
@@ -49,7 +57,7 @@ export function useAccount() {
   useEffect(() => {
     if (!user) return;
     const renew = () => {
-      request<Tokens>('/account/refresh', {}).then(accept).catch(() => {
+      refreshTokens().then(accept).catch(() => {
         setToken(null); setUser(null);
       });
     };
