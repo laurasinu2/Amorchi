@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export type Account = { id: string; email: string; display_name: string; created_at: string };
+export type Account = { id: string; email: string; display_name: string; created_at: string; email_verified_at: string | null };
 type Tokens = { access_token: string; expires_in: number };
 type AuthPayload = { email: string; password: string; remember: boolean };
 const api = '/api/v1';
