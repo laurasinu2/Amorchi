@@ -131,7 +131,7 @@ export function SettingsPage({pending,settings,photos,subjects,onSaveSettings,ac
     <section className="account-panel">
       <h3><ShieldCheck size={20}/> Cuenta de Memrly</h3>
       {accountChecking?<p>Comprobando sesión…</p>:account?<><p className="account-email">{account.display_name}</p>
-        <p>{account.email}</p><small>Cuenta iniciada en este dispositivo.</small>
+        <p>{account.email}</p><small>{account.email_verified_at ? "Correo verificado" : "Correo pendiente de verificar"}</small><p><small>Cuenta iniciada en este dispositivo.</small></p>
       </>:<><p>Inicia sesión para acceder a tu cuenta y preparar la sincronización de tus recuerdos.</p>
         <div className="account-actions"><button type="button" className="btn primary" onClick={onLogin}>Iniciar sesión</button></div>
       </>}
