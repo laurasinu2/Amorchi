@@ -12,12 +12,16 @@ SUPPORTED = {
     "image/webp": (".webp", lambda b: b.startswith(b"RIFF") and b[8:12] == b"WEBP"),
     "image/heic": (".heic", lambda b: len(b) >= 12 and b[4:8] == b"ftyp"
                    and b[8:12] in (b"heic", b"heix", b"hevc", b"hevx", b"mif1")),
+    "image/heif": (".heif", lambda b: len(b) >= 12 and b[4:8] == b"ftyp"
+                   and b[8:12] in (b"mif1", b"msf1", b"heic", b"heix")),
+    "image/avif": (".avif", lambda b: len(b) >= 12 and b[4:8] == b"ftyp"
+                   and b[8:12] in (b"avif", b"avis")),
 }
 
 def image_extension(mime: str, header: bytes) -> str:
     rule = SUPPORTED.get(mime)
     if not rule or not rule[1](header):
-        raise HTTPException(415, detail="Solo se admiten imágenes JPEG, PNG, WebP o HEIC válidas.")
+        raise HTTPException(415, detail="Solo se admiten imágenes JPEG, PNG, WebP, HEIC, HEIF o AVIF válidas.")
     return rule[0]
 
 def safe_name(filename: str | None) -> str:
