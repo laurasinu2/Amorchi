@@ -16,7 +16,7 @@ def test_signup_requires_explicit_enable(monkeypatch):
     monkeypatch.setenv("MEMRLY_ALLOW_SIGNUP", "false")
     settings.cache_clear()
     with TestClient(app) as client:
-        result = client.post("/api/v1/auth/register", json={
+        result = client.post("/api/v1/account/register", json={
             "email": "not-registered@gmail.com", "password": "strong-password-123",
             "display_name": "Usuario",
         })
@@ -29,15 +29,31 @@ def test_private_upload_workflow(tmp_path, monkeypatch):
     monkeypatch.setenv("MEMRLY_ALLOW_SIGNUP", "true")
     settings.cache_clear()
     suffix = uuid4().hex[:12]
+    codes = {}
+    monkeypatch.setattr("memrly_api.accounts.send_code", lambda email, code, purpose: codes.__setitem__((email, purpose), code))
     with TestClient(app) as client:
         def register(alias):
             email = f"{alias}-{suffix}@gmail.com"
-            response = client.post("/api/v1/auth/register", json={
+            response = client.post("/api/v1/account/register", json={
                 "email": email, "password": "a-long-private-password-123",
+                "repeat_password": "a-long-private-password-123",
                 "display_name": alias,
             })
             assert response.status_code == 201, response.text
-            return email, response.json()["access_token"]
+            unverified = client.post("/api/v1/account/login", json={
+                "email": email, "password": "a-long-private-password-123",
+            })
+            assert unverified.status_code == 403
+            verified = client.post("/api/v1/account/verify", json={
+                "email": email, "code": codes[(email, "verify")],
+            })
+            assert verified.status_code == 200, verified.text
+            login = client.post("/api/v1/account/login", json={
+                "email": email, "password": "a-long-private-password-123",
+                "remember": True,
+            })
+            assert login.status_code == 200, login.text
+            return email, login.json()["access_token"]
         email_a, token_a = register("one")
         email_b, token_b = register("two")
         h1 = {"Authorization": "Bearer " + token_a}
@@ -45,10 +61,10 @@ def test_private_upload_workflow(tmp_path, monkeypatch):
         assert client.get("/api/v1/photos").status_code == 401
         assert client.get("/api/v1/photos", headers=h2).json() == []
         assert client.get("/api/v1/auth/me", headers=h1).json()["email"] == email_a
-        assert client.post("/api/v1/auth/login", json={
+        assert client.post("/api/v1/account/login", json={
             "email": email_a,"password":"a-long-private-password-123",
         }).status_code == 200
-        assert client.post("/api/v1/auth/login", json={
+        assert client.post("/api/v1/account/login", json={
             "email": email_a,"password":"wrong-password",
         }).status_code == 401
         bad = client.post("/api/v1/photos", headers=h1,
@@ -80,4 +96,13 @@ def test_private_upload_workflow(tmp_path, monkeypatch):
         assert duplicate.status_code == 409
         assert client.get(f"/api/v1/photos/{photo_id}/file",headers=h1).content == PNG
         assert client.get("/api/v1/photos",headers=h2).json() == []
+        recovery = client.post("/api/v1/account/forgot", json={"email": email_a})
+        assert recovery.status_code == 200
+        changed = client.post("/api/v1/account/reset", json={
+            "email": email_a, "code": codes[(email_a, "reset")],
+            "password": "replacement-password-123",
+            "repeat_password": "replacement-password-123",
+        })
+        assert changed.status_code == 200
+        assert client.get("/api/v1/photos",headers=h1).status_code == 401
     settings.cache_clear()
