@@ -239,3 +239,7 @@ def upload_photo(
         # An already committed upload never loses its original.
         if moved and not committed:
             final_path.unlink(missing_ok=True)
+
+# Load only after current_user is defined; the sync router uses the same auth dependency.
+from .photo_sync import router as photo_sync_router
+app.include_router(photo_sync_router)
