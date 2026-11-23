@@ -140,8 +140,10 @@ export async function getOnlinePhotoBlob(id:string,quality:'thumb'|'preview'|'or
 }
 
 /** Existing browser-only photos require a one-time deliberate rescue; new photos never use IndexedDB. */
-export async function countLegacyPhotos():Promise<number>{
-  return (await loadLibrary()).photos.length;
+export async function countLegacyPhotos(accountId:string):Promise<number>{
+  const oldCount=(await loadLibrary()).photos.length;
+  const rescued=Number(localStorage.getItem('memrly-legacy-rescued-count:'+accountId)||'0');
+  return Math.max(0,oldCount-(Number.isFinite(rescued)?rescued:0));
 }
 export async function rescueLegacyLibrary(token:string,accountId:string,progress:(message:string)=>void){
   const owner=localStorage.getItem('memrly-photo-sync-owner');
@@ -172,5 +174,6 @@ export async function rescueLegacyLibrary(token:string,accountId:string,progress
   if(!remoteId.settings.has('main')&&old.settings)
     await saveOnlineEntity('settings','main',old.settings,token);
   localStorage.setItem('memrly-photo-sync-owner',accountId);
+  localStorage.setItem('memrly-legacy-rescued-count:'+accountId,String(old.photos.length));
   return {imported,skipped};
 }
