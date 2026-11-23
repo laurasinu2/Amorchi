@@ -1,4 +1,5 @@
 """Authenticated, idempotent photo transfer between IndexedDB and private Memrly storage."""
+import io
 import json
 import shutil
 from datetime import datetime, timezone
@@ -7,7 +8,7 @@ from uuid import UUID, uuid4
 
 import psycopg
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
 from .config import settings
@@ -95,6 +96,35 @@ def get_synced_original(photo_id:UUID, uid:UUID=Depends(current_user), conn=Depe
                         headers={"Cache-Control":"private, no-store",
                                  "X-Content-Type-Options":"nosniff"})
 
+@router.get("/photos/{photo_id}/preview")
+def preview_photo(photo_id:UUID, size:int=360, uid:UUID=Depends(current_user), conn=Depends(get_conn)):
+    """Resize only the transmitted image in RAM. Never alter/delete the full-resolution original."""
+    if size not in (360,1280):
+        raise HTTPException(422,"Tamaño de vista previa no permitido.")
+    with conn.cursor() as cur:
+        row=photo_for_client(cur,uid,photo_id)
+    if not row:
+        raise HTTPException(404,"Fotografía no encontrada.")
+    path=object_path(settings()["storage"],row["object_key"])
+    if not path.is_file():
+        raise HTTPException(404,"Archivo original no encontrado.")
+    try:
+        from PIL import Image, ImageOps, UnidentifiedImageError
+        with Image.open(path) as im:
+            im=ImageOps.exif_transpose(im)
+            im.thumbnail((size,size),Image.Resampling.LANCZOS)
+            if im.mode not in ("RGB","RGBA"):
+                im=im.convert("RGB")
+            output=io.BytesIO()
+            im.save(output,format="WEBP",quality=78,method=4)
+            return Response(output.getvalue(),media_type="image/webp",
+                            headers={"Cache-Control":"private, no-store",
+                                     "X-Content-Type-Options":"nosniff"})
+    except (UnidentifiedImageError,OSError,ValueError):
+        # HEIC may not be decoded by Pillow; the original is still safely served privately.
+        return FileResponse(path,media_type=row["mime_type"],filename=row["filename"],
+                            headers={"Cache-Control":"private, no-store"})
+
 @router.post("/photos",status_code=201)
 def upload_synced_photo(
     photo_id: UUID=Form(...),
@@ -125,6 +155,7 @@ def upload_synced_photo(
             if existing:
                 if existing["sha256"] and existing["sha256"] != digest:
                     raise HTTPException(409,"Identificador de fotografía ya utilizado con otro archivo.")
+                # Existing UUID was uploaded concurrently. No new original is stored.
                 return photo_result(existing)
             cur.execute("""SELECT m.client_photo_id,m.client_metadata,f.filename,f.size_bytes,f.sha256
                            FROM original_files f JOIN media m
