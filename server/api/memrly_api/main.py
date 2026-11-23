@@ -75,7 +75,7 @@ def current_user(
     with conn.cursor() as cur:
         cur.execute("""SELECT u.id FROM app_users u JOIN device_sessions d ON d.user_id=u.id
                        WHERE u.id=%s AND d.id=%s AND u.disabled_at IS NULL
-                       AND u.email_verified_at IS NOT NULL AND d.revoked_at IS NULL
+                       AND d.revoked_at IS NULL
                        AND d.expires_at>now()""", (uid, sid))
         if not cur.fetchone():
             raise HTTPException(401, "Usuario no disponible.")
@@ -124,7 +124,7 @@ def legacy_login():
 @app.get("/api/v1/auth/me")
 def me(uid: Annotated[UUID, Depends(current_user)], conn=Depends(get_conn)):
     with conn.cursor() as cur:
-        cur.execute("""SELECT id,email,display_name,created_at FROM app_users
+        cur.execute("""SELECT id,email,display_name,created_at,email_verified_at FROM app_users
                        WHERE id=%s AND disabled_at IS NULL""", (uid,))
         return cur.fetchone()
 
