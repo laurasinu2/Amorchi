@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { CalendarDays, Heart, Plane } from 'lucide-react';
 import type { AppSettings, Memory, Photo } from '../types';
 import { covers, dateLabel, monthWeeks } from '../dates';
@@ -14,10 +15,32 @@ const category=(m:Memory)=>m.kind==='trip'?'Viaje':m.kind==='event'?'Evento':'Re
  * columnas y gap del grid real. No hay bordes individuales ni puentes por casilla.
  * La selección de un día tiene una capa superior e independiente.
  */
-export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=false,selectedDay}:{
+export function CalendarGrid({year,month,photos,memories,onDay,onRange,settings,compact=false,selectedDay}:{
   year:number;month:number;photos:Photo[];memories:Memory[];settings:AppSettings;
-  onDay:(iso:string)=>void;compact?:boolean;selectedDay?:string;
+  onDay:(iso:string)=>void;onRange?:(from:string,to:string)=>void;compact?:boolean;selectedDay?:string;
 }){
+  const [dragRange,setDragRange]=useState<{from:string;to:string}|null>(null);
+  const dragStart=useRef<string|null>(null);
+  const suppressClick=useRef(false);
+  function startDrag(day:string,e:React.PointerEvent<HTMLButtonElement>){
+    if(!onRange||e.pointerType!=='mouse'||e.button!==0)return;
+    dragStart.current=day;
+    setDragRange({from:day,to:day});
+  }
+  function enterDrag(day:string,e:React.PointerEvent<HTMLButtonElement>){
+    if(!dragStart.current||!(e.buttons&1))return;
+    setDragRange({from:dragStart.current,to:day});
+  }
+  function finishDrag(day:string){
+    const start=dragStart.current;
+    if(!start)return;
+    dragStart.current=null;
+    setDragRange(null);
+    if(start!==day){
+      suppressClick.current=true;
+      onRange?.(start<day?start:day,start<day?day:start);
+    }
+  }
   const weeks=monthWeeks(year,month);
   const coverByDate=new Map<string,Photo>();
   for(const p of [...photos].sort((a,b)=>b.createdAt.localeCompare(a.createdAt))){
@@ -53,10 +76,11 @@ export function CalendarGrid({year,month,photos,memories,onDay,settings,compact=
               matches.length?'has-event':'',
               inRange?'memrly-in-range':'',
               selectedDay===day?'selected':'',
+              dragRange&&day>= (dragRange.from<dragRange.to?dragRange.from:dragRange.to) && day<= (dragRange.from>dragRange.to?dragRange.from:dragRange.to)?'memrly-drag-selected':'',
               holiday?'holiday-border holiday-'+holiday.theme:'',
               birthday?'memrly-special-birthday':'',
               anniversary?'has-anniversary memrly-special-anniversary':''
-            ].join(' ')} title={tooltip} aria-label={label} onClick={()=>onDay(day)}>
+            ].join(' ')} title={tooltip} aria-label={label} onPointerDown={e=>startDrag(day,e)} onPointerEnter={e=>enterDrag(day,e)} onPointerUp={()=>finishDrag(day)} onPointerCancel={()=>{dragStart.current=null;setDragRange(null);}} onClick={()=>{if(suppressClick.current){suppressClick.current=false;return;}onDay(day);}}>
             {photo&&<PhotoView id={photo.id} className="day-backdrop"/>}
             <span className={'day-number '+(matches.length?'memrly-number-mark':'')}>{Number(day.slice(8,10))}</span>
             {anniversary&&<span className="calendar-anniversary" aria-hidden="true"><span className="anniversary-heart">♥</span><span className="anniversary-count">{anniversary.years===0?'Inicio':`${anniversary.years}º`}</span></span>}
