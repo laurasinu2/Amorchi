@@ -1,0 +1,21 @@
+.memrly-online-place-search{display:grid;gap:8px;min-width:0;width:100%}
+.memrly-place-query{display:flex;align-items:center;gap:9px;border:1px solid #cfdaeb;background:#fff;border-radius:10px;padding:5px 6px 5px 12px;color:#163a67;min-width:0}
+.memrly-place-query input{flex:1;min-width:0;border:0;background:transparent;outline:none;color:#092648;font-size:.86rem;padding:7px 2px}
+.memrly-place-query button{background:#0a294f;color:white;border:0;padding:9px 13px;border-radius:8px;font-size:.82rem;font-weight:700}
+.memrly-place-query button:disabled{opacity:.5}
+.memrly-place-results{display:grid;max-height:250px;overflow:auto;gap:4px;border:1px solid #e0e8f1;border-radius:9px;padding:5px}
+.memrly-place-results button{display:flex;align-items:center;gap:9px;text-align:left;border:0;background:#f2f6fb;border-radius:8px;color:#1b3b61;padding:10px}
+.memrly-place-results button:hover{background:#e3effd}
+.memrly-place-results button span{flex:1}.memrly-place-results button small{color:#607995}
+.memrly-place-note{margin:0;font-size:.8rem;color:#7b4f2c}
+.memrly-place-credit{color:#708097;font-size:.68rem}
+.memrly-online-map-frame{height:min(56vh,520px);min-height:320px}
+.memrly-online-map-frame .leaflet-container{height:100%;width:100%;z-index:0}
+.memrly-world-offline{height:100%;display:grid;place-items:center;align-content:center;gap:9px;color:#526881;background:#edf3fa;text-align:center;padding:20px}
+.memrly-online-location-list{display:grid;gap:8px}
+.memrly-online-location-list button{display:flex;gap:12px;align-items:center;text-align:left;padding:12px;border:1px solid #e0e8f1;border-radius:10px;background:white;color:#103153}
+.memrly-online-location-list button>span{display:grid;gap:3px;flex:1;min-width:0}
+.memrly-online-location-list small{color:#657a91}
+.memrly-place-page-search{padding:15px;border:1px solid #e1e8f1;border-radius:13px;background:#fff}
+.memrly-place-selection{display:flex;gap:7px;align-items:center;font-size:.78rem;color:#40658b}
+@media(max-width:640px){.memrly-online-map-frame{height:42vh;min-height:270px}.memrly-place-query button{padding:9px 10px}}
