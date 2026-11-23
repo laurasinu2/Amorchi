@@ -60,6 +60,7 @@ export default function App(){
   const [importOpen,setImportOpen]=useState(false);
   const [importDate,setImportDate]=useState<string|undefined>();
   const [memoryDate,setMemoryDate]=useState<string|undefined>();
+  const [memoryEndDate,setMemoryEndDate]=useState<string|undefined>();
   const [collectionDate,setCollectionDate]=useState<string|undefined>();
   const [memoryOpen,setMemoryOpen]=useState(false);
   const [editMemory,setEditMemory]=useState<Memory|undefined>();
@@ -105,8 +106,8 @@ export default function App(){
     setCalendarMode(current=>current==='year'?'month':current);
     navigate('calendario');
   }
-  function createMemory(kind:MemoryKind='moment',initialDate?:string){
-    setEditMemory(undefined);setNewKind(kind);setMemoryDate(initialDate);setMemoryOpen(true);
+  function createMemory(kind:MemoryKind='moment',initialDate?:string,initialEndDate?:string){
+    setEditMemory(undefined);setNewKind(kind);setMemoryDate(initialDate);setMemoryEndDate(initialEndDate);setMemoryOpen(true);
   }
   function openImport(initialDate?:string){
     setImportDate(initialDate);
@@ -193,7 +194,7 @@ export default function App(){
           {page==='inicio'&&<Dashboard photos={photos} memories={memories} settings={settings} onChangeCover={()=>setCoverTarget('home')} onNavigate={navigate} onOpenMemory={openMemory} onViewPhoto={openPhoto} onImport={()=>openImport()} onCreateMemory={createMemory}/>}
 
           {page==='anios'&&<YearsPage photos={photos} memories={memories} settings={settings} onChangeCover={year=>setCoverTarget({year})} onYear={openCalendarYear} onNavigate={navigate} onOpenMemory={openMemory}/>}
-          {(page==='calendario'||page==='dia')&&<CalendarPage year={year} month={month} mode={calendarMode} selectedDay={selectedDay} photos={photos} memories={memories} settings={settings} onMode={setCalendarMode} onYear={openCalendarYear} onMonth={openCalendarMonth} onDay={openCalendarDay} onViewPhoto={openPhoto} onAddPhotos={openImport} onCreateMemory={day=>createMemory('moment',day)} onAddToCollection={day=>setCollectionDate(day)}/>}
+          {(page==='calendario'||page==='dia')&&<CalendarPage year={year} month={month} mode={calendarMode} selectedDay={selectedDay} photos={photos} memories={memories} settings={settings} onMode={setCalendarMode} onYear={openCalendarYear} onMonth={openCalendarMonth} onDay={openCalendarDay} onViewPhoto={openPhoto} onAddPhotos={openImport} onCreateMemory={day=>createMemory('moment',day)} onCreateRange={(start,end)=>createMemory(start===end?'moment':'event',start,end)} onAddToCollection={day=>setCollectionDate(day)}/>}
           {page==='viajes'&&<MemoriesPage memories={memories} photos={photos} onlyTrips onOpen={openMemory} onCreate={()=>createMemory('trip')}/>}
           {page==='recuerdos'&&<MemoriesPage memories={memories} photos={photos} onlyTrips={false} onOpen={openMemory} onCreate={()=>createMemory('moment')}/>}
           {page==='memoria'&&(selectedMemory?<MemoryDetail memory={selectedMemory} memories={memories} photos={photos} subjects={subjects} settings={settings} onChangeCover={()=>setCoverTarget({memoryId:selectedMemory.id})} onDelete={()=>setMemoryToDeleteId(selectedMemory.id)} onViewPhoto={openPhoto} onEdit={()=>{setEditMemory(selectedMemory);setMemoryOpen(true);}} onOpenMemory={openMemory}/>:<EmptyState title="Recuerdo no encontrado" description="Vuelve a tus recuerdos desde el menú." onAction={()=>navigate('recuerdos')} action="Ver recuerdos"/>)}
@@ -225,7 +226,7 @@ export default function App(){
     {coverTarget&&<CoverPicker photos={coverTarget&&coverTarget!=='home'&&'year' in coverTarget?photos.filter(p=>p.takenOn.startsWith(String(coverTarget.year))):photos} title={coverTarget==='home'?'Elegir foto de fondo de Inicio':'year' in coverTarget?`Portada del año ${coverTarget.year}`:'Elegir foto de fondo del recuerdo'} selectedId={coverTarget==='home'?settings.homeCoverPhotoId:'year' in coverTarget?settings.yearCoverPhotoIds?.[String(coverTarget.year)]:memories.find(m=>m.id===coverTarget.memoryId)?.coverPhotoId} selectedPosition={coverTarget==='home'?settings.homeCoverPosition:'year' in coverTarget?settings.yearCoverPositions?.[String(coverTarget.year)]:memories.find(m=>m.id===coverTarget.memoryId)?.coverPosition} previewKind={coverTarget==='home'?'home':'year' in coverTarget?'year':'memory'} onClose={()=>setCoverTarget(null)} onSelect={commitCover}/>}
     {memoryToDeleteId&&memories.find(m=>m.id===memoryToDeleteId)&&<MemoryDeleteDialog memory={memories.find(m=>m.id===memoryToDeleteId)!} photoCount={photos.filter(p=>p.memoryIds.includes(memoryToDeleteId)).length} onClose={()=>setMemoryToDeleteId(undefined)} onConfirm={commitDeleteMemory}/>}
     {importOpen&&<ImportDialog initialDate={importDate} memories={memories} subjects={subjects} settings={settings} onClose={()=>{setImportOpen(false);setImportDate(undefined);}} onCommit={commitImport}/>}
-    {memoryOpen&&<MemoryDialog initial={editMemory} initialDate={memoryDate} defaultKind={newKind} onClose={()=>{setMemoryOpen(false);setMemoryDate(undefined);}} onSave={commitMemory}/>}
+    {memoryOpen&&<MemoryDialog initial={editMemory} initialDate={memoryDate} initialEndDate={memoryEndDate} defaultKind={newKind} memories={memories} photos={photos} onClose={()=>{setMemoryOpen(false);setMemoryDate(undefined);setMemoryEndDate(undefined);}} onSave={commitMemory}/>}
     {collectionDate&&<AddToCollectionDialog date={collectionDate} photos={photos} collections={collections} onClose={()=>setCollectionDate(undefined)} onSave={commitCollection}/>}
     {subjectOpen&&<SubjectDialog initial={editSubject} photos={photos} onClose={()=>{setSubjectOpen(false);setEditSubject(undefined);}} onSave={commitSubject}/>} 
     {selectedPhoto&&photoEditOpen&&<PhotoDialog photo={selectedPhoto} memories={memories} subjects={subjects} settings={settings} onClose={()=>setPhotoEditOpen(false)} onSave={commitPhoto} onDelete={commitDeletePhoto}/>}
