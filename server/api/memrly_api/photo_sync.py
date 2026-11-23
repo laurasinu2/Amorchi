@@ -231,3 +231,30 @@ def update_synced_metadata(photo_id:UUID,payload:MetadataPayload,
                     (json.dumps(info,ensure_ascii=False),taken,origin,latitude,longitude,row["id"]))
     conn.commit()
     return {"id":str(photo_id),"updated":True}
+
+@router.delete("/photos/{photo_id}")
+def remove_online_photo(photo_id:UUID,uid:UUID=Depends(current_user),conn=Depends(get_conn)):
+    """A confirmed deletion removes the original from the private album.
+    File cleanup follows the database transaction; a cleanup failure is logged
+    and can be repaired from an orphan-file audit."""
+    with conn.cursor() as cur:
+        album=first_writable_album(cur,uid)
+        row=photo_for_client(cur,uid,photo_id)
+        if not row:
+            return {"deleted":True}
+        if row["album_id"]!=album:
+            raise HTTPException(403,"No tienes permiso para eliminar esta fotografía.")
+        cur.execute("SELECT original_file_id FROM media WHERE id=%s AND album_id=%s",
+                    (row["id"],album))
+        media=cur.fetchone()
+        cur.execute("DELETE FROM media WHERE id=%s AND album_id=%s",(row["id"],album))
+        cur.execute("DELETE FROM original_files WHERE id=%s AND album_id=%s",
+                    (media["original_file_id"],album))
+    conn.commit()
+    path=object_path(settings()["storage"],row["object_key"])
+    try:
+        path.unlink(missing_ok=True)
+    except OSError:
+        import logging
+        logging.getLogger(__name__).exception("Orphan file requires server cleanup: %s",photo_id)
+    return {"deleted":True}
