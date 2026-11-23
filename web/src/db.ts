@@ -387,3 +387,12 @@ export async function restoreRemotePhoto(photo:Photo,original:Blob):Promise<void
   await tx.objectStore('photos').put(photo);
   await tx.done;
 }
+
+/** Accept newer remote metadata only for photos with NO unsent local edits. */
+export async function applyRemotePhotoMetadata(photo:Photo):Promise<void>{
+  const db=await database;
+  const tx=db.transaction('photos','readwrite');
+  const existing=await tx.store.get(photo.id);
+  if(existing)await tx.store.put({...existing,...photo});
+  await tx.done;
+}
