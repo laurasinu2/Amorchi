@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { MapPin, Search } from 'lucide-react';
 import './online-places.css';
 
@@ -26,8 +26,7 @@ export function LocationSearch({value,onSelect,placeholder='Buscar una ciudad, c
     return ()=>{window.removeEventListener('online',changed);window.removeEventListener('offline',changed);};
   },[]);
   useEffect(()=>setQuery(value||''),[value]);
-  async function lookup(e:FormEvent<HTMLFormElement>){
-    e.preventDefault();
+  async function lookup(){
     if(!online){setMessage('La búsqueda necesita conexión a Internet.');return;}
     const q=query.trim();
     if(q.length<3){setMessage('Escribe al menos tres caracteres.');return;}
@@ -51,11 +50,11 @@ export function LocationSearch({value,onSelect,placeholder='Buscar una ciudad, c
     finally{setLoading(false);}
   }
   return <div className="memrly-online-place-search">
-    <form onSubmit={lookup} className="memrly-place-query">
+    <div className="memrly-place-query">
       <Search size={17}/>
-      <input aria-label="Buscar localización" value={query} maxLength={160} placeholder={placeholder} onChange={e=>setQuery(e.target.value)} disabled={!online}/>
-      <button type="submit" disabled={!online||loading||query.trim().length<3}>{loading?'Buscando…':'Buscar'}</button>
-    </form>
+      <input aria-label="Buscar localización" value={query} maxLength={160} placeholder={placeholder} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();void lookup();}}} disabled={!online}/>
+      <button type="button" onClick={()=>void lookup()} disabled={!online||loading||query.trim().length<3}>{loading?'Buscando…':'Buscar'}</button>
+    </div>
     {!online&&<p className="memrly-place-note" role="status">Sin conexión. Los lugares ya guardados se mantienen, pero no se pueden buscar otros.</p>}
     {message&&<p className="memrly-place-note" role="status">{message}</p>}
     {!!results.length&&<div className="memrly-place-results" role="listbox" aria-label="Resultados de lugares">
