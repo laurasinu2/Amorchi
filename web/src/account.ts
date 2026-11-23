@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { setOnlinePhotoToken } from './onlineLibrary';
 
 export type Account = { id: string; email: string; display_name: string; created_at: string; email_verified_at: string | null };
 type Tokens = { access_token: string; expires_in: number };
@@ -43,6 +44,7 @@ export function useAccount() {
 
   const accept = useCallback(async (tokens: Tokens) => {
     const next = await request<Account>('/auth/me', undefined, tokens.access_token);
+    setOnlinePhotoToken(tokens.access_token);
     setToken(tokens.access_token);
     setUser(next);
   }, []);
@@ -50,7 +52,9 @@ export function useAccount() {
   useEffect(() => {
     // Only the HttpOnly cookie persists. Never store access tokens in localStorage.
     refreshTokens().then(accept).catch(() => {
-      setToken(null); setUser(null);
+      setOnlinePhotoToken(null);
+      setOnlinePhotoToken(null);
+    setToken(null); setUser(null);
     }).finally(() => setChecking(false));
   }, [accept]);
 
