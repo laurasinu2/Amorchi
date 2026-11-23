@@ -354,3 +354,36 @@ export async function getLocalUsage():Promise<{bytes:number;quota?:number;usage?
 export async function requestPersistence():Promise<boolean>{
   return Boolean(await navigator.storage?.persist?.().catch(()=>false));
 }
+
+/** Acknowledge precisely the queue entries uploaded; don't drop newer edits made meanwhile. */
+export async function acknowledgePhotoOperations(ids:string[]):Promise<void>{
+  if(!ids.length)return;
+  const db=await database;
+  const tx=db.transaction('operations','readwrite');
+  for(const id of ids)await tx.store.delete(id);
+  await tx.done;
+}
+
+/** Restore a private remote original without generating another outgoing upsert. */
+export async function restoreRemotePhoto(photo:Photo,original:Blob):Promise<void>{
+  if(!photo||!photo.id||!photo.filename||!original.size)throw new Error('Fotografía remota incorrecta.');
+  const db=await database;
+  if(await db.get('photos',photo.id))return;
+  const file=new File([original],photo.filename,{type:photo.mimeType||original.type});
+  const [preview,thumbnail]=await Promise.all([
+    webpVariant(file,2560,0.82),webpVariant(file,360,0.72)
+  ]);
+  const tx=db.transaction(['photos','assets','asset_sizes'],'readwrite');
+  await tx.objectStore('assets').put({key:photo.id+':original',blob:original});
+  await tx.objectStore('asset_sizes').put({key:photo.id+':original',bytes:original.size});
+  if(preview){
+    await tx.objectStore('assets').put({key:photo.id+':preview',blob:preview});
+    await tx.objectStore('asset_sizes').put({key:photo.id+':preview',bytes:preview.size});
+  }
+  if(thumbnail){
+    await tx.objectStore('assets').put({key:photo.id+':thumb',blob:thumbnail});
+    await tx.objectStore('asset_sizes').put({key:photo.id+':thumb',bytes:thumbnail.size});
+  }
+  await tx.objectStore('photos').put(photo);
+  await tx.done;
+}
