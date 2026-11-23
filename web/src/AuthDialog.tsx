@@ -43,14 +43,13 @@ export function AuthDialog({ onClose, onLogin }: {
       } else if (mode === 'register') {
         if (password !== repeat) throw new Error('Las contraseñas no coinciden.');
         await accountRequest('register', { email, display_name: name.trim(), password, repeat_password: repeat });
-        change('verify');
-        setNotice('Te hemos enviado un código de seis dígitos.');
+        change('login');
+        setNotice('Cuenta creada. Puedes iniciar sesión; la verificación del correo queda pendiente.');
       } else if (mode === 'verify') {
         const response = await accountRequest('verify', { email, code });
         change('login'); setNotice(response.message);
       } else if (mode === 'forgot') {
-        const response = await accountRequest('forgot', { email });
-        change('reset'); setNotice(response.message);
+        setNotice('La recuperación de contraseña estará disponible cuando configuremos el correo electrónico.');
       } else {
         if (password !== repeat) throw new Error('Las contraseñas no coinciden.');
         const response = await accountRequest('reset', { email, code, password, repeat_password: repeat });
@@ -68,7 +67,7 @@ export function AuthDialog({ onClose, onLogin }: {
     login: 'Accede a tu cuenta para ver tus fotografías, viajes y recuerdos.',
     register: 'Crea tu espacio privado para guardar tus recuerdos.',
     verify: 'Introduce el código que hemos enviado a tu correo electrónico.',
-    forgot: 'Te enviaremos un código para recuperar el acceso.',
+    forgot: 'La recuperación por correo estará disponible próximamente.',
     reset: 'Introduce la nueva contraseña y el código recibido por correo.'
   };
 
