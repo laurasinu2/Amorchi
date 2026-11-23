@@ -20,4 +20,10 @@ def settings():
         "storage": Path(os.environ.get("MEMRLY_STORAGE_ROOT", "/data/files")).resolve(),
         "allow_signup": os.environ.get("MEMRLY_ALLOW_SIGNUP", "false").lower() == "true",
         "max_bytes": size,
+        "smtp_host": os.environ.get("MEMRLY_SMTP_HOST", ""),
+        "smtp_port": int(os.environ.get("MEMRLY_SMTP_PORT", "587")),
+        "smtp_user": os.environ.get("MEMRLY_SMTP_USER", ""),
+        "smtp_password": os.environ.get("MEMRLY_SMTP_PASSWORD", ""),
+        "smtp_from": os.environ.get("MEMRLY_SMTP_FROM", ""),
+        "public_origin": os.environ.get("MEMRLY_PUBLIC_ORIGIN", "https://memrly.duckdns.org"),
     }
