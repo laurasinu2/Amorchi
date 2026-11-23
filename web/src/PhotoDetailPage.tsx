@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import { ArrowLeft, CalendarDays, Check, ChevronLeft, ChevronRight, Download, Edit3, Heart, Image as ImageIcon, MapPin, Maximize2, Minus, MoreHorizontal, Plus, PlusCircle, RotateCcw, Share2, Trash2, Users, X } from 'lucide-react';
 import type { AppSettings, Memory, Photo, Subject } from './types';
 import { dateLabel, kindName } from './dates';
-import { getPhotoAsset } from './db';
+import { getOnlinePhotoBlob } from './onlineLibrary';
 import { relatedMemories, relatedPhotos } from './photoRelations';
 import { PhotoView } from './components/PhotoView';
 
@@ -13,7 +13,7 @@ function usePhotoBlob(id:string,quality:'preview'|'original'){
   useEffect(()=>{
     let active=true,objectUrl='';
     setUrl('');setMissing(false);
-    getPhotoAsset(id,quality).then(blob=>{
+    getOnlinePhotoBlob(id,quality).then(blob=>{
       if(!active)return;
       if(!blob){setMissing(true);return;}
       objectUrl=URL.createObjectURL(blob);
