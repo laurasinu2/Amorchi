@@ -4,6 +4,7 @@ import type { Memory, MemoryKind, Photo } from '../types';
 import { dateLabel, localISO } from '../dates';
 import { createId } from '../id';
 import { PhotoView } from './PhotoView';
+import { LocationSearch } from './LocationSearch';
 import './memory-editor.css';
 
 export function MemoryDialog({onClose,onSave,initial,defaultKind,initialDate,initialEndDate,memories,photos}:{
@@ -16,6 +17,8 @@ export function MemoryDialog({onClose,onSave,initial,defaultKind,initialDate,ini
   const [startDate,setStartDate]=useState(initial?.startDate||initialDate||localISO(new Date()));
   const [endDate,setEndDate]=useState(initial?.endDate||initialEndDate||initialDate||localISO(new Date()));
   const [place,setPlace]=useState(initial?.place||'');
+  const [latitude,setLatitude]=useState<number|undefined>(initial?.latitude);
+  const [longitude,setLongitude]=useState<number|undefined>(initial?.longitude);
   const [related,setRelated]=useState<string[]>(initial?.relatedMemoryIds||[]);
   const [coverId,setCoverId]=useState(initial?.coverPhotoId||'');
   const [chooseCover,setChooseCover]=useState(false);
@@ -38,7 +41,7 @@ export function MemoryDialog({onClose,onSave,initial,defaultKind,initialDate,ini
     try{
       await onSave({
         id:initial?.id||createId(),title:title.trim(),description,kind,startDate,endDate:effectiveEnd,
-        place:place.trim(),latitude:initial?.latitude,longitude:initial?.longitude,
+        place:place.trim(),latitude,longitude,
         relatedMemoryIds:related,coverPhotoId:coverId||undefined,
         coverPosition:coverId===initial?.coverPhotoId?initial?.coverPosition:undefined,
         favorite:initial?.favorite||false,createdAt:initial?.createdAt||new Date().toISOString()
@@ -86,7 +89,12 @@ export function MemoryDialog({onClose,onSave,initial,defaultKind,initialDate,ini
             </div>
             <div className="memrly-memory-row">
               <div className="memrly-memory-row-title"><MapPin size={20}/><div><strong>Lugar</strong><small>Dónde ocurrió</small></div></div>
-              <input type="text" value={place} maxLength={180} placeholder="Escribe el lugar (opcional)" onChange={e=>setPlace(e.target.value)}/>
+              <div className="memrly-online-place-search">
+                <LocationSearch value={place} onSelect={choice=>{setPlace(choice.label);setLatitude(choice.latitude);setLongitude(choice.longitude);}}/>
+                {place&&latitude!==undefined&&longitude!==undefined&&<small className="memrly-place-selection">
+                  <MapPin size={13}/> {place} · {latitude.toFixed(5)}, {longitude.toFixed(5)}
+                </small>}
+              </div>
             </div>
             <div className="memrly-memory-row">
               <div className="memrly-memory-row-title"><Link2 size={20}/><div><strong>Asociar a…</strong><small>Otros viajes, eventos o recuerdos</small></div></div>
