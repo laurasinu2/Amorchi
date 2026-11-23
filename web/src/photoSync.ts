@@ -70,7 +70,10 @@ export async function synchronizePhotos(userId:string,token:string,onProgress:(p
     data.append('photo_id',photo.id);
     data.append('metadata',JSON.stringify(photo));
     data.append('file',file);
-    await call<RemotePhoto>('/photos',token,{method:'POST',body:data});
+    const receipt=await call<RemotePhoto>('/photos',token,{method:'POST',body:data});
+    if(receipt.sha256 && receipt.sha256!==photo.hash){
+      throw new Error('La copia remota no corresponde al original local de '+photo.filename+'. No se ha marcado como sincronizada.');
+    }
     const matching=(pendingById.get(photo.id)||[]).filter(o=>o.type==='upsert');
     if(matching.length)await acknowledgePhotoOperations(matching.map(o=>o.id));
     done++;progress('Original subido');
@@ -92,7 +95,13 @@ export async function synchronizePhotos(userId:string,token:string,onProgress:(p
     });
     if(!response.ok)throw new Error('No se pudo recuperar '+photo.filename+': '+authError(response));
     const blob=await response.blob();
-    if(!blob.size||blob.size>100*1024*1024)throw new Error('El archivo remoto tiene un tamaño no admitido: '+photo.filename);
+    if(!blob.size||blob.size>100*1024*1024||blob.size!==photo.size)
+      throw new Error('El original remoto tiene un tamaño incorrecto: '+photo.filename);
+    if(photo.sha256 && globalThis.crypto?.subtle){
+      const sum=await crypto.subtle.digest('SHA-256',await blob.arrayBuffer());
+      const hash=[...new Uint8Array(sum)].map(value=>value.toString(16).padStart(2,'0')).join('');
+      if(hash!==photo.sha256)throw new Error('La verificación SHA-256 falló para '+photo.filename);
+    }
     await restoreRemotePhoto(photo.metadata,blob);
     done++;progress('Original recuperado');
   }
