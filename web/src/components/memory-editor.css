@@ -1,0 +1,54 @@
+.memrly-memory-editor{width:min(92vw,790px);max-height:90dvh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:#fff;border-radius:19px;color:#092648;box-shadow:0 30px 90px #091c3040}
+.memrly-memory-header{display:flex;align-items:center;justify-content:space-between;padding:20px 26px;border-bottom:1px solid #e2e9f2;flex-shrink:0}
+.memrly-memory-header h2{font-family:Georgia,serif;font-size:1.65rem;margin:0}
+.memrly-memory-header button,.memrly-memory-picker header button{background:none;border:0;color:#092648}
+.memrly-memory-form{min-height:0;display:flex;flex-direction:column;flex:1}
+.memrly-memory-main{padding:23px 26px;overflow-y:auto;display:grid;gap:17px}
+.memrly-memory-top{display:grid;grid-template-columns:155px minmax(0,1fr);gap:24px;align-items:center}
+.memrly-memory-cover{border:1px dashed #a9bfdc;background:#f0f5fb;border-radius:12px;height:130px;overflow:hidden;color:#1a416d;padding:0;display:grid;place-items:center}
+.memrly-memory-cover>span{display:grid;justify-items:center;gap:5px;font-size:.8rem}
+.memrly-memory-cover small{font-size:.69rem}
+.memrly-memory-cover-photo{width:100%;height:100%;object-fit:cover}
+.memrly-memory-kind{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.memrly-memory-kind button{display:flex;gap:7px;align-items:center;border:1px solid #d7e1ef;background:#f0f3f8;color:#2e4868;border-radius:10px;padding:12px 14px;font-weight:700;font-size:.85rem}
+.memrly-memory-kind button.active{background:#0a294f;color:#fff;border-color:#0a294f}
+.memrly-memory-input{display:grid;gap:7px}
+.memrly-memory-input>span{font-size:.87rem;font-weight:700}
+.memrly-memory-input input,.memrly-memory-input textarea,.memrly-memory-row input{width:100%;min-width:0;background:#fff;border:1px solid #d3dfec;border-radius:10px;padding:11px 12px;color:#0a294f}
+.memrly-memory-input textarea{resize:vertical}
+.memrly-memory-divider{border-top:1px solid #e3eaf2;margin:3px 0}
+.memrly-memory-fields{display:grid;gap:0}
+.memrly-memory-row{display:grid;grid-template-columns:minmax(170px,34%) 1fr;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid #e7ecf3}
+.memrly-memory-row:last-child{border-bottom:none}
+.memrly-memory-row-title{display:flex;gap:12px;align-items:center}
+.memrly-memory-row-title>svg{color:#0c345f}
+.memrly-memory-row-title>div{display:grid;gap:5px}
+.memrly-memory-row-title strong{font-size:.9rem}.memrly-memory-row-title small{color:#71829c;font-size:.76rem}
+.memrly-memory-dates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.memrly-memory-dates label{display:grid;gap:4px}
+.memrly-memory-dates label>span{font-size:.72rem;color:#677e9b}
+.memrly-memory-row:has(.memrly-memory-dates label:only-child) .memrly-memory-dates{grid-template-columns:1fr}
+.memrly-memory-relations{display:grid;gap:8px}
+.memrly-memory-related-options,.memrly-memory-related-selected{display:flex;flex-wrap:wrap;gap:7px}
+.memrly-memory-related-options button,.memrly-memory-related-selected button{border-radius:30px;border:1px solid #c8d9ee;padding:7px 10px;background:#f1f6fd;color:#133b69;font-size:.77rem;display:flex;align-items:center;gap:5px}
+.memrly-memory-related-selected button{background:#0e376b;color:#fff}
+.memrly-memory-footer{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:16px 26px;border-top:1px solid #e1e8f2;flex-shrink:0;background:#fff}
+.memrly-memory-footer button{border-radius:10px;min-height:43px;padding:10px 25px;font-weight:700}
+.memrly-memory-cancel{background:#eef1f5;border:1px solid #dee4ed;color:#4b5b72}
+.memrly-memory-save{background:#092648;border:1px solid #092648;color:#fff}
+.memrly-memory-picker-overlay{position:absolute;inset:0;display:grid;place-items:center;background:#0b214c8c;padding:16px;z-index:5}
+.memrly-memory-picker{width:min(100%,580px);max-height:80dvh;display:flex;flex-direction:column;background:#fff;padding:20px;border-radius:16px;gap:14px}
+.memrly-memory-picker header{display:flex;justify-content:space-between;align-items:center}
+.memrly-memory-picker h3{margin:0}
+.memrly-memory-picker-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;overflow:auto}
+.memrly-memory-picker-grid button{padding:0;height:100px;border:2px solid transparent;border-radius:8px;overflow:hidden;background:#e8edf5}
+.memrly-memory-picker-grid button.selected{border-color:#0a376c}
+.memrly-memory-picker-photo{width:100%;height:100%;object-fit:cover}
+.memrly-memory-clear-cover{align-self:start;border:1px solid #d1dce9;background:#eef3fa;border-radius:8px;padding:8px 12px}
+.memrly-calendar-grid .calendar-day.memrly-drag-selected{outline:2px solid #1d5ca6;outline-offset:-2px;background:#dceaff}
+.memrly-calendar-drag-help{font-size:.76rem;color:#62748d;margin:8px 0 0}
+@media(max-width:640px){.memrly-memory-backdrop{padding:0;align-items:stretch}.memrly-memory-editor{width:100%;max-height:100dvh;height:100dvh;border-radius:0}
+.memrly-memory-header{padding:17px}.memrly-memory-main{padding:16px;gap:14px}.memrly-memory-top{grid-template-columns:118px 1fr;gap:12px}
+.memrly-memory-cover{height:112px}.memrly-memory-kind{gap:5px;flex-direction:column}.memrly-memory-kind button{justify-content:center;padding:8px}
+.memrly-memory-row{grid-template-columns:1fr;gap:9px}.memrly-memory-footer{padding:12px 17px calc(12px + env(safe-area-inset-bottom))}
+.memrly-memory-picker-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
