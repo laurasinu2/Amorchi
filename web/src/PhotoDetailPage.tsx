@@ -134,7 +134,7 @@ export function PhotoDetailPage({photo,photos,memories,subjects,settings,onBack,
     finally{setBusy(false);}
   }
   async function originalFile(){
-    const blob=await getPhotoAsset(photo.id,'original');
+    const blob=await getOnlinePhotoBlob(photo.id,'original');
     if(!blob)throw new Error('No se encontró el archivo original.');
     return new File([blob],photo.filename,{type:photo.mimeType||blob.type||'application/octet-stream'});
   }
