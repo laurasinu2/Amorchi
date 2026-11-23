@@ -167,6 +167,14 @@ export function ImportDialog({ memories, subjects, onClose, onCommit, initialDat
                 </div>
               </article>)}</div>}
         </div>
+        {subjects.length > 0 && <details className="memrly-import-subjects"><summary>Personas y mascotas (opcional, aplicar a todas)</summary>
+          <div className="chips">{subjects.map(subject => <button type="button" key={subject.id}
+            className={'chip ' + (selectedSubjects.includes(subject.id) ? 'selected' : '')}
+            onClick={() => setSelectedSubjects(previous => previous.includes(subject.id)
+              ? previous.filter(id => id !== subject.id) : [...previous, subject.id])}>
+            {subject.kind === 'animal' ? '🐾' : '♡'} {subject.name}{selectedSubjects.includes(subject.id) && <Check size={12}/>}
+          </button>)}</div>
+        </details>}
         <div className="memrly-import-bottom">
           <div className="memrly-import-count"><ImagePlus size={20}/><div>
             <strong>{items.length} {items.length === 1 ? 'fotografía seleccionada' : 'fotografías seleccionadas'}</strong>
@@ -179,14 +187,6 @@ export function ImportDialog({ memories, subjects, onClose, onCommit, initialDat
             </button>
           </div>
         </div>
-        {subjects.length > 0 && <details className="memrly-import-subjects"><summary>Personas y mascotas (opcional, aplicar a todas)</summary>
-          <div className="chips">{subjects.map(subject => <button type="button" key={subject.id}
-            className={'chip ' + (selectedSubjects.includes(subject.id) ? 'selected' : '')}
-            onClick={() => setSelectedSubjects(previous => previous.includes(subject.id)
-              ? previous.filter(id => id !== subject.id) : [...previous, subject.id])}>
-            {subject.kind === 'animal' ? '🐾' : '♡'} {subject.name}{selectedSubjects.includes(subject.id) && <Check size={12}/>}
-          </button>)}</div>
-        </details>}
         {done > 0 && <p role="status" className="success-text">{done} fotografías guardadas en este dispositivo.</p>}
         {errors.length > 0 && <div role="alert" className="form-errors">{errors.slice(0,8).map((err,i) => <p key={i}>{err}</p>)}</div>}
       </form>
