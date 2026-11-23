@@ -53,8 +53,7 @@ export function useAccount() {
     // Only the HttpOnly cookie persists. Never store access tokens in localStorage.
     refreshTokens().then(accept).catch(() => {
       setOnlinePhotoToken(null);
-      setOnlinePhotoToken(null);
-    setToken(null); setUser(null);
+      setToken(null); setUser(null);
     }).finally(() => setChecking(false));
   }, [accept]);
 
@@ -62,6 +61,7 @@ export function useAccount() {
     if (!user) return;
     const renew = () => {
       refreshTokens().then(accept).catch(() => {
+        setOnlinePhotoToken(null);
         setToken(null); setUser(null);
       });
     };
@@ -77,6 +77,7 @@ export function useAccount() {
   }
   async function logout() {
     await request('/account/logout', {});
+    setOnlinePhotoToken(null);
     setToken(null); setUser(null);
   }
 
