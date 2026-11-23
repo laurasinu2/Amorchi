@@ -94,6 +94,7 @@ export interface LocalOperation {
 }
 
 export interface ImportOptions {
+  perFile?: Array<{overrideDate?:string;place:string;memoryId?:string}>;
   overrideDate?: string;
   place: string;
   memoryId?: string;
