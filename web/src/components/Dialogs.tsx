@@ -4,6 +4,7 @@ import type { AppSettings, Memory, Photo, Subject, SubjectKind } from '../types'
 import { celebrationCatalog, automaticCelebrationIds, overrideCelebration } from '../celebrations';
 import { dateLabel } from '../dates';
 import { PhotoView } from './PhotoView';
+import { LocationSearch } from './LocationSearch';
 import { createId } from '../id';
 
 export function Dialog({title,children,onClose,wide=false}:{
@@ -132,7 +133,7 @@ export function PhotoDialog({photo,memories,subjects,settings,onClose,onSave,onD
         <div className="editor-meta"><strong>{dateLabel(draft.takenOn)}</strong><small>Origen de la fecha: {draft.dateSource==='exif'?'EXIF':draft.dateSource==='file'?'archivo':'manual'}</small>{photo.latitude!==undefined&&<small>GPS EXIF: {photo.latitude.toFixed(5)}, {photo.longitude?.toFixed(5)}</small>}</div>
         <div className="form-grid">
           <label className="field"><span>Fecha</span><input type="date" value={draft.takenOn} onChange={e=>setDraft(v=>({...v,takenOn:e.target.value,dateSource:'manual'}))} required/></label>
-          <label className="field"><span>Lugar</span><input value={draft.place} onChange={e=>setDraft(v=>({...v,place:e.target.value}))}/></label>
+          <div className="field"><span>Lugar</span><LocationSearch value={draft.place} onSelect={location=>setDraft(v=>({...v,place:location.label,latitude:location.latitude,longitude:location.longitude}))}/></div>
         </div>
         <label className="field"><span>Descripción</span><textarea rows={3} value={draft.description} onChange={e=>setDraft(v=>({...v,description:e.target.value}))}/></label>
         <div className="field"><span>Asociar a recuerdos (puedes elegir varios)</span>
