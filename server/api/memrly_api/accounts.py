@@ -143,19 +143,21 @@ def register(data: Register, conn=Depends(get_conn)):
             )
             cur.execute("INSERT INTO albums(id,name,created_by) VALUES (%s,'Mi álbum',%s)", (aid, uid))
             cur.execute("INSERT INTO album_members(album_id,user_id,role) VALUES (%s,%s,'owner')", (aid, uid))
-            issue_code(cur, uid, str(data.email), "verify")
+            # Email delivery is optional for now; keep email_verified_at NULL until a valid code is confirmed.
+            if settings()["smtp_host"]:
+                issue_code(cur, uid, str(data.email), "verify")
         conn.commit()
     except psycopg.errors.UniqueViolation:
         conn.rollback()
         raise HTTPException(409, "Ya existe una cuenta con este correo.")
-    return {"message": "Te hemos enviado un código para verificar tu correo."}
+    return {"message": "Cuenta creada. Tu correo está pendiente de verificación; ya puedes iniciar sesión."}
 
 
 @router.post("/resend")
 def resend(data: EmailOnly, conn=Depends(get_conn)):
     with conn.cursor() as cur:
         user = user_by_email(cur, data.email)
-        if user and not user["email_verified_at"]:
+        if user and not user["email_verified_at"] and settings()["smtp_host"]:
             issue_code(cur, user["id"], str(data.email), "verify")
     conn.commit()
     return {"message": "Si la cuenta está pendiente, recibirás un código."}
@@ -199,8 +201,6 @@ def login(data: Credentials, response: Response, conn=Depends(get_conn)):
         valid = verify_password(data.password, user["password_hash"] if user else None)
         if not valid or not user:
             raise HTTPException(401, "Correo o contraseña incorrectos.")
-        if not user["email_verified_at"]:
-            raise HTTPException(403, "Verifica tu dirección de correo antes de entrar.")
         result = start_session(cur, user["id"], response, data.remember)
     conn.commit()
     return result
@@ -221,7 +221,7 @@ def refresh(request: Request, response: Response, conn=Depends(get_conn)):
         session = cur.fetchone()
         if not session or session["expires_at"] <= now_utc():
             raise HTTPException(401, "Sesión caducada.")
-        cur.execute("SELECT 1 FROM app_users WHERE id=%s AND disabled_at IS NULL AND email_verified_at IS NOT NULL",
+        cur.execute("SELECT 1 FROM app_users WHERE id=%s AND disabled_at IS NULL",
                     (session["user_id"],))
         if not cur.fetchone():
             raise HTTPException(401, "Cuenta no disponible.")
@@ -255,7 +255,7 @@ def logout(request: Request, response: Response, conn=Depends(get_conn)):
 def forgot(data: EmailOnly, conn=Depends(get_conn)):
     with conn.cursor() as cur:
         user = user_by_email(cur, data.email)
-        if user:
+        if user and settings()["smtp_host"]:
             issue_code(cur, user["id"], str(data.email), "reset")
     conn.commit()
     return {"message": "Si existe la cuenta, recibirás un código de recuperación."}
