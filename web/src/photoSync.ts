@@ -1,5 +1,5 @@
 import type { Photo, LocalOperation } from './types';
-import { getPhotoAsset, loadLibrary, restoreRemotePhoto, acknowledgePhotoOperations } from './db';
+import { getPhotoAsset, loadLibrary, restoreRemotePhoto, acknowledgePhotoOperations, applyRemotePhotoMetadata } from './db';
 
 const PREFIX='/api/v1/sync';
 export type SyncProgress={done:number;total:number;stage:string};
@@ -55,7 +55,8 @@ export async function synchronizePhotos(userId:string,token:string,onProgress:(p
   // Remote deletions are not sent in this first safe release.
   const deletedHere=new Set(operations.filter(op=>op.type==='delete').map(op=>op.entityId));
   const download=remote.filter(p=>!originalMap.has(p.id)&&!deletedHere.has(p.id));
-  const total=upload.length+update.length+download.length;
+  const cleanLocal=remote.filter(p=>originalMap.has(p.id)&&!pendingById.get(p.id)?.some(op=>op.type==='upsert'||op.type==='delete'));
+  const total=upload.length+update.length+download.length+cleanLocal.length;
   let done=0;
   const progress=(stage:string)=>onProgress({done,total,stage});
   progress('Preparando fotografías');
@@ -95,6 +96,11 @@ export async function synchronizePhotos(userId:string,token:string,onProgress:(p
     await restoreRemotePhoto(photo.metadata,blob);
     done++;progress('Original recuperado');
   }
+  for(const photo of cleanLocal){
+    progress('Actualizando ficha local de '+photo.filename);
+    await applyRemotePhotoMetadata(photo.metadata);
+    done++;progress('Ficha actualizada');
+  }
   progress('Sincronización completada');
-  return {uploaded:upload.length,updated:update.length,downloaded:download.length,total};
+  return {uploaded:upload.length,updated:update.length,downloaded:download.length,refreshed:cleanLocal.length,total};
 }
