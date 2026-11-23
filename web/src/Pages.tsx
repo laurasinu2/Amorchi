@@ -145,7 +145,7 @@ export function SearchPage({photos,memories,onView,onOpen}:{photos:Photo[];memor
   </div>;
 }
 
-export function SettingsPage({pending,settings,photos,subjects,onSaveSettings,account,accountChecking,onLogin,onLogout}:{pending:number;settings:AppSettings;photos:Photo[];subjects:Subject[];onSaveSettings:(settings:AppSettings)=>Promise<void>;account:Account|null;accountChecking:boolean;onLogin:()=>void;onLogout:()=>void}){
+export function SettingsPage({pending,settings,photos,subjects,onSaveSettings,account,accountChecking,onLogin,onLogout,onSyncPhotos,syncingPhotos,syncMessage}:{pending:number;settings:AppSettings;photos:Photo[];subjects:Subject[];onSaveSettings:(settings:AppSettings)=>Promise<void>;account:Account|null;accountChecking:boolean;onLogin:()=>void;onLogout:()=>void;onSyncPhotos:()=>void;syncingPhotos:boolean;syncMessage:string}){
   const [bytes,setBytes]=useState(0);
   const [quota,setQuota]=useState<number|undefined>();
   const [persistent,setPersistent]=useState<boolean|undefined>();
@@ -186,8 +186,13 @@ export function SettingsPage({pending,settings,photos,subjects,onSaveSettings,ac
     </section>
     <div className="settings-cards"><section className="panel"><h3><HardDrive size={20}/> Biblioteca offline</h3><p className="large-stat">{format(bytes)}</p><p>Fotografías originales y variantes guardadas localmente.</p>{quota!==undefined&&<small>Cuota estimada del navegador: {format(quota)}</small>}
       <button className="btn subtle" onClick={async()=>{const ok=await requestPersistence();setPersistent(ok);}}><ShieldCheck size={16}/>{persistent?'Almacenamiento persistente concedido':'Solicitar almacenamiento persistente'}</button>
-    </section><section className="panel"><h3><CloudUpload size={20}/> Cola de sincronización</h3><p className="large-stat">{pending}</p><p>Operaciones pendientes en este dispositivo.</p><div className="warning-note">El servidor todavía no está conectado. Estas operaciones NO se han subido y podrían perderse si el navegador elimina sus datos.</div></section></div>
-    <section className="panel"><h3>Estado del proyecto</h3><p>La autenticación de Memrly está disponible. La biblioteca de este dispositivo todavía es local: iniciar sesión no sube fotografías automáticamente. Comprueba las copias de seguridad del servidor antes de confiarle los originales.</p><p>Para una instalación segura en móviles de la misma Wi-Fi será necesario HTTPS fiable y un servidor accesible por dirección local.</p></section>
+    </section><section className="panel"><h3><CloudUpload size={20}/> Cola de sincronización</h3><p className="large-stat">{pending}</p><p>Operaciones pendientes en este dispositivo.</p><p>La sincronización de fotografías es manual. Las otras operaciones locales todavía no se envían al servidor.</p>
+      <button type="button" className="btn primary" disabled={!account||syncingPhotos} onClick={onSyncPhotos}>
+        <CloudUpload size={17}/>{syncingPhotos?'Sincronizando…':'Sincronizar fotografías'}
+      </button>
+      {syncMessage&&<p role="status" className="helper-text">{syncMessage}</p>}
+      {!account&&<small>Inicia sesión para subir o recuperar fotografías de tu cuenta.</small>}</section></div>
+    <section className="panel"><h3>Estado del proyecto</h3><p>Los originales se pueden copiar a tu cuenta de Memrly desde el botón Sincronizar fotografías. El navegador conserva las copias locales. Esta primera fase no sincroniza recuerdos, colecciones ni eliminaciones; no se deben borrar originales manualmente hasta comprobar su copia en el servidor.</p><p>Para una instalación segura en móviles de la misma Wi-Fi será necesario HTTPS fiable y un servidor accesible por dirección local.</p></section>
     {account&&<div className="account-signout"><button type="button" onClick={onLogout}>Cerrar sesión</button></div>}
     {error&&<p role="alert" className="form-errors">{error}</p>}
   </div>;
